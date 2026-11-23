@@ -52,3 +52,11 @@
 - React/Chromium：Gen3 游戏库、两款独立页面、1100/1366/1500 px 与其它世代切换。
 - Windows：Tauri Win32 编译与桌面单测；真实 mGBA/ROM 实机仍须单独验收。
 - [详细说明](gen3-ruby-sapphire.md)。
+
+## Gen3 Ruby/Sapphire CI 结果（2026-11-23）
+- [x] Rust 44 项（Core 8 + Emerald 9 + Ruby/Sapphire 8 + M2 Patch 16 + SQLite 3）。
+- [x] React/Vitest 11 项、TypeScript、ESLint、Vite。
+- [x] Chromium 1100/1366/1500px 红蓝宝石、Gen6、PC Native、M2 页面及 18 张截图。
+- [x] Windows Tauri check、桌面 Rust unit tests、Windows Debug EXE。
+- [ ] Windows 真实 GUI/WebView2 与 mGBA Ruby/Sapphire 真 ROM、ROM Reload 实机测试，所有真实游戏写入仍禁止。
+- [证据](https://github.com/969981/GameTrainer/actions/runs/45111652638)。

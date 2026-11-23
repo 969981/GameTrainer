@@ -59,3 +59,10 @@ Rust 测试：26 个组合、错误 Title/Checksum/Revision、German Debug Ancho
 仍必须由用户在真实 Windows + mGBA + 合法原版 ROM 环境中逐语言验证实际 Seed/Timer 读取、重启失效、选错游戏拒绝、Debug/ROM Hack 识别，以及 M2 Fixture 不能影响真实游戏内存。GameTrainer 当前的 Header/Anchor 验证不足以为真实游戏写入发放授权；后续先做全 ROM SHA1/CRC32 + 全部功能入口签名，再考虑离线单机修改权限。
 
 相关：[架构](architecture.md) · [M1](m1-readonly.md) · [M2](m2-safe-patch.md) · [[gen3-ruby-sapphire]]
+
+## 2026-11-23 已执行的自动化验收（区分实机）
+
+- [CI #45111652638](https://github.com/969981/GameTrainer/actions/runs/45111652638)：全部三个 Job 成功。Rust 格式/Clippy/44 项单元测试成功，其中 Ruby/Sapphire 8 项、三游戏 Fixture Patch 16 项、Registry 8 项。
+- React ESLint、TypeScript、11 项 Vitest、Web Build、Chromium 1100/1366/1500 px 的 Ruby/Sapphire/Gen6/PC/M2 导航和页面截图均通过，共 18 张。
+- Windows Tauri 2 Shell `cargo check`、桌面 Rust 命令测试、debug EXE `cargo build` 及 Artifact 上传通过：[Windows Debug EXE](https://github.com/969981/GameTrainer/actions/runs/45111652638/artifacts/14789568790)。
+- 仍未执行的测试：在用户真实 Windows WebView2 上打开并连接 mGBA、使用真实 Ruby/Sapphire ROM 比对 Seed/Timer、复现 ROM Reload/错误版本拒绝与恢复。

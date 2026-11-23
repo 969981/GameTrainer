@@ -63,6 +63,11 @@ pnpm --filter @gametrainer/desktop test:e2e  # 首先安装 Playwright Chromium
 - M2 可选择 Emerald / Ruby / Sapphire 三种隔离 Fixture 做 Seed 事务与 SQLite 审计，**真实 mGBA 和所有原生游戏仍禁止写入**。
 - v4.6.0 BattleCrit 源资料仅部分 ROM 静态验证，缺乏真实 mGBA 战斗测试，只作为研究模块。
 
+**2026-11-23 Gen3 扩展 CI：三组全部通过**——Rust 44 项单测（Core 8、Emerald 9、Ruby/Sapphire 8、Patch 16、SQLite 3），React/Vitest 11 项、Chromium 三宽度多页面导航与截图，以及 Windows Tauri `cargo check`、Rust 命令测试、调试版 EXE 构建。
+
+- [完整 CI](https://github.com/969981/GameTrainer/actions/runs/45111652638) · [Windows x64 测试 EXE（ZIP）](https://github.com/969981/GameTrainer/actions/runs/45111652638/artifacts/14789568790) · [18 张页面截图](https://github.com/969981/GameTrainer/actions/runs/45111652638/artifacts/14789319553)
+- 这些测试不代表 Windows GUI/WebView2 手动启动或真实 mGBA ROM 的 Seed/Timer 实机读取成功；真实游戏写入仍保持关闭。
+
 ## 文档入口
 
 | 文档 | 用途 |
