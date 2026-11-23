@@ -46,3 +46,23 @@ jobs:
         run: pnpm test
       - name: Production web build
         run: pnpm build
+
+  windows-shell:
+    name: Windows Tauri 2 shell compile
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install frontend
+        run: pnpm install --no-frozen-lockfile
+      - name: Build frontend assets
+        run: pnpm build
+      - name: Check Tauri Windows shell
+        run: cargo check -p game-trainer-desktop
