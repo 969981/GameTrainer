@@ -26,14 +26,13 @@ pub async fn m6_hgss_probe_arm9_stop(
     if port < 1024 {
         return Err("ARM9 debugger port must be >= 1024".into());
     }
-    let profile = profile_for(&game_code, revision)
-        .ok_or("unknown HGSS game code or revision")?;
+    let profile = profile_for(&game_code, revision).ok_or("unknown HGSS game code or revision")?;
     if !profile.static_audit_1451 || profile.write_allowed {
         return Err("only 12 v1.4.5.1 statically audited HGSS variants are eligible".into());
     }
     tauri::async_runtime::spawn_blocking(move || {
-        let mut rsp = RspClient::connect_local(port)
-            .map_err(|e| format!("ARM9 GDB stop handshake: {e}"))?;
+        let mut rsp =
+            RspClient::connect_local(port).map_err(|e| format!("ARM9 GDB stop handshake: {e}"))?;
         if !rsp.is_paused() {
             return Err("debugger did not confirm stopped CPU".into());
         }

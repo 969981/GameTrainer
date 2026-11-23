@@ -1,8 +1,8 @@
 //! M6: safety evidence for NDS ARM9 / HGSS Overlay12.
 //! All production-facing code below is READ ONLY. No Guest write operations
 //! or disassembler-derived trampoline are exposed. This is not ROM identity proof.
+use super::{profile_for, HgssProfile};
 use serde::{Deserialize, Serialize};
-use super::{HgssProfile, profile_for};
 
 const SOURCE: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -204,9 +204,13 @@ pub enum OverlayTransition {
 }
 
 fn loaded(s: &OverlayReport) -> bool {
-    matches!(s.state,
-        OverlayState::OriginalVerified | OverlayState::ForeignPatched |
-        OverlayState::SignatureMismatch | OverlayState::UnexpectedInstruction)
+    matches!(
+        s.state,
+        OverlayState::OriginalVerified
+            | OverlayState::ForeignPatched
+            | OverlayState::SignatureMismatch
+            | OverlayState::UnexpectedInstruction
+    )
 }
 pub fn compare_snapshots(a: &OverlayReport, b: &OverlayReport) -> OverlayTransition {
     if a.game_code != b.game_code || a.revision != b.revision {
@@ -244,28 +248,44 @@ mod fixture_restore {
     impl MockPatch {
         pub fn install(
             &mut self,
-            memory: &mut u16, expected: u16, replacement: u16,
-            epoch: u64, paused: bool,
+            memory: &mut u16,
+            expected: u16,
+            replacement: u16,
+            epoch: u64,
+            paused: bool,
         ) -> Result<(), &'static str> {
-            if !paused || self.active { return Err("not paused or already active"); }
-            if *memory != expected { return Err("not exact original; no adoption"); }
+            if !paused || self.active {
+                return Err("not paused or already active");
+            }
+            if *memory != expected {
+                return Err("not exact original; no adoption");
+            }
             self.original = *memory;
             self.patched = replacement;
             self.epoch = epoch;
             *memory = replacement;
-            if *memory != replacement { return Err("write readback failed"); }
+            if *memory != replacement {
+                return Err("write readback failed");
+            }
             self.active = true;
             Ok(())
         }
         pub fn restore(
-            &mut self, memory: &mut u16, epoch: u64, paused: bool,
+            &mut self,
+            memory: &mut u16,
+            epoch: u64,
+            paused: bool,
         ) -> Result<(), &'static str> {
             if !self.active || !paused || self.epoch != epoch {
                 return Err("no owner, running CPU or overlay epoch changed");
             }
-            if *memory != self.patched { return Err("third-party modification"); }
+            if *memory != self.patched {
+                return Err("third-party modification");
+            }
             *memory = self.original;
-            if *memory != self.original { return Err("restore readback failed"); }
+            if *memory != self.original {
+                return Err("restore readback failed");
+            }
             self.active = false;
             Ok(())
         }
@@ -279,137 +299,167 @@ mod tests {
 
     struct Fake(HashMap<u32, u8>);
     impl Fake {
-        fn new() -> Self { Self(HashMap::new()) }
-        fn bytes(&mut self, a: u32, v: &[u8]) {
-            for (i, b) in v.iter().enumerate() { self.0.insert(a+i as u32, *b); }
+        fn new() -> Self {
+            Self(HashMap::new())
         }
-        fn word(&mut self, a: u32, v: u32) { self.bytes(a, &v.to_le_bytes()); }
+        fn bytes(&mut self, a: u32, v: &[u8]) {
+            for (i, b) in v.iter().enumerate() {
+                self.0.insert(a + i as u32, *b);
+            }
+        }
+        fn word(&mut self, a: u32, v: u32) {
+            self.bytes(a, &v.to_le_bytes());
+        }
     }
     impl GuestReader for Fake {
         fn read_guest(&mut self, a: u32, n: usize) -> Result<Vec<u8>, String> {
-            (0..n).map(|i| self.0.get(&(a+i as u32)).copied()
-                .ok_or_else(|| format!("unmapped {a:08x}+{i}"))).collect()
+            (0..n)
+                .map(|i| {
+                    self.0
+                        .get(&(a + i as u32))
+                        .copied()
+                        .ok_or_else(|| format!("unmapped {a:08x}+{i}"))
+                })
+                .collect()
         }
     }
     fn active_fixture(code: &str, rev: u8) -> (HgssProfile, OverlaySpec, Fake) {
-        let p=profile_for(code,rev).unwrap();
-        let spec=overlay_spec(code,rev).unwrap();
-        let mut m=Fake::new();
-        m.word(spec.field_system_ptr_addr,0x0200_4000);
-        m.word(0x0200_4000,0x0200_5000);
-        m.word(0x0200_5004,0x0200_6000);
-        m.word(0x0200_600c,12);
-        m.word(0x0200_6010,1);
-        let mut context=decoded_hex(&spec.prefix_hex).unwrap();
+        let p = profile_for(code, rev).unwrap();
+        let spec = overlay_spec(code, rev).unwrap();
+        let mut m = Fake::new();
+        m.word(spec.field_system_ptr_addr, 0x0200_4000);
+        m.word(0x0200_4000, 0x0200_5000);
+        m.word(0x0200_5004, 0x0200_6000);
+        m.word(0x0200_600c, 12);
+        m.word(0x0200_6010, 1);
+        let mut context = decoded_hex(&spec.prefix_hex).unwrap();
         context.extend_from_slice(&spec.original_halfword.to_le_bytes());
         context.extend_from_slice(&decoded_hex(&spec.suffix_hex).unwrap());
-        m.bytes(spec.capture_addr-16,&context);
-        (p,spec,m)
+        m.bytes(spec.capture_addr - 16, &context);
+        (p, spec, m)
     }
     #[test]
     fn source_catalog_has_exact_twelve_m6_audited_variants() {
-        let s=overlay_specs();
-        assert_eq!(s.len(),12);
-        assert_eq!(s.iter().filter(|s|s.overlay_id==12).count(),12);
+        let s = overlay_specs();
+        assert_eq!(s.len(), 12);
+        assert_eq!(s.iter().filter(|s| s.overlay_id == 12).count(), 12);
         for v in s {
-            assert!(profile_for(&v.game_code,v.revision).unwrap().static_audit_1451);
-            assert_eq!(decoded_hex(&v.prefix_hex).unwrap().len(),16);
-            assert_eq!(decoded_hex(&v.suffix_hex).unwrap().len(),16);
+            assert!(
+                profile_for(&v.game_code, v.revision)
+                    .unwrap()
+                    .static_audit_1451
+            );
+            assert_eq!(decoded_hex(&v.prefix_hex).unwrap().len(), 16);
+            assert_eq!(decoded_hex(&v.suffix_hex).unwrap().len(), 16);
             assert!(v.capture_addr > v.overlay_load_addr);
-            assert!(v.capture_addr < v.overlay_load_addr+0x40000);
+            assert!(v.capture_addr < v.overlay_load_addr + 0x40000);
         }
-        assert!(overlay_spec("IPKE",0).is_none());
-        assert!(overlay_spec("IPKK",0).is_none());
+        assert!(overlay_spec("IPKE", 0).is_none());
+        assert!(overlay_spec("IPKK", 0).is_none());
     }
     #[test]
     fn overlay_loaded_and_original_signature_only_proves_read_evidence() {
-        for (code,rev) in [("IPKJ",0),("IPGJ",0),("IPKE",10),("IPGS",0)] {
-            let(p,_,mut m)=active_fixture(code,rev);
-            let r=inspect(&mut m,&p,0x0223D3A6).unwrap();
-            assert_eq!(r.state,OverlayState::OriginalVerified);
+        for (code, rev) in [("IPKJ", 0), ("IPGJ", 0), ("IPKE", 10), ("IPGS", 0)] {
+            let (p, _, mut m) = active_fixture(code, rev);
+            let r = inspect(&mut m, &p, 0x0223D3A6).unwrap();
+            assert_eq!(r.state, OverlayState::OriginalVerified);
             assert!(r.gdb_stop_verified && r.neighbor_signature_valid);
             assert!(!r.running_rom_sha1_verified && !r.write_authorized);
         }
     }
     #[test]
     fn stopped_field_without_battle_is_not_loaded() {
-        let(p,spec,mut m)=active_fixture("IPKJ",0);
-        m.word(spec.field_system_ptr_addr,0);
-        let r=inspect(&mut m,&p,0x02001000).unwrap();
-        assert_eq!(r.state,OverlayState::NotLoaded);
+        let (p, spec, mut m) = active_fixture("IPKJ", 0);
+        m.word(spec.field_system_ptr_addr, 0);
+        let r = inspect(&mut m, &p, 0x02001000).unwrap();
+        assert_eq!(r.state, OverlayState::NotLoaded);
         assert!(r.observed_halfword.is_none());
     }
     #[test]
     fn pending_overlay_does_not_claim_loaded_code() {
-        let(p,_,mut m)=active_fixture("IPKJ",0);
-        m.word(0x0200_6010,0);
-        assert_eq!(inspect(&mut m,&p,0x02001000).unwrap().state,
-            OverlayState::PendingExecution);
+        let (p, _, mut m) = active_fixture("IPKJ", 0);
+        m.word(0x0200_6010, 0);
+        assert_eq!(
+            inspect(&mut m, &p, 0x02001000).unwrap().state,
+            OverlayState::PendingExecution
+        );
     }
     #[test]
     fn exact_foreign_patch_cannot_be_adopted_as_ours() {
-        let(p,s,mut m)=active_fixture("IPKJ",0);
-        m.bytes(s.capture_addr,&s.expected_patched_halfword.to_le_bytes());
-        let e=inspect(&mut m,&p,0x02001000).unwrap();
-        assert_eq!(e.state,OverlayState::ForeignPatched);
+        let (p, s, mut m) = active_fixture("IPKJ", 0);
+        m.bytes(s.capture_addr, &s.expected_patched_halfword.to_le_bytes());
+        let e = inspect(&mut m, &p, 0x02001000).unwrap();
+        assert_eq!(e.state, OverlayState::ForeignPatched);
         assert!(!e.write_authorized);
     }
     #[test]
     fn mutated_surroundings_and_unknown_instruction_fail_closed() {
-        let(p,s,mut m)=active_fixture("IPKJ",0);
-        m.bytes(s.capture_addr-16,&[0xAA]);
-        assert_eq!(inspect(&mut m,&p,0x02001000).unwrap().state,
-            OverlayState::SignatureMismatch);
-        let(p,s,mut m)=active_fixture("IPKJ",0);
-        m.bytes(s.capture_addr,&0xFFFFu16.to_le_bytes());
-        assert_eq!(inspect(&mut m,&p,0x02001000).unwrap().state,
-            OverlayState::UnexpectedInstruction);
+        let (p, s, mut m) = active_fixture("IPKJ", 0);
+        m.bytes(s.capture_addr - 16, &[0xAA]);
+        assert_eq!(
+            inspect(&mut m, &p, 0x02001000).unwrap().state,
+            OverlayState::SignatureMismatch
+        );
+        let (p, s, mut m) = active_fixture("IPKJ", 0);
+        m.bytes(s.capture_addr, &0xFFFFu16.to_le_bytes());
+        assert_eq!(
+            inspect(&mut m, &p, 0x02001000).unwrap().state,
+            OverlayState::UnexpectedInstruction
+        );
     }
     #[test]
     fn invalid_pointer_and_unexpected_pc_are_rejected() {
-        let(p,s,mut m)=active_fixture("IPKJ",0);
-        assert!(inspect(&mut m,&p,0x0100_0000).is_err());
-        m.word(s.field_system_ptr_addr,0x7fff_ffff);
-        assert!(inspect(&mut m,&p,0x0200_1000).is_err());
+        let (p, s, mut m) = active_fixture("IPKJ", 0);
+        assert!(inspect(&mut m, &p, 0x0100_0000).is_err());
+        m.word(s.field_system_ptr_addr, 0x7fff_ffff);
+        assert!(inspect(&mut m, &p, 0x0200_1000).is_err());
     }
     #[test]
     fn detects_entry_exit_and_unexpected_code_changes() {
-        let(p,s,mut m)=active_fixture("IPKJ",0);
-        let original=inspect(&mut m,&p,0x0200_1000).unwrap();
-        m.word(0x0200_600c,5);
-        let empty=inspect(&mut m,&p,0x0200_1000).unwrap();
-        assert_eq!(compare_snapshots(&empty,&original),OverlayTransition::EnteredBattle);
-        assert_eq!(compare_snapshots(&original,&empty),OverlayTransition::ExitedBattle);
-        m.word(0x0200_600c,12);
-        m.bytes(s.capture_addr,&s.expected_patched_halfword.to_le_bytes());
-        let foreign=inspect(&mut m,&p,0x0200_1000).unwrap();
-        assert_eq!(compare_snapshots(&original,&foreign),
-            OverlayTransition::CodeUnexpectedlyChanged);
+        let (p, s, mut m) = active_fixture("IPKJ", 0);
+        let original = inspect(&mut m, &p, 0x0200_1000).unwrap();
+        m.word(0x0200_600c, 5);
+        let empty = inspect(&mut m, &p, 0x0200_1000).unwrap();
+        assert_eq!(
+            compare_snapshots(&empty, &original),
+            OverlayTransition::EnteredBattle
+        );
+        assert_eq!(
+            compare_snapshots(&original, &empty),
+            OverlayTransition::ExitedBattle
+        );
+        m.word(0x0200_600c, 12);
+        m.bytes(s.capture_addr, &s.expected_patched_halfword.to_le_bytes());
+        let foreign = inspect(&mut m, &p, 0x0200_1000).unwrap();
+        assert_eq!(
+            compare_snapshots(&original, &foreign),
+            OverlayTransition::CodeUnexpectedlyChanged
+        );
     }
     #[test]
     fn fixture_restores_exact_owned_bytes_only_when_stopped_and_same_epoch() {
         use super::fixture_restore::MockPatch;
-        let mut memory=0x2801u16;
-        let mut tx=MockPatch::default();
-        assert!(tx.install(&mut memory,0x2801,0x4280,9,false).is_err());
-        tx.install(&mut memory,0x2801,0x4280,9,true).unwrap();
-        assert_eq!(memory,0x4280);
-        assert!(tx.restore(&mut memory,10,true).is_err());
-        assert!(tx.restore(&mut memory,9,false).is_err());
-        memory=0x9999;
-        assert!(tx.restore(&mut memory,9,true).is_err());
-        assert_eq!(memory,0x9999);
-        memory=0x4280;
-        tx.restore(&mut memory,9,true).unwrap();
-        assert_eq!(memory,0x2801);
-        assert!(tx.restore(&mut memory,9,true).is_err());
+        let mut memory = 0x2801u16;
+        let mut tx = MockPatch::default();
+        assert!(tx.install(&mut memory, 0x2801, 0x4280, 9, false).is_err());
+        tx.install(&mut memory, 0x2801, 0x4280, 9, true).unwrap();
+        assert_eq!(memory, 0x4280);
+        assert!(tx.restore(&mut memory, 10, true).is_err());
+        assert!(tx.restore(&mut memory, 9, false).is_err());
+        memory = 0x9999;
+        assert!(tx.restore(&mut memory, 9, true).is_err());
+        assert_eq!(memory, 0x9999);
+        memory = 0x4280;
+        tx.restore(&mut memory, 9, true).unwrap();
+        assert_eq!(memory, 0x2801);
+        assert!(tx.restore(&mut memory, 9, true).is_err());
     }
     #[test]
     fn fixture_rejects_third_party_exact_patch_instead_of_adopting() {
         use super::fixture_restore::MockPatch;
-        let mut memory=0x4280u16;
-        let mut tx=MockPatch::default();
-        assert!(tx.install(&mut memory,0x2801,0x4280,1,true).is_err());
-        assert_eq!(memory,0x4280);
+        let mut memory = 0x4280u16;
+        let mut tx = MockPatch::default();
+        assert!(tx.install(&mut memory, 0x2801, 0x4280, 1, true).is_err());
+        assert_eq!(memory, 0x4280);
     }
 }

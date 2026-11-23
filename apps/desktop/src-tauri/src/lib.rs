@@ -292,7 +292,7 @@ pub fn run() {
         m5::m5_attach_hgss,
         m5::m5_hgss_snapshot,
         m5::m5_detach_hgss,
-            m6::m6_hgss_probe_arm9_stop
+        m6::m6_hgss_probe_arm9_stop
     ]);
     builder
         .run(tauri::generate_context!())
