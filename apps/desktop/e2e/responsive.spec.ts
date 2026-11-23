@@ -21,14 +21,14 @@ for (const width of [1100, 1366, 1500]) {
     await expect(page.getByRole("button", { name: "打开 Pokémon X / Y" })).toBeVisible();
     await expect(page.getByRole("button", { name: "打开 Pokémon Emerald" })).toHaveCount(0);
     await page.getByRole("button", { name: "打开 Pokémon X / Y" }).click();
-    await expect(page.getByRole("button", { name: "队伍与盒子" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "队伍与盒子", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "RNG / Seed" })).toHaveCount(0);
     await page.screenshot({ path: 'test-results/screenshots/gen6-' + width + '.png', fullPage: true });
 
     await page.getByRole("button", { name: "游戏库" }).click();
     await page.getByRole("button", { name: "PC Native", exact: true }).last().click();
     await page.getByRole("button", { name: "打开 Windows Native · Template" }).click();
-    await expect(page.getByRole("button", { name: "进程观察" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "进程观察", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "RNG / Seed" })).toHaveCount(0);
     await page.screenshot({ path: 'test-results/screenshots/pc-' + width + '.png', fullPage: true });
   });
