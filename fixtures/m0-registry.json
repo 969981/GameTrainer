@@ -958,6 +958,226 @@
           "parameter_schema": []
         }
       ]
+    },
+    {
+      "game_id": "games.pokemon.diamond",
+      "name": "Pokémon Diamond",
+      "summary": "钻石 v0.8.14 · 5 个欧美 ROM Profile · DeSmuME ARM9 GDB 只读诊断",
+      "icon": "gem",
+      "platform_family": "gen4",
+      "target_platform": "nds",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.dp.rng",
+          "name": "RNG / LCRNG / MT",
+          "group": "研究",
+          "description": "只读 Current Seed、MT State[0]、MT Index、Delay 与进程头部匹配；不推断未经校准的 Advances。",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.egg",
+          "name": "寄养屋 / 孵蛋 / Egg RNG",
+          "group": "培育",
+          "description": "保留来源蛋 RNG、父母本、遗传与快速操作的研究入口；Guest Hook/写蛋操作未迁移。",
+          "icon": "users",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.wild",
+          "name": "野生遭遇 / 钓鱼 / 蜜树",
+          "group": "遭遇",
+          "description": "源包野生、钓鱼、Sweet Scent、Honey Tree 4 类地址按 ROM 分版本研究。",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.map",
+          "name": "地图、传送 / PokéFinder",
+          "group": "地图",
+          "description": "原 Lua 地图目录、传送原生函数与回退点的只读研究；不执行 Warp。",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.safari",
+          "name": "大湿地 / 自豪后院",
+          "group": "存档研究",
+          "description": "大湿地 Daily 与 Safari Seed、后院稀有宝可梦的源数据；写入需存档身份与事务验收。",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.legend",
+          "name": "神兽 / 剧情 Flags",
+          "group": "剧情",
+          "description": "来源 Uxie/Azelf、Giratina、Regigigas 等 Flag 与 Work 研究；禁止立即改写。",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.battle",
+          "name": "Overlay11 命中／会心／OHKO",
+          "group": "战斗研究",
+          "description": "仅 APAE/APAI 的原始 ROM 静态 Callsite 证据；多 Hook 共享调度器尚未安全验证。",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.guestexec",
+          "name": "Guest Thumb 0x5A / 0xA5",
+          "group": "逆向实验",
+          "description": "源 v0.8.14 双阶段卸载与 72B Cave 静态/Mock 证据；无 Guest 实机执行成功与 PC 安全点。",
+          "icon": "file-code",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.pearl",
+      "name": "Pokémon Pearl",
+      "summary": "珍珠 v0.8.14 · 5 个欧美 ROM Profile · 仅 2 个版本有 Overlay11 完整静态审计",
+      "icon": "sparkles",
+      "platform_family": "gen4",
+      "target_platform": "nds",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.dp.rng",
+          "name": "RNG / LCRNG / MT",
+          "group": "研究",
+          "description": "只读 Current Seed、MT State[0]、MT Index、Delay 与进程头部匹配；不推断未经校准的 Advances。",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.egg",
+          "name": "寄养屋 / 孵蛋 / Egg RNG",
+          "group": "培育",
+          "description": "保留来源蛋 RNG、父母本、遗传与快速操作的研究入口；Guest Hook/写蛋操作未迁移。",
+          "icon": "users",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.wild",
+          "name": "野生遭遇 / 钓鱼 / 蜜树",
+          "group": "遭遇",
+          "description": "源包野生、钓鱼、Sweet Scent、Honey Tree 4 类地址按 ROM 分版本研究。",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.map",
+          "name": "地图、传送 / PokéFinder",
+          "group": "地图",
+          "description": "原 Lua 地图目录、传送原生函数与回退点的只读研究；不执行 Warp。",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.safari",
+          "name": "大湿地 / 自豪后院",
+          "group": "存档研究",
+          "description": "大湿地 Daily 与 Safari Seed、后院稀有宝可梦的源数据；写入需存档身份与事务验收。",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.legend",
+          "name": "神兽 / 剧情 Flags",
+          "group": "剧情",
+          "description": "来源 Uxie/Azelf、Giratina、Regigigas 等 Flag 与 Work 研究；禁止立即改写。",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.battle",
+          "name": "Overlay11 命中／会心／OHKO",
+          "group": "战斗研究",
+          "description": "仅 APAE/APAI 的原始 ROM 静态 Callsite 证据；多 Hook 共享调度器尚未安全验证。",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.dp.guestexec",
+          "name": "Guest Thumb 0x5A / 0xA5",
+          "group": "逆向实验",
+          "description": "源 v0.8.14 双阶段卸载与 72B Cave 静态/Mock 证据；无 Guest 实机执行成功与 PC 安全点。",
+          "icon": "file-code",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
     }
   ]
 }

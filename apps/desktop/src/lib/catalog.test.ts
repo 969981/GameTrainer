@@ -8,7 +8,7 @@ const catalog = fixture as unknown as GameCatalog;
 describe("M0 shared catalog selectors", () => {
   it("exposes all five platform families", () => {
     expect(catalog.games.map((game) => game.platform_family).sort())
-      .toEqual(["gen3", "gen3", "gen3", "gen3", "gen3", "gen4", "gen4", "gen4", "gen5", "gen6", "pc"]);
+      .toEqual(["gen3", "gen3", "gen3", "gen3", "gen3", "gen4", "gen4", "gen4", "gen4", "gen4", "gen5", "gen6", "pc"]);
     expect(catalog.read_only).toBe(true);
     expect(catalog.source).toBe("mock");
   });

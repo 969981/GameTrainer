@@ -29,6 +29,8 @@ describe("M0 dynamic AppShell", () => {
     expect(screen.getByRole("button", { name: "打开 Pokémon FireRed" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon LeafGreen" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Platinum" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开 Pokémon Diamond" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开 Pokémon Pearl" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Black 2" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon X / Y" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Windows Native · Template" })).toBeInTheDocument();
@@ -77,7 +79,7 @@ describe("M0 dynamic AppShell", () => {
     mount({ ...baseCatalog, games: [...baseCatalog.games, sixth] });
     fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon FireRed (Extension)" }));
     expect(screen.getByRole("button", { name: "FireRed Extension Seed" })).toBeInTheDocument();
-    expect(screen.getByText(/12 Game Adapters/)).toBeInTheDocument();
+    expect(screen.getByText(/14 Game Adapters/)).toBeInTheDocument();
   });
 
   it("never produces live RNG values in browser Mock", () => {

@@ -317,7 +317,7 @@ mod tests {
     #[test]
     fn readonly_catalog_command_returns_rust_registry() {
         let catalog = get_catalog().expect("valid Rust Mock registry");
-        assert_eq!(catalog.games.len(), 11);
+        assert_eq!(catalog.games.len(), 13);
         assert!(catalog.read_only);
         assert!(catalog
             .games
