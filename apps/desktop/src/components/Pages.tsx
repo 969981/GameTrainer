@@ -1,5 +1,6 @@
 import { Activity, ArrowRight, BookOpenText, Check, Cpu, FileWarning, Gamepad2, Layers3, Library, MonitorCog, SearchX, ShieldAlert, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { M3LivePanel } from "@/components/M3LivePanel";
 import { EmeraldRngLivePanel, MgbaConnection, RubySapphireLivePanel, RubySapphireProfileCatalog } from "@/components/MgbaConnection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -85,9 +86,10 @@ export function ModulesPage({ catalog }: { catalog: GameCatalog }) {
 }
 export function RuntimePage({ catalog }: { catalog: GameCatalog }) {
   return <div className="page-stack"><div className="page-heading"><div><div className="eyebrow">RUNTIME MANAGER</div><h1>运行时管理</h1><p>未来每类模拟器或原生进程分别实现独立 Provider。</p></div><Badge>全部未连接</Badge></div>
-    <StatusNotice title="Runtime 状态说明" message="Windows 桌面版可手动连接 Emerald 只读会话；其它运行时仍为规划。浏览器 Mock 不扫描进程。" />
+    <StatusNotice title="Runtime 状态说明" message="Windows 桌面版支持 mGBA 外部只读连接；M3 使用独立 GDB 调试会话的完整 ROM SHA1 和显式安全确认。" />
     <MgbaConnection />
     <RubySapphireProfileCatalog />
+    <M3LivePanel />
     <div className="runtime-list">{catalog.runtimes.map((runtime) => <Card key={runtime.runtime_id}><CardContent className="runtime-row"><span className="feature-icon"><MonitorCog size={22} /></span><div><strong>{runtime.name}</strong><small>{runtime.description}</small><code>{runtime.runtime_id}</code></div><Badge>PLANNED</Badge></CardContent></Card>)}</div>
   </div>;
 }
