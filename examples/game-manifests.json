@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "note": "Design/mock examples only. Not functional adapters or verified profiles.",
+  "platforms": [
+    "gen3",
+    "gen4",
+    "gen5",
+    "gen6",
+    "pc"
+  ],
+  "examples": [
+    {
+      "game_id": "games.pokemon.emerald",
+      "name": "Pokémon Emerald",
+      "platform_family": "gen3",
+      "target_platform": "gba",
+      "runtime_candidates": [
+        "runtimes.mgba.external",
+        "runtimes.mgba.bridge"
+      ],
+      "features": [
+        "features.gen3.rng",
+        "features.gen3.capture",
+        "features.gen3.warp"
+      ],
+      "profile_status": "not_verified",
+      "mode": "mock"
+    },
+    {
+      "game_id": "games.pokemon.platinum",
+      "name": "Pokémon Platinum",
+      "platform_family": "gen4",
+      "target_platform": "nds",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        "features.gen4.rng",
+        "features.pokemon.party"
+      ],
+      "profile_status": "not_implemented",
+      "mode": "mock"
+    },
+    {
+      "game_id": "games.pokemon.black2",
+      "name": "Pokémon Black 2",
+      "platform_family": "gen5",
+      "target_platform": "nds",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        "features.gen5.rng",
+        "features.pokemon.party"
+      ],
+      "profile_status": "not_implemented",
+      "mode": "mock"
+    },
+    {
+      "game_id": "games.pokemon.xy",
+      "name": "Pokémon X / Y",
+      "platform_family": "gen6",
+      "target_platform": "3ds",
+      "runtime_candidates": [
+        "runtimes.3ds.future"
+      ],
+      "features": [
+        "features.pokemon.party",
+        "features.pokemon.save"
+      ],
+      "profile_status": "not_implemented",
+      "mode": "mock"
+    },
+    {
+      "game_id": "games.native.template",
+      "name": "Custom Windows Game",
+      "platform_family": "pc",
+      "target_platform": "windows",
+      "runtime_candidates": [
+        "runtimes.win.external",
+        "runtimes.win.agent.future"
+      ],
+      "features": [
+        "features.process.watch",
+        "features.memory.watch",
+        "features.patch.preview"
+      ],
+      "profile_status": "template_only",
+      "mode": "mock"
+    }
+  ]
+}

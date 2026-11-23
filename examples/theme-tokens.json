@@ -1,0 +1,22 @@
+{
+  "name": "GameTrainer Studio V3 Dark Control",
+  "mode": "dark",
+  "tokens": {
+    "background": "#0A101B",
+    "rail": "#0D1422",
+    "surface": "#151F30",
+    "surfaceElevated": "#192539",
+    "border": "#2B3850",
+    "accent": "#7356DF",
+    "brandPurple": "#5228BD",
+    "info": "#5994FF",
+    "brandBlue": "#376BEE",
+    "text": "#E8ECF6",
+    "muted": "#98A3BA",
+    "success": "#70D4AA",
+    "warning": "#F1C883",
+    "danger": "#F39B9E"
+  },
+  "spacing": "8px base",
+  "status": "illustrative design tokens; check WCAG contrast in implementation"
+}
