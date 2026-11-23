@@ -313,9 +313,9 @@ pub fn run() {
         m9::m9_dp_read_arm9,
         m10::m10_dp_core_identity,
         m10::m10_dp_dual_cpu_overlay11_readonly,
-            m11::m11_dp_preview,
-            m11::m11_dp_apply,
-            m11::m11_dp_restore
+        m11::m11_dp_preview,
+        m11::m11_dp_apply,
+        m11::m11_dp_restore
     ]);
     builder
         .run(tauri::generate_context!())
