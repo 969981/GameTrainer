@@ -407,9 +407,9 @@ impl LiveEditor {
         }
         let owned=self.active.take().ok_or(LiveError::Missing)?;
         let validation=owned.spans.iter().try_for_each(|span| -> Result<(),LiveError> {
-            if self.rsp.read(span.address,span.after.len())?!=span.after {
-                Err(LiveError::Conflict)
-            } else {Ok(())}
+            let current=self.rsp.read(span.address,span.after.len())?;
+            if current==span.after || current==span.before {Ok(())}
+            else {Err(LiveError::Conflict)}
         });
         if let Err(error)=validation {
             self.active=Some(owned);
@@ -421,9 +421,17 @@ impl LiveEditor {
             return Err(error);
         }
         // Reverse order is essential: unhook dispatch pointer before cave cleanup.
+        // A prior failed attempt may already have restored some spans. Only
+        // exact original/owned bytes are acceptable during an idempotent retry.
         let mut safe=true;
         for span in owned.spans.iter().rev(){
-            if self.rsp.write(span.address,&span.before).is_err(){safe=false;break;}
+            match self.rsp.read(span.address,span.after.len()){
+                Ok(current) if current==span.before=>{},
+                Ok(current) if current==span.after=>{
+                    if self.rsp.write(span.address,&span.before).is_err(){safe=false;break;}
+                },
+                _=>{safe=false;break;}
+            }
         }
         if !safe {
             let mut unresolved=owned;
@@ -435,8 +443,11 @@ impl LiveEditor {
                              "Multispan restore not verified; keep mGBA CPU paused",Some("RESTORE_FAILED"));
             return Err(LiveError::RecoveryFailed);
         }
-        self.event("restored","ok",owned.feature,Some(&owned.owner),None,
-                   "Original guest bytes restored and confirmed",None)?;
+        if let Err(error)=self.event("restored","ok",owned.feature,Some(&owned.owner),None,
+                   "Original guest bytes restored and confirmed",None){
+            self.active=Some(Owned{failed:true,..owned});
+            return Err(error);
+        }
         self.rsp.resume()?;
         Ok(LiveReceipt{owner_id:owned.owner,feature_id:owned.feature.id().into(),
             state:"restored".into(),audit_committed:true,emulator_running:!self.rsp.is_paused()})
