@@ -4,6 +4,14 @@
 
 **当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
 
+## M10 · 钻石／珍珠 DeSmuME 内核 ROM SHA256 及 ARM9/ARM7/Overlay11 诊断
+
+M8 现扩展为 M10 双协议：保留 HGSS 原有 76B SHA1 桥，为钻石／珍珠增加独立 89B SHA256 ROM Reader 内核管道、Win32 进程/管道/双 GDB LISTEN 端口 PID 校验，以及前后 ROM Epoch 校验。Tauri/React 新增 M10 ROM 身份、独立 ARM9/ARM7 Stop/PC 与 Overlay11 静态只读观察。**APAE/APAI 有完整原版 ROM 对照；其余 8 个版本尚缺完整 ROM SHA256 参照。**
+
+**核心身份匹配不等于 Guest 安全写入**：尚无实机双核原子停机、JIT/ICache、Overlay11 加载/卸载与原指令故障恢复证据；原 CT 的捕捉、穿墙、传送与 0x5A/0xA5 Thumb Hook 继续禁用。
+
+[M10 完整说明](docs/m10-dp-loaded-rom-sha256-and-overlay11.md) · [Win32 桥头文件](integrations/desmume/gt_dp_m10_bridge.h) · [ADR-0012](docs/decisions/0012-m10-dp-running-rom-identity.md)。
+
 ## M9 · Pokémon Diamond / Pearl v0.8.14
 
 基于上传的 DeSmuME v0.8.14 GuestExecEvidence Source/CT，新增 10 个五语言独立来源 Profile、钻石/珍珠两个 Gen4 游戏适配器、各 8 个研究模块、Rust 只读 ARM9 GDB Stop/PC/Header/指令锚点/RNG 采样、珍珠 APAE/APAI Overlay11 静态只读证据和前端面板；离线 NDS SHA256 不冒充运行中完整 ROM 身份。
