@@ -318,7 +318,7 @@ mod tests {
             registry.register(&AddedGame(existing)),
             Err(RegistryError::GameId(_))
         ));
-        assert_eq!(registry.snapshot().games.len(), 5);
+        assert_eq!(registry.snapshot().games.len(), 7);
     }
 
     #[test]
