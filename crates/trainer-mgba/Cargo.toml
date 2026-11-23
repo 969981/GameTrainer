@@ -1,0 +1,9 @@
+[package]
+name = "trainer-mgba"
+version.workspace = true
+edition.workspace = true
+description = "Read-only mGBA guest-memory / Emerald Rev0 probe and session safeguards"
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
