@@ -130,7 +130,7 @@ export function FrlgLivePanel() {
         <Button className="w-full" disabled={!desktop || !current || !current.guest_paused || busy || !!preview || hasOwner || (feature === "wild" && !templateFile)}
           onClick={() => makePreview.mutate()}><FileCode2 size={15}/> 仅预览 Guest 指令差异</Button>
         {preview && <div className="m3-preview">
-          <strong>差异区域：{preview.spans.length} · 30 秒一次性 Token</strong>
+          <strong>差异区域：{preview.spans.length} · {preview.expires_in_seconds} 秒一次性 Token</strong>
           {preview.spans.map(span => <div key={span.address} className="m3-span">
             <strong>{span.label}</strong><code>{span.address}</code>
             <small>原值：{span.before.length > 60 ? span.before.slice(0,60) + "…" : span.before}</small>

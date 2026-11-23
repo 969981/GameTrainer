@@ -20,7 +20,7 @@ const MAIL: u32 = 0x0203_FFC0;
 const WILD_PAYLOAD_LEN: usize = 116;
 const WILD_PAYLOAD_SHA256: &str =
     "83a069853f427e86bc62c2ed3a56741c94ed13301d58321b02a5ac39698fed6a";
-const PREVIEW_TTL: Duration = Duration::from_secs(30);
+const PREVIEW_TTL: Duration = Duration::from_secs(300);
 
 #[derive(Debug, Error)]
 pub enum LiveError {
