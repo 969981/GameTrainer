@@ -41,7 +41,7 @@
  	}
  
  	gameInfo.chipID  = 0xC2;														// The Manufacturer ID is defined by JEDEC (C2h = Macronix)
-@@ -835,6 +847,10 @@
+@@ -835,6 +848,10 @@
  	NDS_Reset();
  
 +#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
@@ -52,7 +52,7 @@
  }
  
  void NDS_FreeROM(void)
-@@ -840,6 +856,9 @@
+@@ -840,6 +857,9 @@
  void NDS_FreeROM(void)
  {
  	FCEUI_StopMovie();
