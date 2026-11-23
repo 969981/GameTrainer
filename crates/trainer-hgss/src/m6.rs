@@ -90,7 +90,7 @@ pub struct OverlayReport {
     pub state: OverlayState,
     pub running_rom_sha1_verified: bool,
     pub write_authorized: bool,
-    pub evidence_scope: &'static str,
+    pub evidence_scope: String,
 }
 fn blank(spec: &OverlaySpec, pc: u32) -> OverlayReport {
     OverlayReport {
@@ -110,7 +110,7 @@ fn blank(spec: &OverlaySpec, pc: u32) -> OverlayReport {
         state: OverlayState::NotLoaded,
         running_rom_sha1_verified: false,
         write_authorized: false,
-        evidence_scope: "arm9_gdb_stopped_guest_read_only_not_full_rom_validation",
+        evidence_scope: "arm9_gdb_stopped_guest_read_only_not_full_rom_validation".into(),
     }
 }
 
