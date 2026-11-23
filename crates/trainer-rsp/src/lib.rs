@@ -30,7 +30,9 @@ fn decode(bytes: &[u8]) -> Result<Vec<u8>, RspError> {
         return Err(RspError::Protocol("odd hex"));
     }
     bytes
-        .as_chunks::<2>().0.iter()
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|two| {
             let s = std::str::from_utf8(two).map_err(|_| RspError::Protocol("nonascii hex"))?;
             u8::from_str_radix(s, 16).map_err(|_| RspError::Protocol("bad hex"))
