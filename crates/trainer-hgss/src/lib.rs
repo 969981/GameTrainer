@@ -7,7 +7,8 @@ use std::collections::HashSet;
 
 pub const SOURCE_VERSION: &str = "1.4.5.1";
 pub const PROFILES_JSON: &str = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"), "/../../fixtures/hgss-v1451-profiles.json"
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../fixtures/hgss-v1451-profiles.json"
 ));
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -42,8 +43,9 @@ pub fn profile_for(code: &str, revision: u8) -> Option<HgssProfile> {
 /// Header-only identification does NOT authorize writes or prove an unmodified ROM.
 pub fn parse_rom_header(header: &[u8]) -> Option<(String, u8)> {
     let code = std::str::from_utf8(header.get(0x0C..0x10)?).ok()?;
-    if !(code.starts_with("IPK") || code.starts_with("IPG")) ||
-        !code.bytes().all(|c| c.is_ascii_uppercase()) {
+    if !(code.starts_with("IPK") || code.starts_with("IPG"))
+        || !code.bytes().all(|c| c.is_ascii_uppercase())
+    {
         return None;
     }
     Some((code.to_string(), *header.get(0x1E)?))
@@ -59,14 +61,16 @@ pub fn matches_offline_rom(code: &str, revision: u8, file_sha1: &str) -> bool {
 pub fn valid_profile_catalog() -> bool {
     let profiles = retail_profiles();
     let mut pairs = HashSet::new();
-    profiles.len() == 14 && profiles.iter().all(|p| {
-        pairs.insert((p.game_code.clone(), p.revision))
-            && p.sha1.len() == 40 && p.sha1.bytes().all(|b| b.is_ascii_hexdigit())
-            && !p.write_allowed
-            && p.mt_state0_addr == p.current_seed_addr + 4
-            && (0x0200_0000..0x0240_0000).contains(&p.mt_index_addr)
-            && (0x0200_0000..0x0240_0000).contains(&p.pid_pointer_addr)
-    })
+    profiles.len() == 14
+        && profiles.iter().all(|p| {
+            pairs.insert((p.game_code.clone(), p.revision))
+                && p.sha1.len() == 40
+                && p.sha1.bytes().all(|b| b.is_ascii_hexdigit())
+                && !p.write_allowed
+                && p.mt_state0_addr == p.current_seed_addr + 4
+                && (0x0200_0000..0x0240_0000).contains(&p.mt_index_addr)
+                && (0x0200_0000..0x0240_0000).contains(&p.pid_pointer_addr)
+        })
 }
 
 #[cfg(test)]
@@ -78,7 +82,10 @@ mod tests {
         let profiles = retail_profiles();
         assert_eq!(profiles.iter().filter(|p| p.static_audit_1451).count(), 12);
         assert_eq!(profiles.iter().filter(|p| p.game == "HeartGold").count(), 7);
-        assert_eq!(profiles.iter().filter(|p| p.game == "SoulSilver").count(), 7);
+        assert_eq!(
+            profiles.iter().filter(|p| p.game == "SoulSilver").count(),
+            7
+        );
     }
     #[test]
     fn europ_english_revision_not_usa_revision() {

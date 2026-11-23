@@ -4,9 +4,7 @@ use tauri::{Manager, State};
 use trainer_hgss::{retail_profiles, HgssProfile};
 
 #[cfg(windows)]
-use trainer_runtime_win::{
-    list_desmume_targets, AttachedHgss, HgssReadOnlySnapshot, MgbaTarget,
-};
+use trainer_runtime_win::{list_desmume_targets, AttachedHgss, HgssReadOnlySnapshot, MgbaTarget};
 
 #[cfg(windows)]
 pub struct M5State(Mutex<Option<AttachedHgss>>);
@@ -38,21 +36,26 @@ pub fn m5_list_desmume() -> Result<Vec<serde_json::Value>, String> {
 
 #[cfg(windows)]
 #[tauri::command]
-pub async fn m5_attach_hgss(process_id: u32, game_id: String, state: State<'_, M5State>)
-    -> Result<HgssReadOnlySnapshot, String>
-{
-    let attached = tauri::async_runtime::spawn_blocking(move ||
-        AttachedHgss::attach(process_id, &game_id).map_err(|e| e.to_string()))
-        .await.map_err(|e| e.to_string())??;
+pub async fn m5_attach_hgss(
+    process_id: u32,
+    game_id: String,
+    state: State<'_, M5State>,
+) -> Result<HgssReadOnlySnapshot, String> {
+    let attached = tauri::async_runtime::spawn_blocking(move || {
+        AttachedHgss::attach(process_id, &game_id).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
     let receipt = attached.snapshot().map_err(|e| e.to_string())?;
     *state.0.lock().map_err(|_| "M5 session lock poisoned")? = Some(attached);
     Ok(receipt)
 }
 #[cfg(not(windows))]
 #[tauri::command]
-pub async fn m5_attach_hgss(_process_id: u32, _game_id: String)
-    -> Result<serde_json::Value, String>
-{
+pub async fn m5_attach_hgss(
+    _process_id: u32,
+    _game_id: String,
+) -> Result<serde_json::Value, String> {
     Err("M5 read-only attach requires Windows DeSmuME".into())
 }
 
@@ -60,8 +63,13 @@ pub async fn m5_attach_hgss(_process_id: u32, _game_id: String)
 #[tauri::command]
 pub fn m5_hgss_snapshot(state: State<'_, M5State>) -> Result<HgssReadOnlySnapshot, String> {
     let mut guard = state.0.lock().map_err(|_| "M5 session lock poisoned")?;
-    let result = guard.as_ref().ok_or("no attached HGSS DeSmuME session")?.snapshot();
-    if result.is_err() { *guard = None; }
+    let result = guard
+        .as_ref()
+        .ok_or("no attached HGSS DeSmuME session")?
+        .snapshot();
+    if result.is_err() {
+        *guard = None;
+    }
     result.map_err(|e| e.to_string())
 }
 #[cfg(not(windows))]
@@ -78,7 +86,9 @@ pub fn m5_detach_hgss(state: State<'_, M5State>) -> Result<(), String> {
 }
 #[cfg(not(windows))]
 #[tauri::command]
-pub fn m5_detach_hgss() -> Result<(), String> { Ok(()) }
+pub fn m5_detach_hgss() -> Result<(), String> {
+    Ok(())
+}
 
 #[cfg(test)]
 mod tests {

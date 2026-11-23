@@ -10,11 +10,11 @@ use std::{
     ptr::{null, null_mut},
 };
 use thiserror::Error;
+use trainer_hgss::{profile_for as hgss_profile_for, HgssProfile};
 use trainer_mgba::{
     guest_offset, parse_header, EmeraldReadOnlySession, GuestMemoryReader, ProbeError, RngSnapshot,
     RuntimeFingerprint,
 };
-use trainer_hgss::{profile_for as hgss_profile_for, HgssProfile};
 use trainer_rs::{
     parse_header as parse_rs_header, profile_for as rs_profile_for, RsError, RsGame,
     RsReadOnlySession, RsSeedSnapshot,
@@ -354,7 +354,6 @@ impl GuestMemoryReader for GuestHostReader {
         })
     }
 }
-
 /// Scans a selected mGBA process for a known Emerald ROM and GBAMemory pointer tuple.
 /// Any ambiguity or invalid profile is a hard failure. There is no write mode.
 pub struct AttachedEmerald {
@@ -642,7 +641,6 @@ mod tests {
     }
 }
 
-
 // M5: DeSmuME NDS read-only provider. Separate from mGBA/GDB and never requests
 // PROCESS_VM_WRITE, PROCESS_VM_OPERATION, or PROCESS_CREATE_THREAD.
 fn is_desmume_executable(name: &str) -> bool {
@@ -660,11 +658,15 @@ pub fn list_desmume_targets() -> Result<Vec<MgbaTarget>, RuntimeError> {
     let mut targets = Vec::new();
     let mut ok = unsafe { Process32FirstW(snapshot.0, &mut entry) };
     while ok != 0 {
-        let end = entry.szExeFile.iter().position(|&ch| ch == 0)
+        let end = entry
+            .szExeFile
+            .iter()
+            .position(|&ch| ch == 0)
             .unwrap_or(entry.szExeFile.len());
         let name = String::from_utf16_lossy(&entry.szExeFile[..end]);
         if is_desmume_executable(&name) {
-            if let Ok(handle) = open_handle(entry.th32ProcessID, PROCESS_QUERY_LIMITED_INFORMATION) {
+            if let Ok(handle) = open_handle(entry.th32ProcessID, PROCESS_QUERY_LIMITED_INFORMATION)
+            {
                 if let Ok(created_at) = creation_time(handle.0) {
                     targets.push(MgbaTarget {
                         process_id: entry.th32ProcessID,
@@ -709,7 +711,9 @@ pub struct AttachedHgss {
 impl AttachedHgss {
     fn host_addr(base: u64, guest: u32) -> Result<u64, RuntimeError> {
         if !(0x0200_0000..0x0240_0000).contains(&guest) {
-            return Err(RuntimeError::Hgss("guest address outside NDS main RAM".into()));
+            return Err(RuntimeError::Hgss(
+                "guest address outside NDS main RAM".into(),
+            ));
         }
         Ok(base + u64::from(guest - 0x0200_0000))
     }
@@ -721,11 +725,14 @@ impl AttachedHgss {
     /// Probe the unique 4 MiB DeSmuME main-RAM base using source-backed
     /// Seed/MT/pointer structure. Scoring never makes an ambiguous candidate writable.
     pub fn attach(pid: u32, requested_game_id: &str) -> Result<Self, RuntimeError> {
-        if !matches!(requested_game_id,
-            "games.pokemon.heartgold" | "games.pokemon.soulsilver") {
+        if !matches!(
+            requested_game_id,
+            "games.pokemon.heartgold" | "games.pokemon.soulsilver"
+        ) {
             return Err(RuntimeError::Hgss("unsupported requested game ID".into()));
         }
-        let target = list_desmume_targets()?.into_iter()
+        let target = list_desmume_targets()?
+            .into_iter()
             .find(|target| target.process_id == pid)
             .ok_or(RuntimeError::InvalidTarget)?;
         let handle = open_handle(pid, PROCESS_QUERY_INFORMATION | PROCESS_VM_READ)?;
@@ -733,7 +740,11 @@ impl AttachedHgss {
         if created_at != target.created_at {
             return Err(RuntimeError::Hgss("DeSmuME PID was replaced".into()));
         }
-        let process = Process { handle, pid, created_at };
+        let process = Process {
+            handle,
+            pid,
+            created_at,
+        };
         let regions = process.memory_regions();
         let mut hits = Vec::new();
         let mut scanned = 0usize;
@@ -743,17 +754,22 @@ impl AttachedHgss {
             let mut off = 0usize;
             while off < size && scanned < SCAN_LIMIT {
                 let count = (size - off).min(CHUNK).min(SCAN_LIMIT - scanned);
-                if count == 0 { break; }
+                if count == 0 {
+                    break;
+                }
                 let mut bytes = vec![0u8; count];
                 if process.read_host(region + off as u64, &mut bytes).is_ok() {
                     for (idx, w) in bytes.windows(4).enumerate() {
                         if (&w[..3] == b"IPK" || &w[..3] == b"IPG")
-                            && matches!(w[3], b'J' | b'E' | b'D' | b'F' | b'I' | b'S' | b'K') {
+                            && matches!(w[3], b'J' | b'E' | b'D' | b'F' | b'I' | b'S' | b'K')
+                        {
                             // A matched game code is still untrusted until the
                             // Header Rev and 4MiB main-RAM probes pass.
                             hits.push(region + off as u64 + idx as u64);
                             if hits.len() > 256 {
-                                return Err(RuntimeError::Hgss("too many ambiguous ROM markers".into()));
+                                return Err(RuntimeError::Hgss(
+                                    "too many ambiguous ROM markers".into(),
+                                ));
                             }
                         }
                     }
@@ -762,7 +778,9 @@ impl AttachedHgss {
                 off = off.saturating_add(step);
                 scanned = scanned.saturating_add(step);
             }
-            if scanned >= SCAN_LIMIT { break; }
+            if scanned >= SCAN_LIMIT {
+                break;
+            }
         }
         const MIRRORS: [u64; 4] = [0x003FFE0C, 0x007FFE0C, 0x00BFFE0C, 0x00FFFE0C];
         let mut candidates = Vec::new();
@@ -771,15 +789,26 @@ impl AttachedHgss {
             let mut code = [0u8; 4];
             let mut rev = [0u8; 1];
             if process.read_host(hit, &mut code).is_err()
-                || process.read_host(hit + 0x12, &mut rev).is_err() {
+                || process.read_host(hit + 0x12, &mut rev).is_err()
+            {
                 continue;
             }
-            let Ok(code) = std::str::from_utf8(&code) else { continue };
-            let Some(profile) = hgss_profile_for(code, rev[0]) else { continue };
-            if profile.game_id != requested_game_id { continue; }
+            let Ok(code) = std::str::from_utf8(&code) else {
+                continue;
+            };
+            let Some(profile) = hgss_profile_for(code, rev[0]) else {
+                continue;
+            };
+            if profile.game_id != requested_game_id {
+                continue;
+            }
             for mirror in MIRRORS {
-                let Some(base) = hit.checked_sub(mirror) else { continue };
-                if !seen.insert(base) { continue; }
+                let Some(base) = hit.checked_sub(mirror) else {
+                    continue;
+                };
+                if !seen.insert(base) {
+                    continue;
+                }
                 let probe = (
                     Self::read_guest(&process, base, profile.current_seed_addr),
                     Self::read_guest(&process, base, profile.mt_state0_addr),
@@ -789,13 +818,17 @@ impl AttachedHgss {
                     Self::read_guest(&process, base, profile.delay_addr),
                 );
                 let (Ok(seed), Ok(mt), Ok(index), Ok(pidptr), Ok(trainerptr), Ok(delay)) = probe
-                    else { continue };
+                else {
+                    continue;
+                };
                 if index > 624
                     || !(0x0200_0000..0x0240_0000).contains(&pidptr)
-                    || !(0x0200_0000..0x0240_0000).contains(&trainerptr) {
+                    || !(0x0200_0000..0x0240_0000).contains(&trainerptr)
+                {
                     continue;
                 }
-                let score: u32 = 100 + if seed != 0 { 30 } else { 0 }
+                let score: u32 = 100
+                    + if seed != 0 { 30 } else { 0 }
                     + if mt != 0 { 20 } else { 0 }
                     + if index == 624 { 15 } else { 8 }
                     + if delay < 0x0010_0000 { 8 } else { 0 }
@@ -803,49 +836,79 @@ impl AttachedHgss {
                 candidates.push((score, base, hit, profile.clone()));
             }
         }
-        candidates.sort_by(|a,b| b.0.cmp(&a.0));
+        candidates.sort_by(|a, b| b.0.cmp(&a.0));
         let Some((score, base, hit, profile)) = candidates.first().cloned() else {
             return Err(RuntimeError::Hgss(
-                "no verified DeSmuME MAIN_MEM mapping; unsupported ROM/revision or no game loaded".into()));
+                "no verified DeSmuME MAIN_MEM mapping; unsupported ROM/revision or no game loaded"
+                    .into(),
+            ));
         };
         if candidates.get(1).is_some_and(|next| next.0 == score) {
-            return Err(RuntimeError::Hgss("multiple equally scored NDS RAM mappings".into()));
+            return Err(RuntimeError::Hgss(
+                "multiple equally scored NDS RAM mappings".into(),
+            ));
         }
         let session_id = format!("hgss-readonly-{}-{}-{:X}", pid, created_at, base);
-        Ok(Self { process, profile, nds_base: base, header_hit: hit, session_id })
+        Ok(Self {
+            process,
+            profile,
+            nds_base: base,
+            header_hit: hit,
+            session_id,
+        })
     }
 
-    pub fn session_id(&self) -> &str { &self.session_id }
-    pub fn game_id(&self) -> &str { &self.profile.game_id }
+    pub fn session_id(&self) -> &str {
+        &self.session_id
+    }
+    pub fn game_id(&self) -> &str {
+        &self.profile.game_id
+    }
     pub fn snapshot(&self) -> Result<HgssReadOnlySnapshot, RuntimeError> {
         if creation_time(self.process.handle.0)? != self.process.created_at {
-            return Err(RuntimeError::Hgss("emulator process identity changed".into()));
+            return Err(RuntimeError::Hgss(
+                "emulator process identity changed".into(),
+            ));
         }
         let mut header = [0u8; 0x13];
         self.process.read_host(self.header_hit, &mut header)?;
         if &header[..4] != self.profile.game_code.as_bytes()
-            || header[0x12] != self.profile.revision {
-            return Err(RuntimeError::Hgss("ROM code/revision changed; reconnect required".into()));
+            || header[0x12] != self.profile.revision
+        {
+            return Err(RuntimeError::Hgss(
+                "ROM code/revision changed; reconnect required".into(),
+            ));
         }
         let p = &self.profile;
         let current_seed = Self::read_guest(&self.process, self.nds_base, p.current_seed_addr)?;
         let mt_state0 = Self::read_guest(&self.process, self.nds_base, p.mt_state0_addr)?;
         let mt_index = Self::read_guest(&self.process, self.nds_base, p.mt_index_addr)?;
         let delay = Self::read_guest(&self.process, self.nds_base, p.delay_addr)?;
-        let trainer_ptr = Self::read_guest(&self.process, self.nds_base, p.trainer_ids_pointer_addr)?;
+        let trainer_ptr =
+            Self::read_guest(&self.process, self.nds_base, p.trainer_ids_pointer_addr)?;
         let pid_ptr = Self::read_guest(&self.process, self.nds_base, p.pid_pointer_addr)?;
         if mt_index > 624
             || !(0x0200_0000..0x0240_0000).contains(&trainer_ptr)
-            || !(0x0200_0000..0x0240_0000).contains(&pid_ptr) {
-            return Err(RuntimeError::Hgss("MT index/pointers became invalid; session revoked".into()));
+            || !(0x0200_0000..0x0240_0000).contains(&pid_ptr)
+        {
+            return Err(RuntimeError::Hgss(
+                "MT index/pointers became invalid; session revoked".into(),
+            ));
         }
-        let ids_addr = trainer_ptr.checked_add(0x84)
+        let ids_addr = trainer_ptr
+            .checked_add(0x84)
             .ok_or_else(|| RuntimeError::Hgss("trainer pointer overflow".into()))?;
         let ids = Self::read_guest(&self.process, self.nds_base, ids_addr).ok();
         Ok(HgssReadOnlySnapshot {
-            session_id: self.session_id.clone(), game_id: p.game_id.clone(),
-            game_code: p.game_code.clone(), language: p.language.clone(),
-            revision: p.revision, current_seed, mt_state0, mt_index, delay,
+            session_id: self.session_id.clone(),
+            game_id: p.game_id.clone(),
+            game_code: p.game_code.clone(),
+            language: p.language.clone(),
+            revision: p.revision,
+            current_seed,
+            mt_state0,
+            mt_index,
+            delay,
             trainer_id: ids.map(|v| v as u16),
             secret_id: ids.map(|v| (v >> 16) as u16),
             verification: "code_revision_ram_pointer_probe_only",
