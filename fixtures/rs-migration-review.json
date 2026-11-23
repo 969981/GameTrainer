@@ -1,18 +1,17 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "source": "user-uploaded Ruby/Sapphire v4.6.0 source",
   "review_date": "2026-11-23",
-  "status": "review_only",
-  "live_write_enabled": false,
-  "notes": "Evidence metadata only; never interpret as address/payload or capability grant.",
+  "status": "m3_experimental_live_implementation",
+  "notes": "Explicit per-feature opt-in only. Exact live ROM SHA1 and original guest bytes required; never a general write capability.",
   "features": [
     {
       "id": "features.rs.capture",
       "area": "capture",
       "risk": "high",
       "priority": "P1",
-      "phase": "read_only_evidence",
-      "live_write_enabled": false,
+      "phase": "m3_experimental_live_capture",
+      "live_write_enabled": true,
       "resource_kinds": [
         "rom_halfword",
         "rom_halfword"
@@ -28,7 +27,18 @@
       "source_paths": [
         "src/main.lua",
         "docs/ROM_VERIFICATION_FULL_MATRIX.md"
-      ]
+      ],
+      "approval": "manual_backup_and_offline_single_player_confirmation",
+      "runtime_gate": [
+        "full_gdb_guest_rom_sha1",
+        "verified_header_and_anchor",
+        "confirmed_paused_guest_cpu",
+        "original_bytes_match",
+        "resource_owner",
+        "sqlite_intent_before_write",
+        "readback_and_guarded_restore"
+      ],
+      "genuine_mgba_emulator_result": "not_verified"
     },
     {
       "id": "features.rs.fishing.assist",
@@ -135,8 +145,8 @@
       "area": "battlecrit",
       "risk": "critical",
       "priority": "P5",
-      "phase": "blocked_experimental",
-      "live_write_enabled": false,
+      "phase": "m3_experimental_live_battle_hook",
+      "live_write_enabled": true,
       "resource_kinds": [
         "battle_dispatch_pointer",
         "rom_code_cave",
@@ -154,6 +164,26 @@
       "source_paths": [
         "src/cheats_panel.lua",
         "docs/RS_CHEATS_V46_BATTLE_RESEARCH.md"
+      ],
+      "approval": "manual_backup_and_offline_single_player_confirmation",
+      "runtime_gate": [
+        "full_gdb_guest_rom_sha1",
+        "verified_header_and_anchor",
+        "confirmed_paused_guest_cpu",
+        "original_bytes_match",
+        "resource_owner",
+        "sqlite_intent_before_write",
+        "readback_and_guarded_restore",
+        "user_supplied_v46_template_sha256",
+        "out_of_battle_main_flags",
+        "pointer_last_cave_first"
+      ],
+      "genuine_mgba_emulator_result": "not_verified",
+      "allowed_builds": [
+        "AXPE_R1",
+        "AXPE_R2",
+        "AXVJ_R0",
+        "AXPJ_R0"
       ]
     },
     {
@@ -176,5 +206,8 @@
         "docs/RS_CHEATS_V46_BATTLE_RESEARCH.md"
       ]
     }
-  ]
+  ],
+  "default_live_write_enabled": false,
+  "live_transport": "127.0.0.1 GDB RSP; CPU stopped, no Win32 WriteProcessMemory",
+  "actual_mgba_rom_testing": "not_yet_verified"
 }
