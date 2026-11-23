@@ -1,0 +1,11 @@
+[package]
+name = "trainer-patch"
+version.workspace = true
+edition.workspace = true
+description = "M2 verified, owner-scoped transactional patch state machine"
+
+[dependencies]
+trainer-storage = { path = "../trainer-storage" }
+serde.workspace = true
+thiserror.workspace = true
+uuid = { version = "1", features = ["v4"] }

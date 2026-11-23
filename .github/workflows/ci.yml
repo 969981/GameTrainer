@@ -1,4 +1,4 @@
-name: M0 Continuous Integration
+name: GameTrainer Continuous Integration
 
 on:
   push:
@@ -25,9 +25,9 @@ jobs:
       - name: Rust formatting
         run: cargo fmt --all -- --check
       - name: Core clippy
-        run: cargo clippy -p trainer-core -p trainer-mgba --all-targets -- -D warnings
+        run: cargo clippy -p trainer-core -p trainer-mgba -p trainer-patch -p trainer-storage --all-targets -- -D warnings
       - name: Core unit tests
-        run: cargo test -p trainer-core -p trainer-mgba
+        run: cargo test -p trainer-core -p trainer-mgba -p trainer-patch -p trainer-storage
 
   frontend:
     name: React UI & Mock registry

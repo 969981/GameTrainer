@@ -1,0 +1,13 @@
+[package]
+name = "trainer-storage"
+version.workspace = true
+edition.workspace = true
+description = "SQLite append-only action event audit ledger"
+
+[dependencies]
+rusqlite = { version = "0.37", features = ["bundled"] }
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
