@@ -3,6 +3,8 @@
 
 use trainer_core::{GameCatalog, GameRegistry, SessionSnapshot};
 
+mod m2;
+
 #[tauri::command]
 fn get_catalog() -> Result<GameCatalog, String> {
     GameRegistry::mock()
@@ -102,7 +104,10 @@ fn get_session_snapshot() -> SessionSnapshot {
 }
 
 pub fn run() {
-    let builder = tauri::Builder::default();
+    let builder = tauri::Builder::default().setup(|app| {
+        m2::install(app);
+        Ok(())
+    });
     #[cfg(windows)]
     let builder = builder
         .manage(m1::RuntimeState(std::sync::Mutex::new(None)))
@@ -112,11 +117,28 @@ pub fn run() {
             m1::list_mgba_processes,
             m1::attach_emerald_read_only,
             m1::read_emerald_rng,
-            m1::detach_emerald
+            m1::detach_emerald,
+            m2::m2_fixture_status,
+            m2::m2_start_fixture,
+            m2::m2_preview_fixture_seed,
+            m2::m2_cancel_fixture_preview,
+            m2::m2_apply_fixture_preview,
+            m2::m2_restore_fixture_patch,
+            m2::m2_list_action_history
         ]);
     #[cfg(not(windows))]
     let builder =
-        builder.invoke_handler(tauri::generate_handler![get_catalog, get_session_snapshot]);
+        builder.invoke_handler(tauri::generate_handler![
+            get_catalog,
+            get_session_snapshot,
+            m2::m2_fixture_status,
+            m2::m2_start_fixture,
+            m2::m2_preview_fixture_seed,
+            m2::m2_cancel_fixture_preview,
+            m2::m2_apply_fixture_preview,
+            m2::m2_restore_fixture_patch,
+            m2::m2_list_action_history
+        ]);
     builder
         .run(tauri::generate_context!())
         .expect("failed to run GameTrainer Studio");
