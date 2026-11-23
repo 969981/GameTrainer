@@ -88,10 +88,17 @@ pub struct PatchSpec {
 impl PatchSpec {
     /// This private API construction is trusted server-side, not a JS address.
     pub fn emerald_fixture_seed(seed: u32) -> Self {
-        Self { feature_id: FEATURE_ID, address: FIXTURE_SEED_ADDRESS, desired: seed.to_le_bytes().to_vec() }
+        Self {
+            feature_id: FEATURE_ID,
+            address: FIXTURE_SEED_ADDRESS,
+            desired: seed.to_le_bytes().to_vec(),
+        }
     }
     fn validate(&self) -> Result<(), PatchError> {
-        if self.feature_id != FEATURE_ID || self.address != FIXTURE_SEED_ADDRESS || self.desired.len() != 4 {
+        if self.feature_id != FEATURE_ID
+            || self.address != FIXTURE_SEED_ADDRESS
+            || self.desired.len() != 4
+        {
             return Err(PatchError::InvalidSpan);
         }
         Ok(())
@@ -167,10 +174,21 @@ pub struct PatchManager {
 
 impl PatchManager {
     pub fn new(audit: AuditStore, ttl: Duration) -> Self {
-        Self { pending: HashMap::new(), active: HashMap::new(), audit, ttl }
+        Self {
+            pending: HashMap::new(),
+            active: HashMap::new(),
+            audit,
+            ttl,
+        }
     }
-    pub fn audit(&self) -> &AuditStore { &self.audit }
-    pub fn preview<T: PatchTarget>(&mut self, target: &T, spec: PatchSpec) -> Result<PatchPreview, PatchError> {
+    pub fn audit(&self) -> &AuditStore {
+        &self.audit
+    }
+    pub fn preview<T: PatchTarget>(
+        &mut self,
+        target: &T,
+        spec: PatchSpec,
+    ) -> Result<PatchPreview, PatchError> {
         spec.validate()?;
         let identity = target.identity()?;
         identity.validate_fixture()?;
@@ -178,7 +196,9 @@ impl PatchManager {
             return Err(PatchError::Overlap);
         }
         let expected = target.read(spec.address, spec.desired.len())?;
-        if expected == spec.desired { return Err(PatchError::Noop); }
+        if expected == spec.desired {
+            return Err(PatchError::Noop);
+        }
         self.validate_identity(target, &identity)?;
         let preview_id = Uuid::new_v4().to_string();
         let preview = PatchPreview {
@@ -189,48 +209,109 @@ impl PatchManager {
             feature_id: spec.feature_id.to_string(),
             profile_id: identity.profile_id.clone(),
             address_display: format!("0x{:08X}", spec.address),
-            before_display: read_seed(&expected).map_or_else(|| "<unavailable>".into(), |v|format!("0x{v:08X}")),
-            after_display: read_seed(&spec.desired).map_or_else(|| "<unavailable>".into(), |v|format!("0x{v:08X}")),
+            before_display: read_seed(&expected)
+                .map_or_else(|| "<unavailable>".into(), |v| format!("0x{v:08X}")),
+            after_display: read_seed(&spec.desired)
+                .map_or_else(|| "<unavailable>".into(), |v| format!("0x{v:08X}")),
             expires_in_seconds: self.ttl.as_secs(),
             risk: "Fixture only: no emulator memory is changed".into(),
             environment: "fixture".into(),
             status: PatchStatus::Pending,
         };
-        self.event(&identity, spec.feature_id, Some(&preview_id), None, "preview", "accepted", "Fixture preview created", None)?;
-        self.pending.insert(preview_id.clone(), Pending {
-            preview_id, identity, spec, expected, expires_at: Instant::now() + self.ttl,
-        });
+        self.event(
+            &identity,
+            spec.feature_id,
+            Some(&preview_id),
+            None,
+            "preview",
+            "accepted",
+            "Fixture preview created",
+            None,
+        )?;
+        self.pending.insert(
+            preview_id.clone(),
+            Pending {
+                preview_id,
+                identity,
+                spec,
+                expected,
+                expires_at: Instant::now() + self.ttl,
+            },
+        );
         Ok(preview)
     }
     pub fn cancel_preview(&mut self, preview_id: &str) -> Result<(), PatchError> {
-        let pending = self.pending.remove(preview_id).ok_or(PatchError::UnknownPreview)?;
-        self.event(&pending.identity, pending.spec.feature_id, Some(preview_id), None,
-            "preview_cancelled", "ok", "Fixture preview discarded", None)?;
+        let pending = self
+            .pending
+            .remove(preview_id)
+            .ok_or(PatchError::UnknownPreview)?;
+        self.event(
+            &pending.identity,
+            pending.spec.feature_id,
+            Some(preview_id),
+            None,
+            "preview_cancelled",
+            "ok",
+            "Fixture preview discarded",
+            None,
+        )?;
         Ok(())
     }
-    pub fn apply<T: PatchTarget>(&mut self, target: &mut T, preview_id: &str) -> Result<PatchReceipt, PatchError> {
+    pub fn apply<T: PatchTarget>(
+        &mut self,
+        target: &mut T,
+        preview_id: &str,
+    ) -> Result<PatchReceipt, PatchError> {
         // Consume BEFORE any subsequent validation: a rejected/expired token cannot be replayed.
-        let pending = self.pending.remove(preview_id).ok_or(PatchError::UnknownPreview)?;
-        if Instant::now() >= pending.expires_at { return Err(PatchError::PreviewExpired); }
+        let pending = self
+            .pending
+            .remove(preview_id)
+            .ok_or(PatchError::UnknownPreview)?;
+        if Instant::now() >= pending.expires_at {
+            return Err(PatchError::PreviewExpired);
+        }
         pending.identity.validate_fixture()?;
         self.validate_identity(target, &pending.identity)?;
-        if self.overlaps(&pending.identity, pending.spec.address, pending.spec.desired.len()) {
+        if self.overlaps(
+            &pending.identity,
+            pending.spec.address,
+            pending.spec.desired.len(),
+        ) {
             return Err(PatchError::Overlap);
         }
         let current = target.read(pending.spec.address, pending.expected.len())?;
         if current != pending.expected {
-            self.event(&pending.identity, pending.spec.feature_id, Some(&pending.preview_id), None,
-                "apply_rejected", "conflict", "Fixture bytes changed before apply", Some("EXPECTED_MISMATCH"))?;
+            self.event(
+                &pending.identity,
+                pending.spec.feature_id,
+                Some(&pending.preview_id),
+                None,
+                "apply_rejected",
+                "conflict",
+                "Fixture bytes changed before apply",
+                Some("EXPECTED_MISMATCH"),
+            )?;
             return Err(PatchError::Conflict);
         }
         self.validate_identity(target, &pending.identity)?;
         let owner_id = Uuid::new_v4().to_string();
         // Durable, append-only intent MUST commit before any target mutation.
-        self.event(&pending.identity, pending.spec.feature_id, Some(&pending.preview_id), Some(&owner_id),
-            "apply_intent", "pending", "Fixture patch was requested", None)?;
+        self.event(
+            &pending.identity,
+            pending.spec.feature_id,
+            Some(&pending.preview_id),
+            Some(&owner_id),
+            "apply_intent",
+            "pending",
+            "Fixture patch was requested",
+            None,
+        )?;
         let active = Active {
-            owner_id: owner_id.clone(), identity: pending.identity.clone(),
-            spec: pending.spec, original: pending.expected, status: PatchStatus::Active,
+            owner_id: owner_id.clone(),
+            identity: pending.identity.clone(),
+            spec: pending.spec,
+            original: pending.expected,
+            status: PatchStatus::Active,
         };
         if let Err(write_error) = target.write(active.spec.address, &active.spec.desired) {
             return self.rollback_after_failure(target, active, "WRITE_FAILED", write_error);
@@ -239,71 +320,159 @@ impl PatchManager {
         if result.as_deref() != Ok(active.spec.desired.as_slice())
             || self.validate_identity(target, &active.identity).is_err()
         {
-            return self.rollback_after_failure(target, active, "VERIFY_FAILED", PatchError::VerifyFailed);
+            return self.rollback_after_failure(
+                target,
+                active,
+                "VERIFY_FAILED",
+                PatchError::VerifyFailed,
+            );
         }
         // Keep an owned patch in memory even if the subsequent audit outcome fails.
         self.active.insert(owner_id.clone(), active.clone());
-        if let Err(error) = self.event(&active.identity, active.spec.feature_id, Some(preview_id), Some(&owner_id),
-            "applied", "ok", "Fixture patch applied and read back", None)
-        {
+        if let Err(error) = self.event(
+            &active.identity,
+            active.spec.feature_id,
+            Some(preview_id),
+            Some(&owner_id),
+            "applied",
+            "ok",
+            "Fixture patch applied and read back",
+            None,
+        ) {
             let _ = self.restore(target, &owner_id);
             return Err(error);
         }
         Ok(receipt(&active))
     }
-    fn rollback_after_failure<T: PatchTarget>(&mut self, target: &mut T, mut active: Active, reason: &str, original_error: PatchError) -> Result<PatchReceipt, PatchError> {
+    fn rollback_after_failure<T: PatchTarget>(
+        &mut self,
+        target: &mut T,
+        mut active: Active,
+        reason: &str,
+        original_error: PatchError,
+    ) -> Result<PatchReceipt, PatchError> {
         // Only undo if the entire value equals our proposed bytes AND identity is intact.
         // Partial/foreign writes must be reported, NOT forcibly overwritten.
         let current = target.read(active.spec.address, active.original.len());
         let still_same_identity = self.validate_identity(target, &active.identity).is_ok();
         if current.as_deref() == Ok(active.original.as_slice()) && still_same_identity {
-            self.event(&active.identity, active.spec.feature_id, None, Some(&active.owner_id),
-                "rollback_confirmed", "ok", "Target remained unchanged after failure", Some(reason))?;
+            self.event(
+                &active.identity,
+                active.spec.feature_id,
+                None,
+                Some(&active.owner_id),
+                "rollback_confirmed",
+                "ok",
+                "Target remained unchanged after failure",
+                Some(reason),
+            )?;
             return Err(original_error);
         }
         if current.as_deref() == Ok(active.spec.desired.as_slice()) && still_same_identity {
             if target.write(active.spec.address, &active.original).is_ok()
-                && target.read(active.spec.address, active.original.len()).as_deref() == Ok(active.original.as_slice())
+                && target
+                    .read(active.spec.address, active.original.len())
+                    .as_deref()
+                    == Ok(active.original.as_slice())
                 && self.validate_identity(target, &active.identity).is_ok()
             {
-                self.event(&active.identity, active.spec.feature_id, None, Some(&active.owner_id),
-                    "rollback_confirmed", "ok", "Exact fixture bytes restored after failed apply", Some(reason))?;
+                self.event(
+                    &active.identity,
+                    active.spec.feature_id,
+                    None,
+                    Some(&active.owner_id),
+                    "rollback_confirmed",
+                    "ok",
+                    "Exact fixture bytes restored after failed apply",
+                    Some(reason),
+                )?;
                 return Err(original_error);
             }
         }
         active.status = PatchStatus::RestoreFailed;
-        let _ = self.event(&active.identity, active.spec.feature_id, None, Some(&active.owner_id),
-            "restore_failed", "error", "Potentially partial patch; manual inspection required", Some(reason));
+        let _ = self.event(
+            &active.identity,
+            active.spec.feature_id,
+            None,
+            Some(&active.owner_id),
+            "restore_failed",
+            "error",
+            "Potentially partial patch; manual inspection required",
+            Some(reason),
+        );
         self.active.insert(active.owner_id.clone(), active);
         Err(PatchError::RestoreFailed)
     }
-    pub fn restore<T: PatchTarget>(&mut self, target: &mut T, owner_id: &str) -> Result<PatchReceipt, PatchError> {
-        let mut active = self.active.get(owner_id).cloned().ok_or(PatchError::UnknownOwner)?;
+    pub fn restore<T: PatchTarget>(
+        &mut self,
+        target: &mut T,
+        owner_id: &str,
+    ) -> Result<PatchReceipt, PatchError> {
+        let mut active = self
+            .active
+            .get(owner_id)
+            .cloned()
+            .ok_or(PatchError::UnknownOwner)?;
         active.identity.validate_fixture()?;
         self.validate_identity(target, &active.identity)?;
         let current = target.read(active.spec.address, active.original.len())?;
         if current != active.spec.desired {
             active.status = PatchStatus::Conflict;
             self.active.insert(owner_id.to_owned(), active.clone());
-            self.event(&active.identity, active.spec.feature_id, None, Some(owner_id),
-                "restore_conflict", "conflict", "Restore denied: target is not owned patch bytes", Some("EXPECTED_MISMATCH"))?;
+            self.event(
+                &active.identity,
+                active.spec.feature_id,
+                None,
+                Some(owner_id),
+                "restore_conflict",
+                "conflict",
+                "Restore denied: target is not owned patch bytes",
+                Some("EXPECTED_MISMATCH"),
+            )?;
             return Err(PatchError::Conflict);
         }
-        self.event(&active.identity, active.spec.feature_id, None, Some(owner_id),
-            "restore_intent", "pending", "Fixture patch restore requested", None)?;
+        self.event(
+            &active.identity,
+            active.spec.feature_id,
+            None,
+            Some(owner_id),
+            "restore_intent",
+            "pending",
+            "Fixture patch restore requested",
+            None,
+        )?;
         if target.write(active.spec.address, &active.original).is_err()
-            || target.read(active.spec.address, active.original.len()).as_deref() != Ok(active.original.as_slice())
+            || target
+                .read(active.spec.address, active.original.len())
+                .as_deref()
+                != Ok(active.original.as_slice())
             || self.validate_identity(target, &active.identity).is_err()
         {
             active.status = PatchStatus::RestoreFailed;
             self.active.insert(owner_id.to_owned(), active.clone());
-            let _ = self.event(&active.identity, active.spec.feature_id, None, Some(owner_id),
-                "restore_failed", "error", "Restore not verified; owner retained", Some("RESTORE_FAILED"));
+            let _ = self.event(
+                &active.identity,
+                active.spec.feature_id,
+                None,
+                Some(owner_id),
+                "restore_failed",
+                "error",
+                "Restore not verified; owner retained",
+                Some("RESTORE_FAILED"),
+            );
             return Err(PatchError::RestoreFailed);
         }
         // Only remove memory ownership once SQLite confirms restored receipt.
-        self.event(&active.identity, active.spec.feature_id, None, Some(owner_id),
-            "restored", "ok", "Original fixture value restored and verified", None)?;
+        self.event(
+            &active.identity,
+            active.spec.feature_id,
+            None,
+            Some(owner_id),
+            "restored",
+            "ok",
+            "Original fixture value restored and verified",
+            None,
+        )?;
         self.active.remove(owner_id);
         active.status = PatchStatus::Restored;
         Ok(receipt(&active))
@@ -324,24 +493,49 @@ impl PatchManager {
             let other_end = other_start + span as u64;
             start < other_end && other_start < end
         };
-        self.pending.values().any(|p| p.identity.session_id == identity.session_id
-            && overlaps(p.spec.address, p.spec.desired.len()))
-            || self.active.values().any(|p| p.identity.session_id == identity.session_id
-                && overlaps(p.spec.address, p.spec.desired.len()))
+        self.pending.values().any(|p| {
+            p.identity.session_id == identity.session_id
+                && overlaps(p.spec.address, p.spec.desired.len())
+        }) || self.active.values().any(|p| {
+            p.identity.session_id == identity.session_id
+                && overlaps(p.spec.address, p.spec.desired.len())
+        })
     }
-    fn validate_identity<T: PatchTarget>(&self, target: &T, expected: &TargetIdentity) -> Result<(), PatchError> {
+    fn validate_identity<T: PatchTarget>(
+        &self,
+        target: &T,
+        expected: &TargetIdentity,
+    ) -> Result<(), PatchError> {
         let now = target.identity()?;
         now.validate_fixture()?;
-        if now != *expected { return Err(PatchError::StaleSession); }
+        if now != *expected {
+            return Err(PatchError::StaleSession);
+        }
         Ok(())
     }
-    fn event(&mut self, identity: &TargetIdentity, feature_id: &str, preview_id: Option<&str>,
-        owner_id: Option<&str>, kind: &str, status: &str, summary: &str, error: Option<&str>) -> Result<(), PatchError>
-    {
+    fn event(
+        &mut self,
+        identity: &TargetIdentity,
+        feature_id: &str,
+        preview_id: Option<&str>,
+        owner_id: Option<&str>,
+        kind: &str,
+        status: &str,
+        summary: &str,
+        error: Option<&str>,
+    ) -> Result<(), PatchError> {
         let row = ActionEvent::new(
-            Uuid::new_v4().to_string(), owner_id.map(str::to_owned), preview_id.map(str::to_owned),
-            identity.session_id.clone(), identity.game_id.clone(), feature_id.to_owned(),
-            "fixture", kind, status, summary, error,
+            Uuid::new_v4().to_string(),
+            owner_id.map(str::to_owned),
+            preview_id.map(str::to_owned),
+            identity.session_id.clone(),
+            identity.game_id.clone(),
+            feature_id.to_owned(),
+            "fixture",
+            kind,
+            status,
+            summary,
+            error,
         );
         self.audit.append(&row)?;
         Ok(())
@@ -352,9 +546,12 @@ fn read_seed(bytes: &[u8]) -> Option<u32> {
 }
 fn receipt(active: &Active) -> PatchReceipt {
     PatchReceipt {
-        owner_id: active.owner_id.clone(), session_id: active.identity.session_id.clone(),
-        feature_id: active.spec.feature_id.into(), status: active.status.clone(),
-        environment: "fixture".into(), audited: true,
+        owner_id: active.owner_id.clone(),
+        session_id: active.identity.session_id.clone(),
+        feature_id: active.spec.feature_id.into(),
+        status: active.status.clone(),
+        environment: "fixture".into(),
+        audited: true,
     }
 }
 
@@ -365,17 +562,22 @@ pub struct FixtureTarget {
     fail_next_write: bool,
 }
 impl Default for FixtureTarget {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 impl FixtureTarget {
     pub fn new() -> Self {
         Self {
             identity: TargetIdentity {
-                session_id: Uuid::new_v4().to_string(), epoch: 1,
+                session_id: Uuid::new_v4().to_string(),
+                epoch: 1,
                 process_identity: "in-memory-only".into(),
-                runtime_id: "runtime.fixture.memory".into(), game_id: GAME_ID.into(),
+                runtime_id: "runtime.fixture.memory".into(),
+                game_id: GAME_ID.into(),
                 build_id: "synthetic-emerald-rev0".into(),
-                profile_id: FIXTURE_PROFILE_ID.into(), environment: "fixture".into(),
+                profile_id: FIXTURE_PROFILE_ID.into(),
+                environment: "fixture".into(),
             },
             seed: 0x1234_5678,
             fail_next_write: false,
@@ -383,28 +585,45 @@ impl FixtureTarget {
     }
     pub fn snapshot(&self, patches: Vec<PatchReceipt>) -> FixtureSnapshot {
         FixtureSnapshot {
-            session_id: self.identity.session_id.clone(), epoch: self.identity.epoch,
-            seed: self.seed, active_patches: patches,
-            read_only_game_runtime: true, environment: "fixture".into(),
+            session_id: self.identity.session_id.clone(),
+            epoch: self.identity.epoch,
+            seed: self.seed,
+            active_patches: patches,
+            read_only_game_runtime: true,
+            environment: "fixture".into(),
         }
     }
     #[cfg(test)]
-    fn change_seed_externally(&mut self, seed: u32) { self.seed = seed; }
+    fn change_seed_externally(&mut self, seed: u32) {
+        self.seed = seed;
+    }
     #[cfg(test)]
-    fn bump_epoch(&mut self) { self.identity.epoch += 1; }
+    fn bump_epoch(&mut self) {
+        self.identity.epoch += 1;
+    }
     #[cfg(test)]
-    fn change_build(&mut self) { self.identity.build_id = "different build".into(); }
+    fn change_build(&mut self) {
+        self.identity.build_id = "different build".into();
+    }
     #[cfg(test)]
-    fn fail_one_write(&mut self) { self.fail_next_write = true; }
+    fn fail_one_write(&mut self) {
+        self.fail_next_write = true;
+    }
 }
 impl PatchTarget for FixtureTarget {
-    fn identity(&self) -> Result<TargetIdentity, PatchError> { Ok(self.identity.clone()) }
+    fn identity(&self) -> Result<TargetIdentity, PatchError> {
+        Ok(self.identity.clone())
+    }
     fn read(&self, address: u32, len: usize) -> Result<Vec<u8>, PatchError> {
-        if address != FIXTURE_SEED_ADDRESS || len != 4 { return Err(PatchError::InvalidSpan); }
+        if address != FIXTURE_SEED_ADDRESS || len != 4 {
+            return Err(PatchError::InvalidSpan);
+        }
         Ok(self.seed.to_le_bytes().to_vec())
     }
     fn write(&mut self, address: u32, bytes: &[u8]) -> Result<(), PatchError> {
-        if address != FIXTURE_SEED_ADDRESS || bytes.len() != 4 { return Err(PatchError::InvalidSpan); }
+        if address != FIXTURE_SEED_ADDRESS || bytes.len() != 4 {
+            return Err(PatchError::InvalidSpan);
+        }
         if self.fail_next_write {
             self.fail_next_write = false;
             return Err(PatchError::Target("injected fixture write failure".into()));
@@ -421,7 +640,9 @@ mod tests {
         PatchManager::new(AuditStore::open_memory().unwrap(), Duration::from_secs(30))
     }
     fn preview(manager: &mut PatchManager, target: &FixtureTarget) -> PatchPreview {
-        manager.preview(target, PatchSpec::emerald_fixture_seed(0xF00D_BABE)).unwrap()
+        manager
+            .preview(target, PatchSpec::emerald_fixture_seed(0xF00D_BABE))
+            .unwrap()
     }
     #[test]
     fn preview_has_no_side_effect_and_audits_fixture_only() {
@@ -455,14 +676,20 @@ mod tests {
         let mut target = FixtureTarget::new();
         let p = preview(&mut manager, &target);
         manager.apply(&mut target, &p.preview_id).unwrap();
-        assert!(matches!(manager.apply(&mut target, &p.preview_id), Err(PatchError::UnknownPreview)));
+        assert!(matches!(
+            manager.apply(&mut target, &p.preview_id),
+            Err(PatchError::UnknownPreview)
+        ));
     }
     #[test]
     fn expired_token_is_never_applied() {
         let mut manager = PatchManager::new(AuditStore::open_memory().unwrap(), Duration::ZERO);
         let mut target = FixtureTarget::new();
         let p = preview(&mut manager, &target);
-        assert!(matches!(manager.apply(&mut target, &p.preview_id), Err(PatchError::PreviewExpired)));
+        assert!(matches!(
+            manager.apply(&mut target, &p.preview_id),
+            Err(PatchError::PreviewExpired)
+        ));
         assert_eq!(target.seed, 0x1234_5678);
     }
     #[test]
@@ -471,8 +698,15 @@ mod tests {
             let mut manager = manager();
             let mut target = FixtureTarget::new();
             let p = preview(&mut manager, &target);
-            if build_change { target.change_build(); } else { target.bump_epoch(); }
-            assert!(matches!(manager.apply(&mut target, &p.preview_id), Err(PatchError::StaleSession)));
+            if build_change {
+                target.change_build();
+            } else {
+                target.bump_epoch();
+            }
+            assert!(matches!(
+                manager.apply(&mut target, &p.preview_id),
+                Err(PatchError::StaleSession)
+            ));
             assert_eq!(target.seed, 0x1234_5678);
         }
     }
@@ -482,7 +716,10 @@ mod tests {
         let mut target = FixtureTarget::new();
         let p = preview(&mut manager, &target);
         target.change_seed_externally(7);
-        assert!(matches!(manager.apply(&mut target, &p.preview_id), Err(PatchError::Conflict)));
+        assert!(matches!(
+            manager.apply(&mut target, &p.preview_id),
+            Err(PatchError::Conflict)
+        ));
         assert_eq!(target.seed, 7);
     }
     #[test]
@@ -490,11 +727,19 @@ mod tests {
         let mut manager = manager();
         let mut target = FixtureTarget::new();
         let p = preview(&mut manager, &target);
-        assert!(matches!(manager.preview(&target, PatchSpec::emerald_fixture_seed(1)), Err(PatchError::Overlap)));
+        assert!(matches!(
+            manager.preview(&target, PatchSpec::emerald_fixture_seed(1)),
+            Err(PatchError::Overlap)
+        ));
         let receipt = manager.apply(&mut target, &p.preview_id).unwrap();
-        assert!(matches!(manager.preview(&target, PatchSpec::emerald_fixture_seed(2)), Err(PatchError::Overlap)));
+        assert!(matches!(
+            manager.preview(&target, PatchSpec::emerald_fixture_seed(2)),
+            Err(PatchError::Overlap)
+        ));
         manager.restore(&mut target, &receipt.owner_id).unwrap();
-        manager.preview(&target, PatchSpec::emerald_fixture_seed(3)).unwrap();
+        manager
+            .preview(&target, PatchSpec::emerald_fixture_seed(3))
+            .unwrap();
     }
     #[test]
     fn restore_never_overwrites_foreign_changes() {
@@ -503,7 +748,10 @@ mod tests {
         let p = preview(&mut manager, &target);
         let receipt = manager.apply(&mut target, &p.preview_id).unwrap();
         target.change_seed_externally(0xAA);
-        assert!(matches!(manager.restore(&mut target, &receipt.owner_id), Err(PatchError::Conflict)));
+        assert!(matches!(
+            manager.restore(&mut target, &receipt.owner_id),
+            Err(PatchError::Conflict)
+        ));
         assert_eq!(target.seed, 0xAA);
         assert_eq!(manager.active()[0].status, PatchStatus::Conflict);
     }
@@ -513,7 +761,10 @@ mod tests {
         let mut target = FixtureTarget::new();
         let p = preview(&mut manager, &target);
         target.fail_one_write();
-        assert!(matches!(manager.apply(&mut target, &p.preview_id), Err(PatchError::Target(_))));
+        assert!(matches!(
+            manager.apply(&mut target, &p.preview_id),
+            Err(PatchError::Target(_))
+        ));
         assert_eq!(target.seed, 0x1234_5678);
         assert_eq!(manager.audit().unresolved_count("fixture").unwrap(), 0);
     }
@@ -524,7 +775,10 @@ mod tests {
         let p = preview(&mut manager, &target);
         let receipt = manager.apply(&mut target, &p.preview_id).unwrap();
         target.fail_one_write();
-        assert!(matches!(manager.restore(&mut target, &receipt.owner_id), Err(PatchError::RestoreFailed)));
+        assert!(matches!(
+            manager.restore(&mut target, &receipt.owner_id),
+            Err(PatchError::RestoreFailed)
+        ));
         assert_eq!(target.seed, 0xF00D_BABE);
         assert_eq!(manager.active()[0].status, PatchStatus::RestoreFailed);
         manager.restore(&mut target, &receipt.owner_id).unwrap();
@@ -535,7 +789,10 @@ mod tests {
         let mut manager = manager();
         let mut target = FixtureTarget::new();
         target.identity.environment = "live".into();
-        assert!(matches!(manager.preview(&target, PatchSpec::emerald_fixture_seed(1)), Err(PatchError::WriteLocked)));
+        assert!(matches!(
+            manager.preview(&target, PatchSpec::emerald_fixture_seed(1)),
+            Err(PatchError::WriteLocked)
+        ));
         assert_eq!(target.seed, 0x1234_5678);
     }
     #[test]
@@ -544,7 +801,10 @@ mod tests {
         let mut target = FixtureTarget::new();
         let p = preview(&mut manager, &target);
         manager.cancel_preview(&p.preview_id).unwrap();
-        assert!(matches!(manager.apply(&mut target, &p.preview_id), Err(PatchError::UnknownPreview)));
+        assert!(matches!(
+            manager.apply(&mut target, &p.preview_id),
+            Err(PatchError::UnknownPreview)
+        ));
     }
     #[test]
     fn reset_disallows_stale_preview_and_old_owner() {
@@ -553,6 +813,9 @@ mod tests {
         let p = preview(&mut manager, &target);
         manager.clear_fixture_session();
         let mut second = FixtureTarget::new();
-        assert!(matches!(manager.apply(&mut second, &p.preview_id), Err(PatchError::UnknownPreview)));
+        assert!(matches!(
+            manager.apply(&mut second, &p.preview_id),
+            Err(PatchError::UnknownPreview)
+        ));
     }
 }

@@ -127,18 +127,17 @@ pub fn run() {
             m2::m2_list_action_history
         ]);
     #[cfg(not(windows))]
-    let builder =
-        builder.invoke_handler(tauri::generate_handler![
-            get_catalog,
-            get_session_snapshot,
-            m2::m2_fixture_status,
-            m2::m2_start_fixture,
-            m2::m2_preview_fixture_seed,
-            m2::m2_cancel_fixture_preview,
-            m2::m2_apply_fixture_preview,
-            m2::m2_restore_fixture_patch,
-            m2::m2_list_action_history
-        ]);
+    let builder = builder.invoke_handler(tauri::generate_handler![
+        get_catalog,
+        get_session_snapshot,
+        m2::m2_fixture_status,
+        m2::m2_start_fixture,
+        m2::m2_preview_fixture_seed,
+        m2::m2_cancel_fixture_preview,
+        m2::m2_apply_fixture_preview,
+        m2::m2_restore_fixture_patch,
+        m2::m2_list_action_history
+    ]);
     builder
         .run(tauri::generate_context!())
         .expect("failed to run GameTrainer Studio");

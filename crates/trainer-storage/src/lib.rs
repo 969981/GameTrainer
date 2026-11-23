@@ -93,8 +93,9 @@ impl AuditStore {
         Self::initialize(Connection::open_in_memory()?)
     }
     fn initialize(connection: Connection) -> Result<Self, AuditError> {
-        connection.execute_batch(
-            "PRAGMA foreign_keys=ON;
+        connection
+            .execute_batch(
+                "PRAGMA foreign_keys=ON;
              CREATE TABLE IF NOT EXISTS schema_migrations (
                 version INTEGER PRIMARY KEY
              );
@@ -114,18 +115,19 @@ impl AuditStore {
              );
              CREATE INDEX IF NOT EXISTS idx_action_events_scope_time
                 ON action_events(environment, occurred_at_ms DESC, rowid);",
-        ).or_else(|error| {
-            // SQLite rejects rowid in indexed expressions. Preserve any existing
-            // schema and create a portable index instead.
-            if error.to_string().contains("no such column: rowid") {
-                connection.execute_batch(
-                    "CREATE INDEX IF NOT EXISTS idx_action_events_scope_time
-                     ON action_events(environment, occurred_at_ms DESC);"
-                )
-            } else {
-                Err(error)
-            }
-        })?;
+            )
+            .or_else(|error| {
+                // SQLite rejects rowid in indexed expressions. Preserve any existing
+                // schema and create a portable index instead.
+                if error.to_string().contains("no such column: rowid") {
+                    connection.execute_batch(
+                        "CREATE INDEX IF NOT EXISTS idx_action_events_scope_time
+                     ON action_events(environment, occurred_at_ms DESC);",
+                    )
+                } else {
+                    Err(error)
+                }
+            })?;
         connection.execute(
             "INSERT OR IGNORE INTO schema_migrations(version) VALUES (?1)",
             params![SCHEMA_VERSION],
@@ -220,9 +222,17 @@ mod tests {
     use super::*;
     fn event(kind: &str, status: &str) -> ActionEvent {
         ActionEvent::new(
-            format!("{kind}-{status}"), Some("owner".into()), Some("preview".into()),
-            "fixture-session".into(), "games.pokemon.emerald".into(), "features.gen3.rng".into(),
-            "fixture", kind, status, "4-byte fixture mutation", None,
+            format!("{kind}-{status}"),
+            Some("owner".into()),
+            Some("preview".into()),
+            "fixture-session".into(),
+            "games.pokemon.emerald".into(),
+            "features.gen3.rng".into(),
+            "fixture",
+            kind,
+            status,
+            "4-byte fixture mutation",
+            None,
         )
     }
 
@@ -254,6 +264,9 @@ mod tests {
         let mut e = event("apply_intent", "pending");
         e.environment = "untrusted".into();
         assert!(matches!(store.append(&e), Err(AuditError::Invalid)));
-        assert!(matches!(store.list("unknown", 10), Err(AuditError::Invalid)));
+        assert!(matches!(
+            store.list("unknown", 10),
+            Err(AuditError::Invalid)
+        ));
     }
 }
