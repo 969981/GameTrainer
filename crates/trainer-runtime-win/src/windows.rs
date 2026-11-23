@@ -15,8 +15,8 @@ use trainer_mgba::{
     RuntimeFingerprint,
 };
 use trainer_rs::{
-    parse_header as parse_rs_header, profile_for as rs_profile_for,
-RsError, RsGame, RsReadOnlySession, RsSeedSnapshot,
+    parse_header as parse_rs_header, profile_for as rs_profile_for, RsError, RsGame,
+    RsReadOnlySession, RsSeedSnapshot,
 };
 use windows_sys::Win32::{
     Foundation::{CloseHandle, FILETIME, HANDLE, INVALID_HANDLE_VALUE},
