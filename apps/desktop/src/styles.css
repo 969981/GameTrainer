@@ -297,3 +297,10 @@ code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; overflow
 .m2-event-title{display:flex;align-items:center;gap:12px}
 @media (max-width:1250px){.m2-layout{grid-template-columns:1fr}}
 @media (max-width:700px){.m2-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.m2-history-entry{flex-wrap:wrap}.m2-history-entry time{width:100%;padding-left:56px}}
+
+/* M1 Ruby/Sapphire read-only build matrix */
+.rs-profile-table-wrap {max-height:320px;overflow:auto;margin-top:12px;border:1px solid var(--border);border-radius:10px}
+.rs-profile-table {border-collapse:collapse;width:100%;font-size:12px}
+.rs-profile-table th,.rs-profile-table td {padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.rs-profile-table th {position:sticky;top:0;background:var(--surface-2);color:var(--muted)}
+.rs-profile-table code {white-space:nowrap}
