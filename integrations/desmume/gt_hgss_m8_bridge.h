@@ -108,15 +108,17 @@ inline void hash_chunk(const void* bytes,DWORD length) {
     }
     s.hashed_bytes+=length;
 }
-// Called after a successful ROM load and NDS_Reset. If any byte is missing,
+// Called after a successful ROM load and NDS_Reset. A disk-streaming ROM can
+// change after hashing; require DeSmuME's in-memory ROM reader as well.
+// If any byte is missing,
 // no valid ROM record is published (including compressed or trimmed ROMs).
 inline void rom_commit(const char code[4],uint8_t revision,uint64_t size,
-                       uint32_t crc32,bool jit_enabled) {
+                       uint32_t crc32,bool jit_enabled,bool resident_rom_reader) {
     State& s=state();std::lock_guard<std::mutex> g(s.mu);
     BYTE hash[20]={0};DWORD count=20;
     const bool hgss=code && code[0]=='I'&&code[1]=='P' &&
         (code[2]=='K'||code[2]=='G');
-    const bool ok=hgss&&s.hash_ok&&s.digest&&size>=1024*1024
+    const bool ok=hgss&&resident_rom_reader&&s.hash_ok&&s.digest&&size>=1024*1024
         &&s.hashed_bytes==size&&CryptGetHashParam(s.digest,HP_HASHVAL,hash,&count,0)
         &&count==20;
     if(ok) {
