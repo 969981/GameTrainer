@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/trainer-core", "crates/trainer-mgba", "crates/trainer-runtime-win", "crates/trainer-rs", "crates/trainer-rsp", "crates/trainer-live", "crates/trainer-frlg", "crates/trainer-patch", "crates/trainer-storage", "apps/desktop/src-tauri"]
+members = ["crates/trainer-core", "crates/trainer-mgba", "crates/trainer-runtime-win", "crates/trainer-rs", "crates/trainer-rsp", "crates/trainer-live", "crates/trainer-frlg", "crates/trainer-hgss", "crates/trainer-patch", "crates/trainer-storage", "apps/desktop/src-tauri"]
 resolver = "2"
 
 [workspace.package]

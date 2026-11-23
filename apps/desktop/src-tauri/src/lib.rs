@@ -6,6 +6,7 @@ use trainer_core::{GameCatalog, GameRegistry, SessionSnapshot};
 mod m2;
 mod m3;
 mod m4;
+mod m5;
 
 #[tauri::command]
 fn get_catalog() -> Result<GameCatalog, String> {
@@ -200,6 +201,7 @@ pub fn run() {
         m2::install(app);
         m3::install(app);
         m4::install(app);
+        m5::install(app);
         Ok(())
     });
     #[cfg(windows)]
@@ -243,7 +245,12 @@ pub fn run() {
             m4::m4_frlg_pause,
             m4::m4_frlg_resume,
             m4::m4_frlg_mailbox,
-            m4::m4_frlg_history
+            m4::m4_frlg_history,
+            m5::m5_hgss_profiles,
+            m5::m5_list_desmume,
+            m5::m5_attach_hgss,
+            m5::m5_hgss_snapshot,
+            m5::m5_detach_hgss
         ]);
     #[cfg(not(windows))]
     let builder = builder.invoke_handler(tauri::generate_handler![
@@ -277,7 +284,12 @@ pub fn run() {
         m4::m4_frlg_pause,
         m4::m4_frlg_resume,
         m4::m4_frlg_mailbox,
-        m4::m4_frlg_history
+        m4::m4_frlg_history,
+        m5::m5_hgss_profiles,
+        m5::m5_list_desmume,
+        m5::m5_attach_hgss,
+        m5::m5_hgss_snapshot,
+        m5::m5_detach_hgss
     ]);
     builder
         .run(tauri::generate_context!())
@@ -291,7 +303,7 @@ mod tests {
     #[test]
     fn readonly_catalog_command_returns_rust_registry() {
         let catalog = get_catalog().expect("valid Rust Mock registry");
-        assert_eq!(catalog.games.len(), 9);
+        assert_eq!(catalog.games.len(), 11);
         assert!(catalog.read_only);
         assert!(catalog
             .games
