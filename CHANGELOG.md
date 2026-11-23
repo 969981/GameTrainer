@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-23 — M4 FireRed / LeafGreen v2.0.4 guarded GDB writes
+
+- Added 16 original ROM SHA1 profiles, Rust `trainer-frlg`, GDB-paused capture/wall transactions and SHA256-pinned 116-byte user-provided experimental wild Seed Hook.
+- Added separate M4 Tauri IPC, SQLite live audit and a React FireRed/LeafGreen runtime panel, including real guest diff preview, confirmation and verified restoration. M3/M4 sessions are mutually exclusive.
+- Catalog has two new FireRed/LeafGreen game entries (nine titles total). Public repository does not distribute the original GPL binary or any ROM.
+- **No real mGBA ROM gameplay or abnormal restore acceptance test has been performed.** See [M4](docs/m4-frlg-v204-live.md).
+
 ## 2026-11-23 — M3 opt-in GDB live patches (CI green, emulator unverified)
 
 - Verified [CI #45118655477](https://github.com/969981/GameTrainer/actions/runs/45118655477): 50 Rust tests, 15 UI tests, Chromium 3-width layouts, and Windows debug EXE.

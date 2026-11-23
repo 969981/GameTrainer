@@ -1,8 +1,16 @@
 # GameTrainer Studio
 
-> 多游戏、跨运行时的 Windows 桌面研究与修改工具（M0–M2 已建立，M3 实验性真实 GDB 写入）
+> 多游戏、跨运行时的 Windows 桌面研究与修改工具（M0–M2 已建立，M3/M4 受控 GDB Guest 写入实验）
 
 **当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
+
+## M4 · FireRed / LeafGreen v2.0.4（16 零售版 Profile）
+
+- [M4 架构、受控 Guest 写入与实验 Hook 使用说明](docs/m4-frlg-v204-live.md) · [ADR-0006](docs/decisions/0006-m4-frlg-experimental-live.md)。
+- 已接入完整 ROM SHA1 白名单 16 版：FireRed/LeafGreen 美/日 Rev0/1、德/法/意/西 Rev0。新增 Rust `trainer-frlg`、Tauri M4 独立 Session、React 真实 GDB 面板，游戏库从 7 款增至 9 款。
+- 已编写实际 GDB Guest 写入：固定 ROM 原指令核对与 100% 捕捉、穿墙 Halfword 事务；v2.0.4 116B 固定 SHA256 Payload 的一次性普通野生 Seed Hook（普通 `flags=1` / Repel 修复）。
+- 完整 ROM SHA1 于 connect/preview/apply/restore 复核，后端先写独立 SQLite Intent，写后回读、按所有权恢复；M3/M4 连接互斥。**不支持汉化/随机版或联机游戏，不分发原 GPL-3.0 Hook 二进制。**
+- **真实 Windows+mGBA + 原版火红/叶绿 ROM 的捕捉/穿墙/Hook 实机验收尚未完成**。其它钓鱼、地图传送和游走 Hook 不会因为此版本加入而自动启用。
 
 ## M3 · Ruby/Sapphire 实验性真实写入（未实机验收）
 

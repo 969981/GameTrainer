@@ -12,7 +12,7 @@
 7. docs/roadmap.md
 8. 触及的游戏/模块下属 README 和 Profile 证据
 9. M3 真正 Guest 写入还必须阅读 docs/m3-live-gdb-experimental.md 与 ADR-0005，不能把此前 M2 的限制视为已全面取消
-9. 修改 Ruby/Sapphire 捕捉、钓鱼、传送、战斗或 ROM Hook 时必须先阅读 docs/gen3-rs-migration-security-review.md 和 docs/decisions/0004-rs-migration-write-gates.md
+10. 修改 Ruby/Sapphire 捕捉、钓鱼、传送、战斗或 ROM Hook 时必须先阅读 docs/gen3-rs-migration-security-review.md 和 docs/decisions/0004-rs-migration-write-gates.md
 
 ## 技术边界
 - Windows 优先；Rust Cargo Workspace + Tauri 2 + React/TypeScript/Vite + Tailwind CSS + shadcn/ui。
@@ -76,3 +76,12 @@
 - Mock Fixture：Gen3、Gen4、Gen5、Gen6、PC 五组加载且导航不改核心代码。
 - 实机测试：必须写明 Windows、模拟器版本、游戏版本、结果、复现流程；未测试则明确标记。
 - 输出交付包含：改动文件、主要行为、测试证据、失败/限制、下一步。
+
+## M4 · FireRed/LeafGreen 受控 Guest 写入规则
+
+- 必须阅读 [M4 实施说明](docs/m4-frlg-v204-live.md)、[ADR-0006](docs/decisions/0006-m4-frlg-experimental-live.md)，以及用户上传的 v2.0.4 ScanWildHookFix 源码证据。
+- `crates/trainer-frlg` 与 `fixtures/frlg-v204-roms.json` 是独立游戏版本适配器，不得用红蓝宝石地址或任意 Guest/Host 写入替代。只支持 16 个零售版、必须完整 Guest ROM SHA1 匹配。
+- 真实修改仅受限 Capture、Wall、Wild（用户本地原 116B SHA256 Payload），CPU 必须暂停，校验函数前缀、上下文、Mailbox/Code Cave、SQLite Intent、readback、逆序 restore。野生 Hook 不在战斗中装卸。
+- M3 和 M4 GDB 会话互斥，除非当前会话确认无活跃 Owner 并安全断开。绝不可跨会话旧地址自动恢复；发生 ROM Reload 或 SaveState 旧跳板时拒绝危险写入。
+- 禁止把 CI Rust Mock、Windows EXE 编译或来源 ZIP 的静态检查写成真实 mGBA ROM 的运行成功证据。真实联调和恢复失败注入需独立记录。
+- 本项目不提交或分发原 GPL-3.0 Thumb Payload/游戏 ROM。商业发布前单独评估开源许可和派生范围。

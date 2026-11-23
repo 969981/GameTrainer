@@ -3,6 +3,9 @@
 > 本目录是项目设计规范与开发研究，不包含个人 Vault 内容。双链用于 Obsidian，标准相对链接用于 GitHub。
 
 ## 工程实施
+- [M4 · 火红叶绿 v2.0.4 真实 GDB 与实验性野生 Hook](m4-frlg-v204-live.md) · [[m4-frlg-v204-live]]
+- [ADR-0006 独立 FRLG Guest 写入安全门禁](decisions/0006-m4-frlg-experimental-live.md)
+
 - [M0 工程与 CI 验证](m0-implementation.md) · [[m0-implementation]]
 - [M1 Emerald/mGBA 只读实现、实机验收清单](m1-readonly.md) · [[m1-readonly]]
 

@@ -43,3 +43,10 @@
 - Tauri/React 已新增 M3 确认操作界面；目前正在 CI 和安全恢复审查，未实机测试。
 - Fishing/Feebas 与 Teleport 的运行时 Hook 仍在后续专项审查阶段，不允许仅把 M2 Fixture 校验关闭就启用。
 - [详情](m3-live-gdb-experimental.md) · [ADR-0005](decisions/0005-m3-gdb-guarded-live.md)。
+
+## M4 · FireRed / LeafGreen v2.0.4 受控 Guest GDB 写入
+
+- 新增 16 零售版 ROM SHA1 Profile、Rust trainer-frlg、Tauri m4、React M4 GDB 操作面板以及游戏库 FireRed/LeafGreen 两个独立适配器。
+- 捕捉和穿墙 Halfword、116B 受信任实验性 Wild Seed Hook 代码已实现，须从本地 GPL 原源包选择 Payload。mGBA 真正游戏测试、ROM Reload 和 SaveState Hook 恢复安全尚待现场验收。
+- 源码钓鱼、传送、游走等其它 Hook 继续只读研究，不开放真实执行。
+- [完整实施与验收约束](m4-frlg-v204-live.md) · [ADR-0006](decisions/0006-m4-frlg-experimental-live.md)。

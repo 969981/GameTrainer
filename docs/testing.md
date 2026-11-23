@@ -93,3 +93,15 @@
 - [ ] 实际 Windows+mGBA+ROM 的 GDB 读写、捕捉验证和 BattleCrit 异常战斗/恢复测试，仍为明确阻塞。
 - [CI 全绿证据](https://github.com/969981/GameTrainer/actions/runs/45118655477) · [Windows 测试包](https://github.com/969981/GameTrainer/actions/runs/45118655477/artifacts/14792413807)。
 
+
+## M4 · 火红叶绿 v2.0.4（待实机联调）
+
+- [x] 16 个来源 Profile 完整 SHA1、尺寸/地区/Revision、代码地址与精确原字节字段已编码；未知 ROM 版本拒绝测试。
+- [x] Rust 类型安全限制 Capture/Wall/Wild 三种功能；其它任意地址、任意 Payload、传送/钓鱼 Hook 不可执行。
+- [x] 首次联接、生成预览、Apply 和 Restore 前完整 ROM SHA1 核验；M3 与 M4 互斥 Session 代码已实现。
+- [x] 116B 本地 Wild Hook Payload SHA256 与占位字节核对；来源原本需要用户本地文件，不随项目发行。
+- [ ] 真正 Windows+mGBA 运行时 GDB 中断协议、三种功能的成功与失败表现、断线恢复、跨 SaveState、ROM Reload、战斗状态和 Cave PC 联调证据。
+- [ ] 严格失败注入：SQLite 写失败、第二 Span 写失败、第三方修改、复原过程中进程退出、功能被游戏状态切换中断。
+- [ ] UI 手工验收：端口、Profile SHA1、一次性确认、恢复按钮、邮箱命中数、9 款游戏切换不会复用状态。
+
+[M4 手册](m4-frlg-v204-live.md) · [ADR-0006](decisions/0006-m4-frlg-experimental-live.md)。
