@@ -231,7 +231,7 @@ mod tests {
 mod restore_fault_injection {
     // Pure, synthetic halfword bus. No live emulator writer is linked here.
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-    enum State { New, Prepared, Applied, Uncertain, Restored }
+    enum State { New, Applied, Uncertain, Restored }
     #[derive(Default)]
     struct Bus {
         cell: u16,
@@ -267,7 +267,7 @@ mod restore_fault_injection {
             if !stopped || session!=self.session || epoch!=self.epoch ||
                 self.state!=State::New {return Err("precondition");}
             if bus.read()? != self.original {return Err("foreign code");}
-            self.state=State::Prepared; // durable journal intent in real design
+            // Before attempting writes, real code would durably record intent.
             // Once a write is attempted, an error could mean it took effect.
             self.state=State::Uncertain;
             bus.write(self.patched)?;

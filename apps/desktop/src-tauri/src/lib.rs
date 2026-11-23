@@ -8,6 +8,7 @@ mod m3;
 mod m4;
 mod m5;
 mod m6;
+mod m7;
 
 #[tauri::command]
 fn get_catalog() -> Result<GameCatalog, String> {
@@ -252,7 +253,8 @@ pub fn run() {
             m5::m5_attach_hgss,
             m5::m5_hgss_snapshot,
             m5::m5_detach_hgss,
-            m6::m6_hgss_probe_arm9_stop
+            m6::m6_hgss_probe_arm9_stop,
+            m7::m7_hgss_preflight
         ]);
     #[cfg(not(windows))]
     let builder = builder.invoke_handler(tauri::generate_handler![
@@ -292,7 +294,8 @@ pub fn run() {
         m5::m5_attach_hgss,
         m5::m5_hgss_snapshot,
         m5::m5_detach_hgss,
-        m6::m6_hgss_probe_arm9_stop
+        m6::m6_hgss_probe_arm9_stop,
+            m7::m7_hgss_preflight
     ]);
     builder
         .run(tauri::generate_context!())
