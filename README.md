@@ -4,6 +4,12 @@
 
 **当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
 
+## M6 · HGSS ARM9 GDB + Overlay12 读证据与恢复模拟验证
+
+新增 12 版本精确静态指令证据、DeSmuME ARM9 GDB 只读 Stop/PC/Overlay12 采样、React 诊断面板/JSON 证据复制，以及 Mock 所有权恢复测试。**没有真实 ARM9 写入通道、尚未 Windows DeSmuME 端到端验收，捕捉/穿墙/战斗 Hook 均不解锁。**
+
+[M6 验证文档](docs/m6-hgss-arm9-overlay-proof.md) · [ADR-0008](docs/decisions/0008-m6-arm9-overlay-evidence.md) · [静态证据清单](fixtures/hgss-m6-overlay12.json)。
+
 ## M5 · HeartGold / SoulSilver（HGSS v1.4.5.1）
 
 NDS Gen4 新增心金和魂银两款游戏，包含 14 个多语言 ROM Profile、独立 Rust trainer-hgss、Windows DeSmuME 外部只读内存适配、Tauri 2 IPC、React RNG/MT 面板及本地 NDS ROM SHA1 文件核验。12 个日/欧版 Profile 有 v1.4.5.1 静态审计，两份美版 Rev0 保留为旧版 Profile。
