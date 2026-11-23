@@ -55,7 +55,9 @@ mod real {
     impl GuardedBus for GdbBus {
         fn write_guest(&mut self, address: u32, bytes: &[u8]) -> Result<(), String> {
             if !matches!(bytes.len(), 2 | 72) || !address.is_multiple_of(2) {
-                return Err("M11 source-only halfword or unreferenced 72B Cave write required".into());
+                return Err(
+                    "M11 source-only halfword or unreferenced 72B Cave write required".into(),
+                );
             }
             self.0.write(address, bytes).map_err(|e| e.to_string())
         }

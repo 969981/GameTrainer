@@ -73,9 +73,11 @@ pub fn plan(code: &str, revision: u8, feature: LiveFeature) -> Result<PatchPlan,
             // Only a stable, known-original, unreferenced 72B ARM9 Thumb scratch
             // region. Stage a deterministic RET-only Thumb test image but NEVER
             // install any caller/branch to it. This is not GuestExec 5A/A5.
-            let mut demo=Vec::with_capacity(72);
-            for _ in 0..35 {demo.extend_from_slice(&[0xC0,0x46]);}
-            demo.extend_from_slice(&[0x70,0x47]); // bx lr
+            let mut demo = Vec::with_capacity(72);
+            for _ in 0..35 {
+                demo.extend_from_slice(&[0xC0, 0x46]);
+            }
+            demo.extend_from_slice(&[0x70, 0x47]); // bx lr
             (p.cave_addr,vec![0u8;72],demo,
              "v0.8.14 T.NATIVE_CAVES 72B all-zero region: laboratory-only code staging, NO executable ingress")
         }
@@ -89,10 +91,12 @@ pub fn plan(code: &str, revision: u8, feature: LiveFeature) -> Result<PatchPlan,
     })
 }
 pub fn signature_preflight<R: GuestReader>(r: &mut R, p: &PatchPlan) -> Result<(), String> {
-    let length=p.original.len();
-    let valid_length=if p.feature==LiveFeature::CaveStage {
-        length==72 && p.replacement.len()==72
-    } else {length==2 && p.replacement.len()==2};
+    let length = p.original.len();
+    let valid_length = if p.feature == LiveFeature::CaveStage {
+        length == 72 && p.replacement.len() == 72
+    } else {
+        length == 2 && p.replacement.len() == 2
+    };
     if !valid_length || !p.address.is_multiple_of(2) {
         return Err("M11 source patch span/Thumb alignment is not allowlisted".into());
     }
@@ -107,8 +111,8 @@ pub fn signature_preflight<R: GuestReader>(r: &mut R, p: &PatchPlan) -> Result<(
             return Err("M11 collision surrounding ARM9 Thumb original bytes mismatch".into());
         }
     }
-    if p.feature==LiveFeature::CaveStage {
-        verify_no_executable_ingress(r,p)?;
+    if p.feature == LiveFeature::CaveStage {
+        verify_no_executable_ingress(r, p)?;
     }
     let observed = r.read_guest(p.address, p.original.len())?;
     if observed != p.original {
@@ -117,31 +121,42 @@ pub fn signature_preflight<R: GuestReader>(r: &mut R, p: &PatchPlan) -> Result<(
     Ok(())
 }
 
-
-fn verify_no_executable_ingress<R:GuestReader>(
-    r:&mut R,p:&PatchPlan
-)->Result<(),String>{
-    if p.feature!=LiveFeature::CaveStage {return Ok(());}
-    let profile=profile_for(&p.game_code,p.revision)
+fn verify_no_executable_ingress<R: GuestReader>(r: &mut R, p: &PatchPlan) -> Result<(), String> {
+    if p.feature != LiveFeature::CaveStage {
+        return Ok(());
+    }
+    let profile = profile_for(&p.game_code, p.revision)
         .ok_or("missing original DP profile for Cave stage")?;
     // The v0.8.14 scratch is shared by native warp, battle crit/hit/OHKO,
     // and Guest Exec. Refuse whenever any known program entry is hooked.
-    let (crit,orig_crit,hit,orig_hit,ohko,orig_ohko)=match p.game_code.as_str(){
-        "APAE"=>(0x0223_38E8,[0x18,0xF0,0x28,0xFB],
-                 0x0224_084C,[0xAB,0xF6,0x18,0xEA],
-                 0x0223_3110,[0x18,0xF0,0xFE,0xFE]),
-        "APAI"=>(0x0223_3A5C,[0x18,0xF0,0x46,0xFB],
-                 0x0224_09CC,[0xAB,0xF6,0x76,0xE9],
-                 0x0223_3270,[0x18,0xF0,0x26,0xFF]),
-        _=>return Err("M11 no full-ROM Cave owner profile".into()),
+    let (crit, orig_crit, hit, orig_hit, ohko, orig_ohko) = match p.game_code.as_str() {
+        "APAE" => (
+            0x0223_38E8,
+            [0x18, 0xF0, 0x28, 0xFB],
+            0x0224_084C,
+            [0xAB, 0xF6, 0x18, 0xEA],
+            0x0223_3110,
+            [0x18, 0xF0, 0xFE, 0xFE],
+        ),
+        "APAI" => (
+            0x0223_3A5C,
+            [0x18, 0xF0, 0x46, 0xFB],
+            0x0224_09CC,
+            [0xAB, 0xF6, 0x76, 0xE9],
+            0x0223_3270,
+            [0x18, 0xF0, 0x26, 0xFF],
+        ),
+        _ => return Err("M11 no full-ROM Cave owner profile".into()),
     };
-    let originals=[
-        (profile.field_entry_addr+4,[0x04,0x1C,0x21,0x68]),
-        (crit,orig_crit),(hit,orig_hit),(ohko,orig_ohko)
+    let originals = [
+        (profile.field_entry_addr + 4, [0x04, 0x1C, 0x21, 0x68]),
+        (crit, orig_crit),
+        (hit, orig_hit),
+        (ohko, orig_ohko),
     ];
-    for (addr,expected) in originals {
-        let got=r.read_guest(addr,4)?;
-        if got!=expected {
+    for (addr, expected) in originals {
+        let got = r.read_guest(addr, 4)?;
+        if got != expected {
             return Err(format!("M11 cannot stage/clear 72B Cave: existing or unknown executable ingress @ 0x{addr:08X}"));
         }
     }
@@ -163,7 +178,7 @@ pub fn apply_guarded<B: GuardedBus>(bus: &mut B, p: &PatchPlan) -> Result<(), St
 /// Only a record that owns the exact original/replacement tuple may restore.
 /// A changed overlay or foreign patch is never overwritten.
 pub fn restore_guarded<B: GuardedBus>(bus: &mut B, p: &PatchPlan) -> Result<(), String> {
-    verify_no_executable_ingress(bus,p)?;
+    verify_no_executable_ingress(bus, p)?;
     let got = bus.read_guest(p.address, p.replacement.len())?;
     if got != p.replacement {
         return Err("M11 current bytes no longer match owned patch; refuse blind restore".into());
@@ -236,27 +251,27 @@ mod tests {
                 for (i, v) in p.original.iter().enumerate() {
                     r.bytes.insert(p.address + i as u32, *v);
                 }
-                if p.feature==LiveFeature::CaveStage {
-                    let profile=profile_for(&p.game_code,p.revision).unwrap();
-                    let sites=if p.game_code=="APAE"{
+                if p.feature == LiveFeature::CaveStage {
+                    let profile = profile_for(&p.game_code, p.revision).unwrap();
+                    let sites = if p.game_code == "APAE" {
                         vec![
-                            (0x0223_38E8,vec![0x18,0xF0,0x28,0xFB]),
-                            (0x0224_084C,vec![0xAB,0xF6,0x18,0xEA]),
-                            (0x0223_3110,vec![0x18,0xF0,0xFE,0xFE]),
+                            (0x0223_38E8, vec![0x18, 0xF0, 0x28, 0xFB]),
+                            (0x0224_084C, vec![0xAB, 0xF6, 0x18, 0xEA]),
+                            (0x0223_3110, vec![0x18, 0xF0, 0xFE, 0xFE]),
                         ]
-                    }else{
+                    } else {
                         vec![
-                            (0x0223_3A5C,vec![0x18,0xF0,0x46,0xFB]),
-                            (0x0224_09CC,vec![0xAB,0xF6,0x76,0xE9]),
-                            (0x0223_3270,vec![0x18,0xF0,0x26,0xFF]),
+                            (0x0223_3A5C, vec![0x18, 0xF0, 0x46, 0xFB]),
+                            (0x0224_09CC, vec![0xAB, 0xF6, 0x76, 0xE9]),
+                            (0x0223_3270, vec![0x18, 0xF0, 0x26, 0xFF]),
                         ]
                     };
-                    for(i,b)in [0x04,0x1C,0x21,0x68].iter().enumerate(){
-                        r.bytes.insert(profile.field_entry_addr+4+i as u32,*b);
+                    for (i, b) in [0x04, 0x1C, 0x21, 0x68].iter().enumerate() {
+                        r.bytes.insert(profile.field_entry_addr + 4 + i as u32, *b);
                     }
-                    for(addr,bytes)in sites {
-                        for(i,b)in bytes.iter().enumerate(){
-                            r.bytes.insert(addr+i as u32,*b);
+                    for (addr, bytes) in sites {
+                        for (i, b) in bytes.iter().enumerate() {
+                            r.bytes.insert(addr + i as u32, *b);
                         }
                     }
                 }
@@ -339,31 +354,33 @@ mod tests {
         assert_ne!(r.read_guest(p.address, 2).unwrap(), p.original);
     }
     #[test]
-    fn stage_and_clear_only_known_original_72b_cave_without_any_guest_call(){
-        for (code,rev) in [("APAE",13),("APAI",5)] {
-            let p=plan(code,rev,LiveFeature::CaveStage).unwrap();
-            assert_eq!(p.original.len(),72);
-            assert_eq!(p.replacement.len(),72);
-            assert_eq!(&p.replacement[70..],&[0x70,0x47]);
-            let mut r=Ram::new(&p);
-            apply_guarded(&mut r,&p).unwrap();
-            assert!(apply_guarded(&mut r,&p).is_err());
-            restore_guarded(&mut r,&p).unwrap();
-            assert_eq!(r.read_guest(p.address,72).unwrap(),vec![0u8;72]);
+    fn stage_and_clear_only_known_original_72b_cave_without_any_guest_call() {
+        for (code, rev) in [("APAE", 13), ("APAI", 5)] {
+            let p = plan(code, rev, LiveFeature::CaveStage).unwrap();
+            assert_eq!(p.original.len(), 72);
+            assert_eq!(p.replacement.len(), 72);
+            assert_eq!(&p.replacement[70..], &[0x70, 0x47]);
+            let mut r = Ram::new(&p);
+            apply_guarded(&mut r, &p).unwrap();
+            assert!(apply_guarded(&mut r, &p).is_err());
+            restore_guarded(&mut r, &p).unwrap();
+            assert_eq!(r.read_guest(p.address, 72).unwrap(), vec![0u8; 72]);
             // Staging never patched any program entry.
-            assert_eq!(r.read_guest(
-                profile_for(code,rev).unwrap().field_entry_addr+4,4
-            ).unwrap(),vec![0x04,0x1C,0x21,0x68]);
+            assert_eq!(
+                r.read_guest(profile_for(code, rev).unwrap().field_entry_addr + 4, 4)
+                    .unwrap(),
+                vec![0x04, 0x1C, 0x21, 0x68]
+            );
         }
     }
     #[test]
-    fn cave_restore_refuses_any_foreign_crit_callsite(){
-        let p=plan("APAE",13,LiveFeature::CaveStage).unwrap();
-        let mut r=Ram::new(&p);
-        apply_guarded(&mut r,&p).unwrap();
-        r.bytes.insert(0x0223_38E8,0xFF);
-        assert!(restore_guarded(&mut r,&p).is_err());
-        assert_eq!(r.read_guest(p.address,72).unwrap(),p.replacement);
+    fn cave_restore_refuses_any_foreign_crit_callsite() {
+        let p = plan("APAE", 13, LiveFeature::CaveStage).unwrap();
+        let mut r = Ram::new(&p);
+        apply_guarded(&mut r, &p).unwrap();
+        r.bytes.insert(0x0223_38E8, 0xFF);
+        assert!(restore_guarded(&mut r, &p).is_err());
+        assert_eq!(r.read_guest(p.address, 72).unwrap(), p.replacement);
     }
     #[test]
     fn different_pid_created_time_epoch_and_full_sha_invalidates_owner() {
