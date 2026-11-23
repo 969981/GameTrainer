@@ -495,10 +495,11 @@ mod tests {
             second_pc: Some(0x0200_1000),
             error: None,
         };
-        let r = runtime_audit(identity, false, cpu("ARM9", 3333),
-            cpu("ARM7", 3334), None);
+        let r = runtime_audit(identity, false, cpu("ARM9", 3333), cpu("ARM7", 3334), None);
         assert!(!r.identity.diagnostic_identity_verified);
         assert!(!r.write_authorized);
-        assert!(r.blockers.contains(&"rom_changed_during_gdb_observations".into()));
+        assert!(r
+            .blockers
+            .contains(&"rom_changed_during_gdb_observations".into()));
     }
 }
