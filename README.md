@@ -4,6 +4,12 @@
 
 **当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
 
+## M7 · HGSS 运行中 ROM 身份、ARM9/ARM7/JIT 安全门禁
+
+继续 M6 的下一阶段。Windows DeSmuME 双 ARM9/ARM7 GDB 只读停机探针、运行中 ROM 来源与 JIT/指令缓存阻断条件、Overlay12 代次/字节所有权判定，以及模拟内存的写入 ACK 丢失、恢复失败、SaveState/会话变更故障注入已纳入 Rust/Tauri/React。**M7 不含真实 NDS Guest 写入能力，也没有在本环境对原版 ROM 与 Windows DeSmuME 进行实机恢复测试。**
+
+[M7 只读预检和验收说明](docs/m7-hgss-runtime-proof-gates.md) · [ADR-0009](docs/decisions/0009-m7-runtime-rom-dualcpu-deny.md)。
+
 ## M6 · HGSS ARM9 GDB + Overlay12 读证据与恢复模拟验证
 
 新增 12 版本精确静态指令证据、DeSmuME ARM9 GDB 只读 Stop/PC/Overlay12 采样、React 诊断面板/JSON 证据复制，以及 Mock 所有权恢复测试。**没有真实 ARM9 写入通道、尚未 Windows DeSmuME 端到端验收，捕捉/穿墙/战斗 Hook 均不解锁。**
