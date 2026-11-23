@@ -4,7 +4,9 @@ describe("DP M11 guarded experimental patch client",()=>{
   it("permits only source audited complete-ROM profiles and patch variants",()=>{
     expect(m11SourceAllowed("APAE",13,"wall_collision")).toBe(true);
     expect(m11SourceAllowed("APAE",13,"capture_english")).toBe(true);
+    expect(m11SourceAllowed("APAE",13,"cave_stage")).toBe(true);
     expect(m11SourceAllowed("APAI",5,"wall_collision")).toBe(true);
+    expect(m11SourceAllowed("APAI",5,"cave_stage")).toBe(true);
     expect(m11SourceAllowed("APAI",5,"capture_english")).toBe(false);
     expect(m11SourceAllowed("ADAE",13,"wall_collision")).toBe(false);
     expect(m11SourceAllowed("APAJ",6,"capture_english")).toBe(false);
