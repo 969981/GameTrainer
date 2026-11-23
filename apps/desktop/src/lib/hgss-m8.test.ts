@@ -10,7 +10,7 @@ describe("M8 loaded-ROM binding UI contract",()=>{
  });
  it("never promotes a matching ROM into Guest writes",()=>{
   const r:M8Report={
-   process_id:123,process_created_filetime:7,rom_load_epoch:2,
+   process_id:123,process_created_filetime:"7",rom_load_epoch:2,
    code:"IPKJ",revision:0,rom_size:1048576,rom_crc32:"ABCD1234",
    rom_sha1:"a".repeat(40),catalog_sha1:"a".repeat(40),arm9_port:3333,arm7_port:3334,
    jit_enabled_when_loaded:false,core_rom_stream_complete:true,

@@ -3,7 +3,7 @@ import { isTauriDesktop } from "@/lib/backend";
 
 export interface M8Report {
   process_id:number;
-  process_created_filetime:number;
+  process_created_filetime:string;
   rom_load_epoch:number;
   code:string;revision:number;
   rom_size:number;

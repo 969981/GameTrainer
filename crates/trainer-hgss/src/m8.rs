@@ -78,7 +78,7 @@ pub struct OsBinding {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct M8Report {
     pub process_id: u32,
-    pub process_created_filetime: u64,
+    pub process_created_filetime: String,
     pub rom_load_epoch: u64,
     pub code: String,
     pub revision: u8,
@@ -165,7 +165,7 @@ pub fn evaluate(
     ]);
     M8Report {
         process_id: p.pid,
-        process_created_filetime: p.created_filetime,
+        process_created_filetime: p.created_filetime.to_string(),
         rom_load_epoch: p.rom_epoch,
         code: p.code.clone(),
         revision: p.revision,
