@@ -4,6 +4,12 @@
 
 **当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
 
+## M8 · HGSS DeSmuME 内核运行中 ROM 身份桥（只读）
+
+已接入 DeSmuME NDS_LoadROM 字节流 SHA1、Windows Named Pipe / PID / 创建 FILETIME / 双 GDB TCP Owner PID 绑定、Rust 身份门禁、Tauri/React M8 面板，并提供上游固定 commit 补丁、PowerShell 安装器及 MSVC 合成流 Smoke。**需要自己源码构建带 GDB_STUB + GT_HGSS_M8_BRIDGE 的 DeSmuME，并开启 ROM 内存驻留。ROM 身份诊断 ≠ 双 CPU/JIT/Overlay 写入安全，真实 NDS Guest 写入仍禁用。**
+
+[M8 实施说明](docs/m8-hgss-loaded-rom-bridge.md) · [DeSmuME 集成](integrations/desmume/install-m8-bridge.ps1) · [ADR-0010](docs/decisions/0010-m8-rom-core-pid-binding.md)。
+
 ## M7 · HGSS 运行中 ROM 身份、ARM9/ARM7/JIT 安全门禁
 
 继续 M6 的下一阶段。Windows DeSmuME 双 ARM9/ARM7 GDB 只读停机探针、运行中 ROM 来源与 JIT/指令缓存阻断条件、Overlay12 代次/字节所有权判定，以及模拟内存的写入 ACK 丢失、恢复失败、SaveState/会话变更故障注入已纳入 Rust/Tauri/React。**M7 不含真实 NDS Guest 写入能力，也没有在本环境对原版 ROM 与 Windows DeSmuME 进行实机恢复测试。**
