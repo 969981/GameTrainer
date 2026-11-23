@@ -5,3 +5,8 @@
 mod windows;
 #[cfg(windows)]
 pub use windows::*;
+
+#[cfg(windows)]
+mod m8_win;
+#[cfg(windows)]
+pub use m8_win::read_desmume_runtime_rom_identity;
