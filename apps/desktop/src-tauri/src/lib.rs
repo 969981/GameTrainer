@@ -298,7 +298,7 @@ pub fn run() {
         m5::m5_detach_hgss,
         m6::m6_hgss_probe_arm9_stop,
         m7::m7_hgss_preflight,
-            m8::m8_hgss_core_rom_identity
+        m8::m8_hgss_core_rom_identity
     ]);
     builder
         .run(tauri::generate_context!())
