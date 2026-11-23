@@ -43,7 +43,9 @@ mod m1 {
         // Scanning process memory must never block the WebView UI thread.
         let mut attached = tauri::async_runtime::spawn_blocking(move || {
             AttachedEmerald::attach(process_id).map_err(|error| error.to_string())
-        }).await.map_err(|error| error.to_string())??;
+        })
+        .await
+        .map_err(|error| error.to_string())??;
         let snapshot = attached.snapshot().map_err(|error| error.to_string())?;
         let receipt = ConnectReceipt {
             session_id: attached.session_id().to_owned(),
@@ -57,9 +59,7 @@ mod m1 {
     }
 
     #[tauri::command]
-    pub fn read_emerald_rng(
-        state: State<'_, RuntimeState>,
-    ) -> Result<RngSnapshot, String> {
+    pub fn read_emerald_rng(state: State<'_, RuntimeState>) -> Result<RngSnapshot, String> {
         let mut guard = state.0.lock().map_err(|_| "Runtime state poisoned")?;
         let attached = guard.as_mut().ok_or("没有已连接的只读 Emerald 会话")?;
         match attached.snapshot() {
@@ -115,9 +115,8 @@ pub fn run() {
             m1::detach_emerald
         ]);
     #[cfg(not(windows))]
-    let builder = builder.invoke_handler(tauri::generate_handler![
-        get_catalog, get_session_snapshot
-    ]);
+    let builder =
+        builder.invoke_handler(tauri::generate_handler![get_catalog, get_session_snapshot]);
     builder
         .run(tauri::generate_context!())
         .expect("failed to run GameTrainer Studio");
