@@ -716,23 +716,26 @@ impl Editor {
         // A one-shot wild encounter intentionally changes the mailbox counters.
         // Check all spans before removing the owner to preserve the restore
         // capability after any transport failure or alien bytes.
-        let validation = owned.spans.iter().try_for_each(|span| -> Result<(), LiveError> {
-            let actual = self.rsp.read(span.address, span.after.len())?;
-            if span.address == MAIL {
-                if feature != Feature::Wild
-                    || actual.len() != 16
-                    || actual[7] != 0
-                    || !matches!(actual[4], 0 | 1)
-                    || !matches!(actual[5], 0 | 1)
-                    || !matches!(actual[6], 0 | 1)
-                {
+        let validation = owned
+            .spans
+            .iter()
+            .try_for_each(|span| -> Result<(), LiveError> {
+                let actual = self.rsp.read(span.address, span.after.len())?;
+                if span.address == MAIL {
+                    if feature != Feature::Wild
+                        || actual.len() != 16
+                        || actual[7] != 0
+                        || !matches!(actual[4], 0 | 1)
+                        || !matches!(actual[5], 0 | 1)
+                        || !matches!(actual[6], 0 | 1)
+                    {
+                        return Err(LiveError::Conflict);
+                    }
+                } else if actual != span.after && actual != span.before {
                     return Err(LiveError::Conflict);
                 }
-            } else if actual != span.after && actual != span.before {
-                return Err(LiveError::Conflict);
-            }
-            Ok(())
-        });
+                Ok(())
+            });
         if let Err(error) = validation {
             self.owner = Some(owned);
             return Err(error);
