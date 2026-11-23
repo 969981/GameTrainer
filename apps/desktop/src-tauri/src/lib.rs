@@ -19,15 +19,26 @@ mod m1 {
     use std::sync::Mutex;
     use tauri::State;
     use trainer_mgba::RngSnapshot;
-    use trainer_runtime_win::{list_mgba_targets, AttachedEmerald, MgbaTarget};
+    use trainer_rs::{retail_profiles, RsGame, RsProfile, RsSeedSnapshot};
+    use trainer_runtime_win::{
+        list_mgba_targets, AttachedEmerald, AttachedRubySapphire, MgbaTarget,
+    };
 
-    pub struct RuntimeState(pub Mutex<Option<AttachedEmerald>>);
+    /// Exactly one active Gen3 emulator session. No game may reuse another
+    /// game's memory mapping, profile, or read-only session epoch.
+    enum AttachedGen3 {
+        Emerald(AttachedEmerald),
+        RubySapphire(AttachedRubySapphire),
+    }
+    pub struct RuntimeState(Mutex<Option<AttachedGen3>>);
 
     #[derive(Serialize)]
     pub struct ConnectReceipt {
         pub session_id: String,
+        pub game_id: String,
         pub game_code: String,
         pub language: String,
+        pub revision: u8,
         pub verification: &'static str,
         pub read_only: bool,
     }
@@ -38,11 +49,15 @@ mod m1 {
     }
 
     #[tauri::command]
+    pub fn list_rs_profiles() -> Vec<RsProfile> {
+        retail_profiles()
+    }
+
+    #[tauri::command]
     pub async fn attach_emerald_read_only(
         process_id: u32,
         state: State<'_, RuntimeState>,
     ) -> Result<ConnectReceipt, String> {
-        // Scanning process memory must never block the WebView UI thread.
         let mut attached = tauri::async_runtime::spawn_blocking(move || {
             AttachedEmerald::attach(process_id).map_err(|error| error.to_string())
         })
@@ -51,23 +66,77 @@ mod m1 {
         let snapshot = attached.snapshot().map_err(|error| error.to_string())?;
         let receipt = ConnectReceipt {
             session_id: attached.session_id().to_owned(),
+            game_id: "games.pokemon.emerald".into(),
             game_code: snapshot.game_code,
             language: snapshot.language,
+            revision: 0,
             verification: "partial_anchors_read_only",
             read_only: true,
         };
-        *state.0.lock().map_err(|_| "Runtime state poisoned")? = Some(attached);
+        *state.0.lock().map_err(|_| "Runtime state poisoned")? =
+            Some(AttachedGen3::Emerald(attached));
+        Ok(receipt)
+    }
+
+    #[tauri::command]
+    pub async fn attach_rs_read_only(
+        process_id: u32,
+        game_id: String,
+        state: State<'_, RuntimeState>,
+    ) -> Result<ConnectReceipt, String> {
+        let game = match game_id.as_str() {
+            "games.pokemon.ruby" => RsGame::Ruby,
+            "games.pokemon.sapphire" => RsGame::Sapphire,
+            _ => return Err("只支持 Ruby/Sapphire 的只读目标".into()),
+        };
+        let mut attached = tauri::async_runtime::spawn_blocking(move || {
+            AttachedRubySapphire::attach(process_id, game).map_err(|e| e.to_string())
+        })
+        .await
+        .map_err(|error| error.to_string())??;
+        let snapshot = attached.snapshot().map_err(|error| error.to_string())?;
+        if snapshot.game_id != game_id {
+            return Err("目标游戏和请求的版本不符".into());
+        }
+        let receipt = ConnectReceipt {
+            session_id: attached.session_id().to_owned(),
+            game_id: snapshot.game_id,
+            game_code: snapshot.game_code,
+            language: snapshot.language,
+            revision: snapshot.revision,
+            verification: "header_revision_boot_anchor_only",
+            read_only: true,
+        };
+        *state.0.lock().map_err(|_| "Runtime state poisoned")? =
+            Some(AttachedGen3::RubySapphire(attached));
         Ok(receipt)
     }
 
     #[tauri::command]
     pub fn read_emerald_rng(state: State<'_, RuntimeState>) -> Result<RngSnapshot, String> {
         let mut guard = state.0.lock().map_err(|_| "Runtime state poisoned")?;
-        let attached = guard.as_mut().ok_or("没有已连接的只读 Emerald 会话")?;
+        let Some(AttachedGen3::Emerald(attached)) = guard.as_mut() else {
+            return Err("没有已连接的 Emerald 只读会话".into());
+        };
         match attached.snapshot() {
             Ok(snapshot) => Ok(snapshot),
             Err(error) => {
-                *guard = None; // fail closed; a stale handle cannot be reused.
+                *guard = None; // session invalidated: fail closed
+                Err(error.to_string())
+            }
+        }
+    }
+
+    #[tauri::command]
+    pub fn read_rs_rng(state: State<'_, RuntimeState>) -> Result<RsSeedSnapshot, String> {
+        let mut guard = state.0.lock().map_err(|_| "Runtime state poisoned")?;
+        let Some(AttachedGen3::RubySapphire(attached)) = guard.as_mut() else {
+            return Err("没有已连接的 Ruby/Sapphire 只读会话".into());
+        };
+        match attached.snapshot() {
+            Ok(snapshot) => Ok(snapshot),
+            Err(error) => {
+                *guard = None;
                 Err(error.to_string())
             }
         }
@@ -75,6 +144,7 @@ mod m1 {
 
     #[tauri::command]
     pub fn detach_emerald(state: State<'_, RuntimeState>) -> Result<(), String> {
+        // Legacy IPC name retained. It disconnects any Gen3 game, not just Emerald.
         *state.0.lock().map_err(|_| "Runtime state poisoned")? = None;
         Ok(())
     }
@@ -83,17 +153,30 @@ mod m1 {
     pub fn get_session_snapshot(state: State<'_, RuntimeState>) -> SessionSnapshot {
         let guard = state.0.lock().expect("session mutex poisoned");
         match guard.as_ref() {
-            Some(attached) => SessionSnapshot {
+            Some(AttachedGen3::Emerald(attached)) => SessionSnapshot {
                 state: trainer_core::SessionState::AttachedReadOnly,
                 read_only: true,
                 session_id: Some(attached.session_id().to_owned()),
                 game_id: Some("games.pokemon.emerald".into()),
                 runtime_id: Some("runtimes.mgba.external".into()),
                 profile_id: Some(format!("{}-Rev0-partial", attached.game_code())),
-                message: "已连接只读 mGBA 会话；ROM 锚点是部分验证，不允许写入".into(),
+                message: "Emerald 只读连接：部分 ROM 锚点，禁止任何游戏写入".into(),
+            },
+            Some(AttachedGen3::RubySapphire(attached)) => SessionSnapshot {
+                state: trainer_core::SessionState::AttachedReadOnly,
+                read_only: true,
+                session_id: Some(attached.session_id().to_owned()),
+                game_id: Some(attached.game_id().to_owned()),
+                runtime_id: Some("runtimes.mgba.external".into()),
+                profile_id: Some(format!("{}_R{}-anchor-only", attached.game_code(), attached.revision())),
+                message: format!("{} 只读连接：仅 Header/Rev/16-byte Anchor，禁止游戏写入", attached.game_id()),
             },
             None => SessionSnapshot::default(),
         }
+    }
+
+    pub fn fresh_state() -> RuntimeState {
+        RuntimeState(Mutex::new(None))
     }
 }
 
@@ -110,13 +193,16 @@ pub fn run() {
     });
     #[cfg(windows)]
     let builder = builder
-        .manage(m1::RuntimeState(std::sync::Mutex::new(None)))
+        .manage(m1::fresh_state())
         .invoke_handler(tauri::generate_handler![
             get_catalog,
             m1::get_session_snapshot,
             m1::list_mgba_processes,
+            m1::list_rs_profiles,
             m1::attach_emerald_read_only,
+            m1::attach_rs_read_only,
             m1::read_emerald_rng,
+            m1::read_rs_rng,
             m1::detach_emerald,
             m2::m2_fixture_status,
             m2::m2_start_fixture,
@@ -150,8 +236,10 @@ mod tests {
     #[test]
     fn readonly_catalog_command_returns_rust_registry() {
         let catalog = get_catalog().expect("valid Rust Mock registry");
-        assert_eq!(catalog.games.len(), 5);
+        assert_eq!(catalog.games.len(), 7);
         assert!(catalog.read_only);
+        assert!(catalog.games.iter().any(|game| game.game_id == "games.pokemon.ruby"));
+        assert!(catalog.games.iter().any(|game| game.game_id == "games.pokemon.sapphire"));
         assert_eq!(catalog.source, "mock");
     }
 }

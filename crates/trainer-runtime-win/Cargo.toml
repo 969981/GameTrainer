@@ -6,6 +6,7 @@ description = "Windows external read-only mGBA process adapter"
 
 [dependencies]
 trainer-mgba = { path = "../trainer-mgba" }
+trainer-rs = { path = "../trainer-rs" }
 serde.workspace = true
 thiserror.workspace = true
 

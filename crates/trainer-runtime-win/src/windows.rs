@@ -3,6 +3,7 @@
 //! Candidate discovery is intentionally conservative and rejects ambiguous layouts.
 
 use serde::Serialize;
+use trainer_rs::{parse_header as parse_rs_header, profile_for as rs_profile_for, verify_boot_anchor as rs_verify_anchor, RsError, RsGame, RsReadOnlySession, RsSeedSnapshot};
 use std::{
     collections::HashSet,
     ffi::c_void,
@@ -53,14 +54,16 @@ pub enum RuntimeError {
     InvalidTarget,
     #[error("mGBA process could not be opened read-only")]
     AccessDenied,
-    #[error("no verified Emerald ROM / GBAMemory mapping found; start Emerald in mGBA")]
+    #[error("no verified GBA ROM / GBAMemory mapping found; start a supported game in mGBA")]
     MappingUnavailable,
     #[error("ambiguous mGBA mappings; refused to guess active core")]
     Ambiguous,
     #[error("mGBA scan budget exceeded; no safe mapping selected")]
     ScanBudget,
-    #[error("Emerald profile probe: {0}")]
+    #[error("GBA read-only profile probe: {0}")]
     Probe(#[from] ProbeError),
+    #[error("Ruby/Sapphire read-only profile probe: {0}")]
+    RsProbe(#[from] RsError),
 }
 fn os_error(op: &str) -> RuntimeError {
     RuntimeError::Windows(format!("{op}: {}", std::io::Error::last_os_error()))
@@ -321,8 +324,16 @@ impl GuestMemoryReader for GuestHostReader {
         }
         let mut header = [0u8; 0xC0];
         self.read_guest(0x0800_0000, &mut header)?;
-        let (profile, rev) = parse_header(&header)?;
-        if profile.code != self.code || rev != self.revision {
+        // Identity is polymorphic across Gen3 cartridges. A changed game or
+        // revision is rejected even if an emulator reused the same ROM pointer.
+        let (code, rev) = if let Ok((emerald, rev)) = parse_header(&header) {
+            (emerald.code.to_owned(), rev)
+        } else if let Ok(rs) = parse_rs_header(&header) {
+            (rs.game_code, rs.revision)
+        } else {
+            return Err(ProbeError::Stale);
+        };
+        if code != self.code || rev != self.revision {
             return Err(ProbeError::Stale);
         }
         Ok(RuntimeFingerprint {
@@ -457,6 +468,107 @@ impl AttachedEmerald {
     }
     pub fn snapshot(&mut self) -> Result<RngSnapshot, ProbeError> {
         self.session.read_snapshot(&self.reader)
+    }
+}
+
+
+/// Ruby/Sapphire read-only mGBA connection. The conservative layout check
+/// rejects unknown ROMs/identity and ambiguous host pointer tuples.
+/// Note: Header + retail boot-table anchor is only partial ROM verification.
+pub struct AttachedRubySapphire {
+    reader: GuestHostReader,
+    session: RsReadOnlySession,
+}
+impl AttachedRubySapphire {
+    pub fn attach(pid: u32, requested: RsGame) -> Result<Self, RuntimeError> {
+        let process = Process::open_known_mgba(pid)?;
+        let regions = process.memory_regions();
+        // Game-specific title prevents Ruby/Sapphire/Emerald cross-detection.
+        let marker = match requested {
+            RsGame::Ruby => b"POKEMON RUBY".as_slice(),
+            RsGame::Sapphire => b"POKEMON SAPP".as_slice(),
+        };
+        let raw_roms = process.scan_pattern(&regions, marker, SCAN_LIMIT, MAX_ROM_CANDIDATES)?;
+        let mut roms = Vec::new();
+        for title_at in raw_roms {
+            let Some(base) = title_at.checked_sub(0xA0) else { continue };
+            let mut header = [0u8; 0xC0];
+            if process.read_host(base, &mut header).is_ok() {
+                if let Ok(profile) = parse_rs_header(&header) {
+                    if profile.game == requested {
+                        roms.push((base, profile));
+                    }
+                }
+            }
+        }
+        roms.sort_by_key(|(base, _)| *base);
+        roms.dedup_by_key(|(base, _)| *base);
+        if roms.is_empty() { return Err(RuntimeError::MappingUnavailable); }
+        let mut candidates = Vec::new();
+        let mut seen = HashSet::new();
+        for &(rom, ref profile) in &roms {
+            // Verify the retail boot-table anchor BEFORE any pointer resolution.
+            // This rejects the known AXVD Rev0 German debug build by default.
+            let mut actual_anchor = [0u8; 16];
+            if process.read_host(rom + 0x128, &mut actual_anchor).is_err()
+                || rs_profile_for(&profile.game_code, profile.revision).is_err() {
+                continue;
+            }
+            // Host candidate anchor check is identical to the core's source
+            // registry. The session below repeats it via guest.read.
+            if !trainer_rs::matches_anchor(&profile.game_code, &actual_anchor) {
+                continue;
+            }
+            for pointer_size in [8usize, 4usize] {
+                if pointer_size == 4 && rom > u32::MAX as u64 { continue; }
+                let rom_pointer = rom.to_le_bytes();
+                let slots = process.scan_pattern(
+                    &regions, &rom_pointer[..pointer_size], SCAN_LIMIT, MAX_MAPPING_CANDIDATES
+                )?;
+                for field in slots {
+                    let width = pointer_size as u64;
+                    if field % width != 0 || field < width * 2 { continue; }
+                    let ewram = process.read_pointer(field - width * 2, pointer_size).ok();
+                    let iwram = process.read_pointer(field - width, pointer_size).ok();
+                    let (Some(ewram), Some(iwram)) = (ewram, iwram) else { continue };
+                    if ewram == 0 || iwram == 0 { continue; }
+                    // Source RS layout evidence: observe Seed+Timer+SaveBlock1/2
+                    // using game/locale-specific addresses, never Emerald offsets.
+                    let seed_off = (profile.seed_address - 0x0300_0000) as u64;
+                    let timer_off = (profile.timer_address - 0x0300_0000) as u64;
+                    let save1_off = if profile.game_code.ends_with('J') {0x25494u64} else {0x25734u64};
+                    let save2_off = if profile.game_code.ends_with('J') {0x24C04u64} else {0x24EA4u64};
+                    let mut timer = [0u8; 2];
+                    if process.read_u32(iwram + seed_off).is_err()
+                        || process.read_host(iwram + timer_off, &mut timer).is_err()
+                        || process.read_u32(ewram + save1_off).is_err()
+                        || process.read_u32(ewram + save2_off).is_err()
+                    {
+                        continue;
+                    }
+                    if seen.insert((rom, ewram, iwram, field, pointer_size)) {
+                        candidates.push((rom, ewram, iwram, field, pointer_size, profile.game_code.clone(), profile.revision));
+                    }
+                }
+            }
+        }
+        if candidates.is_empty() { return Err(RuntimeError::MappingUnavailable); }
+        if candidates.len() != 1 { return Err(RuntimeError::Ambiguous); }
+        let (rom, ewram, iwram, pointer_field, pointer_size, code, revision) =
+            candidates.pop().expect("exactly one unique mapping");
+        let reader = GuestHostReader {
+            process, rom, ewram, iwram, pointer_field, pointer_size, code, revision,
+        };
+        let session = RsReadOnlySession::attach(&reader)?;
+        Ok(Self { reader, session })
+    }
+    pub fn session_id(&self) -> &str { self.session.session_id() }
+    pub fn game_id(&self) -> &str { self.session.profile().game.id() }
+    pub fn game_code(&self) -> &str { &self.session.profile().game_code }
+    pub fn revision(&self) -> u8 { self.session.profile().revision }
+    pub fn language(&self) -> &str { &self.session.profile().language }
+    pub fn snapshot(&mut self) -> Result<RsSeedSnapshot, RsError> {
+        self.session.snapshot(&self.reader)
     }
 }
 

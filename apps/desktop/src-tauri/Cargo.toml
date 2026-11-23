@@ -16,6 +16,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 trainer-core = { path = "../../../crates/trainer-core" }
 trainer-mgba = { path = "../../../crates/trainer-mgba" }
+trainer-rs = { path = "../../../crates/trainer-rs" }
 trainer-runtime-win = { path = "../../../crates/trainer-runtime-win" }
 trainer-patch = { path = "../../../crates/trainer-patch" }
 trainer-storage = { path = "../../../crates/trainer-storage" }

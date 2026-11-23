@@ -115,6 +115,11 @@ pub enum RsError {
     Invalidated,
 }
 
+/// True only for source-listed 16-byte retail boot-table anchors.
+/// Identifies a candidate, never authorizes any mutation.
+pub fn matches_anchor(code: &str, actual: &[u8; 16]) -> bool {
+    anchor_for(code).is_some_and(|expected| actual == expected)
+}
 pub fn profile_for(code: &str, revision: u8) -> Result<RsProfile, RsError> {
     let c = code.as_bytes();
     if c.len() != 4 || &c[..2] != b"AX" || !matches!(c[2], b'V' | b'P') {
