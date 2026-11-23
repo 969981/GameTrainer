@@ -39,7 +39,7 @@ pub trait GuestReader {
     fn read_guest(&mut self, address: u32, bytes: usize) -> Result<Vec<u8>, String>;
 }
 fn valid_main_pointer(p: u32) -> bool {
-    (0x0200_0000..0x0240_0000).contains(&p) && p % 4 == 0
+    (0x0200_0000..0x0240_0000).contains(&p) && p.is_multiple_of(4)
 }
 fn u32_guest<R: GuestReader>(r: &mut R, at: u32) -> Result<u32, String> {
     let b = r.read_guest(at, 4)?;
@@ -53,7 +53,7 @@ fn decoded_hex(s: &str) -> Result<Vec<u8>, String> {
         return Err("signature must be exactly 16 bytes".into());
     }
     s.as_bytes()
-        .chunks_exact(2)
+        .as_chunks::<2>().0.iter()
         .map(|b| {
             let pair = std::str::from_utf8(b).map_err(|_| "non-ascii signature")?;
             u8::from_str_radix(pair, 16).map_err(|_| "invalid signature hex".into())
