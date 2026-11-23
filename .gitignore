@@ -9,3 +9,6 @@ coverage/
 *.tsbuildinfo
 .DS_Store
 Thumbs.db
+
+apps/desktop/test-results/
+apps/desktop/playwright-report/

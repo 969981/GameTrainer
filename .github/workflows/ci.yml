@@ -46,6 +46,17 @@ jobs:
         run: pnpm test
       - name: Production web build
         run: pnpm build
+      - name: Install Chromium for layout checks
+        run: pnpm --filter @gametrainer/desktop exec playwright install --with-deps chromium
+      - name: Responsive browser layout tests
+        run: pnpm --filter @gametrainer/desktop test:e2e
+      - name: Publish viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m0-browser-layouts
+          path: apps/desktop/test-results/screenshots/
+          if-no-files-found: ignore
 
   windows-shell:
     name: Windows Tauri 2 shell compile
