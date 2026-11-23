@@ -2,7 +2,7 @@
 
 > 多游戏、跨运行时的 Windows 桌面修改与研究工具（规划阶段）
 
-**当前状态：** 本仓库存放产品架构、V3 UI 布局、AI 编码规范和扩展方案。尚未提供可用的 Rust/Tauri 修改器；所有示例游戏与配置均为设计/Mock，**不能作为已验证的游戏 Profile**。
+**当前状态：M0 已实现（Mock）。** 仓库已包含 Rust GameRegistry、Tauri 2 只读 IPC、React V3 动态工作台、五类游戏 Fixture 和自动化测试；**仍未实现真实进程连接、游戏内存读写、Hook 或 Windows GUI 实机验证**。所有示例游戏与配置均为 Mock，不能作为已验证的游戏 Profile。
 
 ## 产品目标
 
@@ -18,11 +18,30 @@
 - [完整离线 HTML 演示](preview/GameTrainer-Studio-V3.html) — 浏览器下载后打开；Gen3–Gen6、PC 游戏库、动态模块和日记页面。**仅 Mock UI，不连接真实进程。**
 - [使用说明](preview/README.md)
 
+## M0 工程与验证
+
+```bash
+corepack enable
+pnpm install
+pnpm dev                         # 浏览器 Mock
+pnpm desktop                     # Windows Tauri 2 开发启动（需要 Rust/MSVC/WebView2）
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
+cargo fmt --all -- --check
+cargo clippy -p trainer-core --all-targets -- -D warnings
+cargo test -p trainer-core
+```
+
+- [React/Tauri 应用目录](apps/desktop/) · [Rust 核心注册中心](crates/trainer-core/src/lib.rs)
+- [五类游戏平台共享 Fixture](fixtures/m0-registry.json) · [M0 实施与测试记录](docs/m0-implementation.md)
+- [通过的 CI（Rust 7 项、前端 9 项）](https://github.com/969981/GameTrainer/actions/runs/45104751458)
+- 注意：`pnpm dev` 是浏览器 Mock；`pnpm desktop` 尚需 Windows GUI 实测，不能视为已经验证。
+
 ## 文档入口
 
 | 文档 | 用途 |
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | AI 编程代理统一执行规范 |
+| [docs/m0-implementation.md](docs/m0-implementation.md) | M0 已实现工程、测试证据和待办 |
 | [docs/architecture.md](docs/architecture.md) | 分层架构与依赖方向 |
 | [docs/extensions.md](docs/extensions.md) | Gen3–Gen6 / PC Native 扩展与模块清单 |
 | [docs/ui/README.md](docs/ui/README.md) | V3 导航、布局、页面与设计令牌 |
@@ -52,7 +71,7 @@ profiles/                    # 每游戏每版本隔离配置
 docs/                         # Obsidian 友好 Markdown 文档
 ```
 
-**路线：** M0 UI + Mock Registry → M1 Emerald/mGBA 只读 → M2 安全修改与审计 → M3 更多 Gen3 功能 → M4 Gen4/5/6 与 PC Adapter 验证 → M5 日记与插件管理 → M6 可选 Native Agent/MinHook。
+**路线：** M0 UI + Mock Registry（核心 CI 已通过，Windows GUI 待验收）→ M1 Emerald/mGBA 只读 → M2 安全修改与审计 → M3 更多 Gen3 功能 → M4 Gen4/5/6 与 PC Adapter 验证 → M5 日记与插件管理 → M6 可选 Native Agent/MinHook。
 
 ## 许可证提醒
 

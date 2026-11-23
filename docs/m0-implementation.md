@@ -1,7 +1,7 @@
 # M0 · 工程初始化与注册中心实现记录
 
 日期：2026-11-23
-状态：代码已提交；自动化构建测试以 GitHub Actions 结果为准。未进行 Windows/Tauri 实机运行验证。
+状态：M0 核心代码已提交；GitHub Actions [#45104751458](https://github.com/969981/GameTrainer/actions/runs/45104751458) 两项作业均通过。未进行 Windows/Tauri 实机运行验证。
 
 ## 代码落地
 - Cargo Workspace：根 Cargo.toml、crates/trainer-core；纯 Rust typed GameRegistry / GameAdapter / 校验。
@@ -15,6 +15,14 @@
 - Web 测试：五平台筛选、六款扩展、Gen3→Gen6 状态隔离、无匹配空态、所有 Mock 修改禁用。
 - GitHub Actions：Rust fmt/clippy/test，pnpm lint/typecheck/test/build。
 
+## 2026-11-23 CI 证据
+
+- Rust Core：`cargo fmt --all -- --check`、`cargo clippy -p trainer-core --all-targets -- -D warnings`、`cargo test -p trainer-core` 均通过；**7 passed / 0 failed**。
+- React：`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm build` 均通过；**9 passed / 0 failed**，Vite Web build 成功。
+- 最初两轮 CI 分别发现 pnpm lockfile 缓存配置、rustfmt 差异、Vitest DOM 未自动清理及一条文本断言；已修复并在上述 CI 验证。
+- 测试覆盖：Gen3/Gen4/Gen5/Gen6/PC、增加第六款游戏不改主导航、功能隔离、只读修改按钮、重复 ID / 未知 Runtime 拒绝等。
+- 本次测试为 Linux CI 上的 Rust Core、jsdom UI 和 Vite Web 构建，不代表 Windows 原生 Tauri GUI 已编译或实测。
+
 ## 限制
 - 只实现 M0 Mock。没有模拟器附加、进程读取、Hook、ROM Profile 验证、PatchManager、SQLite 实际审计。
 - UI History 为空；Journal 是页面内临时草稿，未写入用户个人 Obsidian。
@@ -22,7 +30,7 @@
 - 第六款游戏在回归测试中临时注册，不属于生产默认的五款清单。
 
 ## 结构检查 / 后续
-- [ ] CI 全部通过、处理依赖/格式/类型报错。
+- [x] CI 全部通过、处理依赖/格式/类型报错（#45104751458）。
 - [ ] Windows 11 Tauri dev GUI 实测及 1100/1366/1500px 布局回归。
 - [ ] M1 mGBA + Emerald 只读接入与 ROM 指纹校验。
 - [ ] 适配器/FeaturePack 从数据 Manifest 迁移到 Rust 编译期游戏模块。

@@ -2,6 +2,9 @@
 
 > 本目录是项目设计规范与开发研究，不包含个人 Vault 内容。双链用于 Obsidian，标准相对链接用于 GitHub。
 
+## 工程实施
+- [M0 工程与 CI 验证](m0-implementation.md) · [[m0-implementation]]
+
 ## 核心设计
 - [总体架构](architecture.md) · [[architecture]]
 - [扩展规划：Gen3–Gen6 + PC](extensions.md) · [[extensions]]

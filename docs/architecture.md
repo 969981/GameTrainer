@@ -27,12 +27,12 @@ Application Services (GameRegistry / SessionManager / CapabilityPolicy)
 - GameBuildProfile：经过证据验证的特定版本配置，不由平台类型自动推导。
 - UI Extension：通用 Slot + SchemaForm + 受控组件；禁止加载不受信任的远程 React/JS。
 
-## 推荐 Workspace（目录为规划，未实现）
+## Workspace（M0 部分已实现；未落地项仍是规划）
 
 ~~~text
-apps/desktop/src                 React 应用
-apps/desktop/src-tauri           Tauri 命令与权限
-crates/trainer-core              实体、Registry、会话与能力
+apps/desktop/src                 React 应用 ✅ M0
+apps/desktop/src-tauri           Tauri 只读命令与权限 ✅ M0
+crates/trainer-core              Registry、描述符、Mock 会话 ✅ M0（真实 Session 未实现）
 crates/trainer-runtime-win       Windows 外部进程 API
 crates/trainer-runtime-mgba      mGBA 地址映射/桥接
 crates/trainer-patch             事务预览、校验、写入、恢复
