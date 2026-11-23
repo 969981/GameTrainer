@@ -11,9 +11,14 @@ import { isTauriDesktop } from "@/lib/backend";
 import {
   applyFixturePreview, cancelFixturePreview, getFixtureStatus, hexSeed, listActionHistory,
   parseHexSeed, previewFixtureSeed, restoreFixturePatch, startFixture,
-  type ActionEvent, type AuditEnvironment, type PatchPreview, type PatchReceipt,
+  type ActionEvent, type AuditEnvironment, type FixtureGameId, type PatchPreview, type PatchReceipt,
 } from "@/lib/patch";
 
+const FIXTURE_GAMES: { id: FixtureGameId; label: string }[] = [
+  { id: "games.pokemon.emerald", label: "Pokémon Emerald（绿宝石）" },
+  { id: "games.pokemon.ruby", label: "Pokémon Ruby（红宝石）" },
+  { id: "games.pokemon.sapphire", label: "Pokémon Sapphire（蓝宝石）" },
+];
 const STEPS = ["选择隔离会话", "预览修改", "明确确认", "检查与恢复"];
 const STATUS_NAME: Record<string, string> = {
   preview: "预览", apply_intent: "写入意图", applied: "应用成功", apply_rejected: "写入拒绝",
@@ -30,6 +35,7 @@ export function PatchLabPage() {
   const desktop = isTauriDesktop();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("0xF00DBABE");
+  const [gameId, setGameId] = useState<FixtureGameId>("games.pokemon.emerald");
   const [preview, setPreview] = useState<PatchPreview | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [lastReceipt, setLastReceipt] = useState<PatchReceipt | null>(null);
@@ -94,13 +100,21 @@ export function PatchLabPage() {
         <CardContent>
           <div className="m2-session">
             <span className="feature-icon"><TestTube2 size={22} /></span>
-            <div><strong>Emerald Seed · Rust Fixture</strong>
+            <div><strong>{FIXTURE_GAMES.find((game) => game.id === status.data?.fixture?.game_id)?.label ?? "Gen3"} · Rust Fixture</strong>
               <small>{status.data?.connected ? "已连接隔离内存" : "未启动 · 无真实游戏进程"} · 固定 4 字节种子</small>
             </div>
             <Badge>{status.data?.connected ? "ISOLATED" : "DETACHED"}</Badge>
           </div>
-          <Button variant="outline" className="w-full" disabled={!desktop || busy || blocked}
-            onClick={() => start.mutate()}><Activity size={15} />
+          <label className="parameter-field m2-seed-entry"><span>选择隔离测试游戏</span>
+            <select aria-label="选择隔离测试游戏" className="m2-fixture-select" value={gameId}
+              disabled={busy || blocked || !!preview}
+              onChange={(event) => setGameId(event.target.value as FixtureGameId)}>
+              {FIXTURE_GAMES.map((game) => <option key={game.id} value={game.id}>{game.label}</option>)}
+            </select>
+            <small>每个游戏单独生成 Session ID、Profile、审计事件；红蓝宝石使用美版 RS Seed 布局模拟值。</small>
+          </label>
+          <Button variant="outline" className="w-full" disabled={!desktop || busy || blocked || !!preview}
+            onClick={() => start.mutate(gameId)}><Activity size={15} />
             {status.data?.connected ? "重置隔离会话" : "开始隔离测试"}
           </Button>
           <label className="parameter-field m2-seed-entry"><span>目标 Seed（十六进制 u32）</span>
@@ -112,7 +126,7 @@ export function PatchLabPage() {
           <div className="m2-actions"><Button className="w-full" disabled={!desktop || !status.data?.connected || seed === null || !!preview || blocked || busy}
             onClick={() => { if (seed !== null) makePreview.mutate(seed); }}><ShieldCheck size={15} /> 生成后端预览</Button></div>
           {status.data?.connected && <div className="m2-current">
-            <span>当前测试内存值</span><code>{hexSeed(status.data.fixture?.seed ?? 0)}</code>
+            <span>当前测试内存值 · {status.data.fixture?.seed_address_display}</span><code>{hexSeed(status.data.fixture?.seed ?? 0)}</code>
           </div>}
           {(status.data?.unresolved_fixture_intents ?? 0) > 0 && <div className="m2-recovery-note">
             <AlertTriangle size={16} /><span>SQLite 发现 {status.data?.unresolved_fixture_intents} 条未闭合的测试写入意图。重启后只展示证据，不自动恢复旧内存。</span>

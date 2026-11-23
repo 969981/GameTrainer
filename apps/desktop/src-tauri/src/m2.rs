@@ -84,14 +84,15 @@ pub fn m2_fixture_status(state: State<'_, LabState>) -> Result<LabStatus, String
     })
 }
 #[tauri::command]
-pub fn m2_start_fixture(state: State<'_, LabState>) -> Result<LabStatus, String> {
+pub fn m2_start_fixture(state: State<'_, LabState>, game_id: Option<String>) -> Result<LabStatus, String> {
     with_lab(&state, |lab| {
         if !lab.engine.active().is_empty() {
             return Err("请先恢复现有测试补丁；不能通过重置绕过补丁所有权".into());
         }
         // Synthetic memory starts clean. Never auto-replay or restore SQLite entries.
         lab.engine.clear_fixture_session();
-        lab.target = Some(FixtureTarget::new());
+        let selected = game_id.as_deref().unwrap_or(trainer_patch::GAME_ID);
+        lab.target = Some(FixtureTarget::for_game(selected).map_err(|e| e.to_string())?);
         Ok(LabStatus {
             connected: true,
             fixture: lab
@@ -115,9 +116,9 @@ pub fn m2_preview_fixture_seed(
 ) -> Result<PatchPreview, String> {
     with_lab(&state, |lab| {
         let target = lab.target.as_ref().ok_or("请先开始隔离测试会话")?;
-        lab.engine
-            .preview(target, PatchSpec::emerald_fixture_seed(target_seed))
-            .map_err(|e| e.to_string())
+        let spec = PatchSpec::for_fixture_game(target.game_id(), target_seed)
+            .map_err(|e| e.to_string())?;
+        lab.engine.preview(target, spec).map_err(|e| e.to_string())
     })
 }
 #[tauri::command]
@@ -193,4 +194,24 @@ mod tests {
         assert_eq!(target.snapshot(Vec::new()).seed, before);
         assert!(lab.engine.audit().list("live", 10).unwrap().is_empty());
     }
+    #[test]
+    fn ruby_and_sapphire_fixture_sessions_are_isolated_and_audited() {
+        for game in [trainer_patch::RUBY_GAME_ID, trainer_patch::SAPPHIRE_GAME_ID] {
+            let mut lab = Lab {
+                engine: PatchManager::new(AuditStore::open_memory().unwrap(), Duration::from_secs(30)),
+                target: Some(FixtureTarget::for_game(game).unwrap()),
+            };
+            let target = lab.target.as_mut().unwrap();
+            let preview = lab.engine.preview(
+                target, PatchSpec::for_fixture_game(game, 0xF00D_BABE).unwrap()
+            ).unwrap();
+            let applied = lab.engine.apply(target, &preview.preview_id).unwrap();
+            assert_eq!(target.snapshot(vec![]).seed, 0xF00D_BABE);
+            lab.engine.restore(target, &applied.owner_id).unwrap();
+            assert_eq!(target.snapshot(vec![]).seed, 0x1234_5678);
+            let events = lab.engine.audit().list("fixture", 100).unwrap();
+            assert!(events.iter().all(|event| event.game_id == game));
+        }
+    }
+
 }

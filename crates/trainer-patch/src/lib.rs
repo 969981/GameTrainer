@@ -14,7 +14,21 @@ use uuid::Uuid;
 pub const FIXTURE_SEED_ADDRESS: u32 = 0x0300_5D80;
 pub const FEATURE_ID: &str = "features.gen3.rng";
 pub const GAME_ID: &str = "games.pokemon.emerald";
+pub const RUBY_GAME_ID: &str = "games.pokemon.ruby";
+pub const SAPPHIRE_GAME_ID: &str = "games.pokemon.sapphire";
 pub const FIXTURE_PROFILE_ID: &str = "fixture-only-emerald-seed-v1";
+pub const FIXTURE_RS_SEED_ADDRESS: u32 = 0x0300_4818; // English-layout synthetic fixture
+
+/// Exactly three allowlisted synthetic target profiles. No runtime can
+/// derive a real-game WriteCapability from these constants.
+fn fixture_profile(game_id: &str) -> Option<(&'static str, u32)> {
+    Some(match game_id {
+        GAME_ID => (FIXTURE_PROFILE_ID, FIXTURE_SEED_ADDRESS),
+        RUBY_GAME_ID => ("fixture-only-ruby-usa-seed-v1", FIXTURE_RS_SEED_ADDRESS),
+        SAPPHIRE_GAME_ID => ("fixture-only-sapphire-usa-seed-v1", FIXTURE_RS_SEED_ADDRESS),
+        _ => return None,
+    })
+}
 
 #[derive(Debug, Error)]
 pub enum PatchError {
@@ -60,9 +74,10 @@ pub struct TargetIdentity {
 }
 impl TargetIdentity {
     fn validate_fixture(&self) -> Result<(), PatchError> {
+        let (profile_id, _) =
+            fixture_profile(&self.game_id).ok_or(PatchError::WriteLocked)?;
         if self.environment != "fixture"
-            || self.profile_id != FIXTURE_PROFILE_ID
-            || self.game_id != GAME_ID
+            || self.profile_id != profile_id
             || self.runtime_id != "runtime.fixture.memory"
             || self.process_identity != "in-memory-only"
         {
@@ -86,17 +101,22 @@ pub struct PatchSpec {
     desired: Vec<u8>,
 }
 impl PatchSpec {
-    /// This private API construction is trusted server-side, not a JS address.
-    pub fn emerald_fixture_seed(seed: u32) -> Self {
-        Self {
+    /// Trusted Rust-only construction; JavaScript cannot specify an address.
+    /// The Ruby/Sapphire fixture deliberately models the English RS Seed layout.
+    pub fn for_fixture_game(game_id: &str, seed: u32) -> Result<Self, PatchError> {
+        let (_, address) = fixture_profile(game_id).ok_or(PatchError::WriteLocked)?;
+        Ok(Self {
             feature_id: FEATURE_ID,
-            address: FIXTURE_SEED_ADDRESS,
+            address,
             desired: seed.to_le_bytes().to_vec(),
-        }
+        })
+    }
+    pub fn emerald_fixture_seed(seed: u32) -> Self {
+        Self::for_fixture_game(GAME_ID, seed).expect("registered Emerald fixture profile")
     }
     fn validate(&self) -> Result<(), PatchError> {
         if self.feature_id != FEATURE_ID
-            || self.address != FIXTURE_SEED_ADDRESS
+            || !matches!(self.address, FIXTURE_SEED_ADDRESS | FIXTURE_RS_SEED_ADDRESS)
             || self.desired.len() != 4
         {
             return Err(PatchError::InvalidSpan);
@@ -145,6 +165,8 @@ pub struct FixtureSnapshot {
     pub session_id: String,
     pub epoch: u64,
     pub seed: u32,
+    pub game_id: String,
+    pub seed_address_display: String,
     pub active_patches: Vec<PatchReceipt>,
     pub read_only_game_runtime: bool,
     pub environment: String,
@@ -192,6 +214,8 @@ impl PatchManager {
         spec.validate()?;
         let identity = target.identity()?;
         identity.validate_fixture()?;
+        let (_, expected_address) = fixture_profile(&identity.game_id).ok_or(PatchError::WriteLocked)?;
+        if spec.address != expected_address { return Err(PatchError::WriteLocked); }
         if self.overlaps(&identity, spec.address, spec.desired.len()) {
             return Err(PatchError::Overlap);
         }
@@ -566,26 +590,35 @@ impl Default for FixtureTarget {
 }
 impl FixtureTarget {
     pub fn new() -> Self {
-        Self {
+        Self::for_game(GAME_ID).expect("registered Emerald fixture")
+    }
+    pub fn for_game(game_id: &str) -> Result<Self, PatchError> {
+        let (profile_id, _) = fixture_profile(game_id).ok_or(PatchError::WriteLocked)?;
+        Ok(Self {
             identity: TargetIdentity {
                 session_id: Uuid::new_v4().to_string(),
                 epoch: 1,
                 process_identity: "in-memory-only".into(),
                 runtime_id: "runtime.fixture.memory".into(),
-                game_id: GAME_ID.into(),
-                build_id: "synthetic-emerald-rev0".into(),
-                profile_id: FIXTURE_PROFILE_ID.into(),
+                game_id: game_id.into(),
+                build_id: "synthetic-rev0".into(),
+                profile_id: profile_id.into(),
                 environment: "fixture".into(),
             },
             seed: 0x1234_5678,
             fail_next_write: false,
-        }
+        })
+    }
+    pub fn game_id(&self) -> &str {
+        &self.identity.game_id
     }
     pub fn snapshot(&self, patches: Vec<PatchReceipt>) -> FixtureSnapshot {
         FixtureSnapshot {
             session_id: self.identity.session_id.clone(),
             epoch: self.identity.epoch,
             seed: self.seed,
+            game_id: self.identity.game_id.clone(),
+            seed_address_display: format!("0x{:08X}", fixture_profile(&self.identity.game_id).expect("allowlisted fixture").1),
             active_patches: patches,
             read_only_game_runtime: true,
             environment: "fixture".into(),
@@ -613,13 +646,13 @@ impl PatchTarget for FixtureTarget {
         Ok(self.identity.clone())
     }
     fn read(&self, address: u32, len: usize) -> Result<Vec<u8>, PatchError> {
-        if address != FIXTURE_SEED_ADDRESS || len != 4 {
+        if fixture_profile(&self.identity.game_id).is_none_or(|(_, expected)| expected != address) || len != 4 {
             return Err(PatchError::InvalidSpan);
         }
         Ok(self.seed.to_le_bytes().to_vec())
     }
     fn write(&mut self, address: u32, bytes: &[u8]) -> Result<(), PatchError> {
-        if address != FIXTURE_SEED_ADDRESS || bytes.len() != 4 {
+        if fixture_profile(&self.identity.game_id).is_none_or(|(_, expected)| expected != address) || bytes.len() != 4 {
             return Err(PatchError::InvalidSpan);
         }
         if self.fail_next_write {
@@ -816,4 +849,55 @@ mod tests {
             Err(PatchError::UnknownPreview)
         ));
     }
+    #[test]
+    fn ruby_sapphire_fixture_scopes_are_independent_and_restorable() {
+        for game_id in [RUBY_GAME_ID, SAPPHIRE_GAME_ID] {
+            let mut manager = manager();
+            let mut target = FixtureTarget::for_game(game_id).unwrap();
+            let original = target.snapshot(vec![]);
+            assert_eq!(original.game_id, game_id);
+            assert_eq!(original.seed_address_display, "0x03004818");
+            let preview = manager
+                .preview(&target, PatchSpec::for_fixture_game(game_id, 0x1122_3344).unwrap())
+                .unwrap();
+            assert_eq!(preview.game_id, game_id);
+            let applied = manager.apply(&mut target, &preview.preview_id).unwrap();
+            assert_eq!(target.seed, 0x1122_3344);
+            let events = manager.audit().list("fixture", 10).unwrap();
+            assert!(events.iter().all(|event| event.game_id == game_id));
+            manager.restore(&mut target, &applied.owner_id).unwrap();
+            assert_eq!(target.seed, 0x1234_5678);
+        }
+    }
+
+    #[test]
+    fn cross_game_fixture_spec_cannot_modify_other_game() {
+        let mut manager = manager();
+        let target = FixtureTarget::for_game(RUBY_GAME_ID).unwrap();
+        assert!(matches!(
+            manager.preview(&target, PatchSpec::emerald_fixture_seed(5)),
+            Err(PatchError::WriteLocked)
+        ));
+        assert!(matches!(
+            FixtureTarget::for_game("games.pokemon.hacked"),
+            Err(PatchError::WriteLocked)
+        ));
+        assert_eq!(target.seed, 0x1234_5678);
+    }
+
+    #[test]
+    fn ruby_sapphire_old_preview_does_not_survive_game_switch() {
+        let mut manager = manager();
+        let ruby = FixtureTarget::for_game(RUBY_GAME_ID).unwrap();
+        let preview = manager
+            .preview(&ruby, PatchSpec::for_fixture_game(RUBY_GAME_ID, 5).unwrap())
+            .unwrap();
+        let mut sapphire = FixtureTarget::for_game(SAPPHIRE_GAME_ID).unwrap();
+        assert!(matches!(
+            manager.apply(&mut sapphire, &preview.preview_id),
+            Err(PatchError::StaleSession)
+        ));
+        assert_eq!(sapphire.seed, 0x1234_5678);
+    }
+
 }

@@ -30,6 +30,8 @@ export interface FixtureSnapshot {
   session_id: string;
   epoch: number;
   seed: number;
+  game_id: string;
+  seed_address_display: string;
   active_patches: PatchReceipt[];
   read_only_game_runtime: true;
   environment: "fixture";
@@ -71,9 +73,10 @@ export async function getFixtureStatus(): Promise<FixtureStatus> {
   requireTauri();
   return invoke<FixtureStatus>("m2_fixture_status");
 }
-export async function startFixture(): Promise<FixtureStatus> {
+export type FixtureGameId = "games.pokemon.emerald" | "games.pokemon.ruby" | "games.pokemon.sapphire";
+export async function startFixture(gameId: FixtureGameId): Promise<FixtureStatus> {
   requireTauri();
-  return invoke<FixtureStatus>("m2_start_fixture");
+  return invoke<FixtureStatus>("m2_start_fixture", { gameId });
 }
 export async function previewFixtureSeed(seed: number): Promise<PatchPreview> {
   requireTauri();
