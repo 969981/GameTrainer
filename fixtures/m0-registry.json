@@ -418,6 +418,180 @@
       ]
     },
     {
+      "game_id": "games.pokemon.firered",
+      "name": "Pokémon FireRed",
+      "platform_family": "gen3",
+      "target_platform": "gba",
+      "summary": "火红 v2.0.4 · 8 个零售版本 Profile · M4 实验性真实 Guest 写入/野生 Hook",
+      "icon": "flame",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.mgba.external",
+        "runtimes.mgba.bridge"
+      ],
+      "features": [
+        {
+          "feature_id": "features.frlg.rng",
+          "name": "RNG / Seed 研究",
+          "group": "研究",
+          "description": "16 个 FRLG 零售版原始 Seed/Initial Seed 布局；只读研究",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.capture",
+          "name": "100% 捕捉",
+          "group": "游戏修改",
+          "description": "M4 GDB 独立实写入口：固定机器码原值 + ROM SHA1 + 用户确认；游戏实测未完成",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.wall",
+          "name": "穿墙",
+          "group": "游戏修改",
+          "description": "M4 GDB 固定 ROM 半字补丁。进入楼梯或门前应关闭；尚无游戏实测",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.wild.seed",
+          "name": "任意野生 Seed Hook（实验）",
+          "group": "实验 Hook",
+          "description": "v2.0.4 116B Thumb code-cave + flags==1 / Repel 修复；用户本地模板、仅单次，尚无实机验收",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.roamer",
+          "name": "三圣兽游走",
+          "group": "研究",
+          "description": "原版三圣兽 PID/位置与 FRLG Roamer IV bug 只读研究",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.teleport",
+          "name": "关都 / 七岛地图",
+          "group": "地图",
+          "description": "源包地点目录及 callback2 传送风险：仅目录，不允许 GDB 写入",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.leafgreen",
+      "name": "Pokémon LeafGreen",
+      "platform_family": "gen3",
+      "target_platform": "gba",
+      "summary": "叶绿 v2.0.4 · 8 个零售版本 Profile · M4 实验性真实 Guest 写入/野生 Hook",
+      "icon": "leaf",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.mgba.external",
+        "runtimes.mgba.bridge"
+      ],
+      "features": [
+        {
+          "feature_id": "features.frlg.rng",
+          "name": "RNG / Seed 研究",
+          "group": "研究",
+          "description": "16 个 FRLG 零售版原始 Seed/Initial Seed 布局；只读研究",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.capture",
+          "name": "100% 捕捉",
+          "group": "游戏修改",
+          "description": "M4 GDB 独立实写入口：固定机器码原值 + ROM SHA1 + 用户确认；游戏实测未完成",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.wall",
+          "name": "穿墙",
+          "group": "游戏修改",
+          "description": "M4 GDB 固定 ROM 半字补丁。进入楼梯或门前应关闭；尚无游戏实测",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.wild.seed",
+          "name": "任意野生 Seed Hook（实验）",
+          "group": "实验 Hook",
+          "description": "v2.0.4 116B Thumb code-cave + flags==1 / Repel 修复；用户本地模板、仅单次，尚无实机验收",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.roamer",
+          "name": "三圣兽游走",
+          "group": "研究",
+          "description": "原版三圣兽 PID/位置与 FRLG Roamer IV bug 只读研究",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.frlg.teleport",
+          "name": "关都 / 七岛地图",
+          "group": "地图",
+          "description": "源包地点目录及 callback2 传送风险：仅目录，不允许 GDB 写入",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
       "game_id": "games.pokemon.platinum",
       "name": "Pokémon Platinum",
       "platform_family": "gen4",

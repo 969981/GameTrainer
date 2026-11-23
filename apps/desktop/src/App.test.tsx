@@ -21,11 +21,13 @@ beforeEach(() => {
 });
 
 describe("M0 dynamic AppShell", () => {
-  it("lists seven game descriptors across five platforms and never claims connected status", () => {
+  it("lists nine game descriptors across five platforms and never claims connected status", () => {
     mount();
     expect(screen.getByRole("button", { name: "打开 Pokémon Emerald" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Ruby" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Sapphire" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开 Pokémon FireRed" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开 Pokémon LeafGreen" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Platinum" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Black 2" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon X / Y" })).toBeInTheDocument();
@@ -69,13 +71,13 @@ describe("M0 dynamic AppShell", () => {
 
   it("renders sixth game and its feature without AppShell changes", () => {
     const sixth: GameDescriptor = {
-      ...baseCatalog.games[0], game_id: "games.pokemon.firered", name: "Pokémon FireRed",
-      features: [{ ...baseCatalog.games[0].features[0], feature_id: "features.firered.seed", name: "FireRed Seed" }],
+      ...baseCatalog.games[0], game_id: "games.pokemon.firered.extension", name: "Pokémon FireRed (Extension)",
+      features: [{ ...baseCatalog.games[0].features[0], feature_id: "features.firered.extension.seed", name: "FireRed Extension Seed" }],
     };
     mount({ ...baseCatalog, games: [...baseCatalog.games, sixth] });
-    fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon FireRed" }));
-    expect(screen.getByRole("button", { name: "FireRed Seed" })).toBeInTheDocument();
-    expect(screen.getByText(/8 Game Adapters/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon FireRed (Extension)" }));
+    expect(screen.getByRole("button", { name: "FireRed Extension Seed" })).toBeInTheDocument();
+    expect(screen.getByText(/10 Game Adapters/)).toBeInTheDocument();
   });
 
   it("never produces live RNG values in browser Mock", () => {

@@ -251,7 +251,7 @@ mod tests {
     #[test]
     fn loads_five_platforms_and_three_independent_gen3_games() {
         let registry = GameRegistry::mock().expect("valid M0 fixture");
-        assert_eq!(registry.snapshot().games.len(), 7);
+        assert_eq!(registry.snapshot().games.len(), 9);
         for platform in [
             PlatformFamily::Gen3,
             PlatformFamily::Gen4,
@@ -318,7 +318,7 @@ mod tests {
             registry.register(&AddedGame(existing)),
             Err(RegistryError::GameId(_))
         ));
-        assert_eq!(registry.snapshot().games.len(), 7);
+        assert_eq!(registry.snapshot().games.len(), 9);
     }
 
     #[test]

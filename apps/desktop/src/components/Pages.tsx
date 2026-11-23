@@ -1,6 +1,7 @@
 import { Activity, ArrowRight, BookOpenText, Check, Cpu, FileWarning, Gamepad2, Layers3, Library, MonitorCog, SearchX, ShieldAlert, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { M3LivePanel } from "@/components/M3LivePanel";
+import { FrlgLivePanel } from "@/components/FrlgLivePanel";
 import { EmeraldRngLivePanel, MgbaConnection, RubySapphireLivePanel, RubySapphireProfileCatalog } from "@/components/MgbaConnection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,7 @@ export function RuntimePage({ catalog }: { catalog: GameCatalog }) {
     <MgbaConnection />
     <RubySapphireProfileCatalog />
     <M3LivePanel />
+    <FrlgLivePanel />
     <div className="runtime-list">{catalog.runtimes.map((runtime) => <Card key={runtime.runtime_id}><CardContent className="runtime-row"><span className="feature-icon"><MonitorCog size={22} /></span><div><strong>{runtime.name}</strong><small>{runtime.description}</small><code>{runtime.runtime_id}</code></div><Badge>PLANNED</Badge></CardContent></Card>)}</div>
   </div>;
 }

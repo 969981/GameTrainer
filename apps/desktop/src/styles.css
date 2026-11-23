@@ -324,3 +324,6 @@ code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; overflow
 .m3-event-list{display:grid;gap:8px}
 .m3-event-list>div{display:flex;align-items:center;gap:15px;padding:10px 0;border-bottom:1px solid var(--border);font-size:11px;flex-wrap:wrap}
 .m3-event-list span,.m3-event-list small{color:var(--muted)}
+
+/* M4 FireRed/LeafGreen Experimental Lab */
+.m3-identity input{background:var(--surface-2);color:var(--text);border:1px solid var(--border);padding:8px;border-radius:7px;max-width:160px;min-width:0}
