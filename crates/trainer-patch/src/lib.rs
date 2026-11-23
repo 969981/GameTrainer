@@ -8,7 +8,7 @@ use std::{
     time::{Duration, Instant},
 };
 use thiserror::Error;
-use trainer_storage::{ActionEvent, AuditError, AuditStore};
+use trainer_storage::{ActionEvent, AuditError, AuditStore, EventContext};
 use uuid::Uuid;
 
 pub const FIXTURE_SEED_ADDRESS: u32 = 0x0300_5D80;
@@ -317,7 +317,7 @@ impl PatchManager {
             return self.rollback_after_failure(target, active, "WRITE_FAILED", write_error);
         }
         let result = target.read(active.spec.address, active.original.len());
-        if result.as_deref() != Ok(active.spec.desired.as_slice())
+        if !matches!(&result, Ok(bytes) if bytes == &active.spec.desired)
             || self.validate_identity(target, &active.identity).is_err()
         {
             return self.rollback_after_failure(
@@ -355,7 +355,7 @@ impl PatchManager {
         // Partial/foreign writes must be reported, NOT forcibly overwritten.
         let current = target.read(active.spec.address, active.original.len());
         let still_same_identity = self.validate_identity(target, &active.identity).is_ok();
-        if current.as_deref() == Ok(active.original.as_slice()) && still_same_identity {
+        if matches!(&current, Ok(bytes) if bytes == &active.original) && still_same_identity {
             self.event(
                 &active.identity,
                 active.spec.feature_id,
@@ -368,7 +368,7 @@ impl PatchManager {
             )?;
             return Err(original_error);
         }
-        if current.as_deref() == Ok(active.spec.desired.as_slice()) && still_same_identity {
+        if matches!(&current, Ok(bytes) if bytes == &active.spec.desired) && still_same_identity {
             if target.write(active.spec.address, &active.original).is_ok()
                 && target
                     .read(active.spec.address, active.original.len())
@@ -526,12 +526,14 @@ impl PatchManager {
     ) -> Result<(), PatchError> {
         let row = ActionEvent::new(
             Uuid::new_v4().to_string(),
-            owner_id.map(str::to_owned),
-            preview_id.map(str::to_owned),
-            identity.session_id.clone(),
-            identity.game_id.clone(),
-            feature_id.to_owned(),
-            "fixture",
+            EventContext {
+                owner_id: owner_id.map(str::to_owned),
+                preview_id: preview_id.map(str::to_owned),
+                session_id: identity.session_id.clone(),
+                game_id: identity.game_id.clone(),
+                feature_id: feature_id.to_owned(),
+                environment: "fixture".into(),
+            },
             kind,
             status,
             summary,

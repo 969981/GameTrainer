@@ -38,16 +38,20 @@ pub struct ActionEvent {
     pub occurred_at_ms: i64,
 }
 
+/// Immutable context stamped by the trusted Rust host, never by JavaScript.
+pub struct EventContext {
+    pub owner_id: Option<String>,
+    pub preview_id: Option<String>,
+    pub session_id: String,
+    pub game_id: String,
+    pub feature_id: String,
+    pub environment: String,
+}
 impl ActionEvent {
     /// Only human-safe descriptions: never persist raw memory dumps or credentials.
     pub fn new(
         event_id: String,
-        owner_id: Option<String>,
-        preview_id: Option<String>,
-        session_id: String,
-        game_id: String,
-        feature_id: String,
-        environment: &str,
+        context: EventContext,
         action_kind: &str,
         status: &str,
         summary: &str,
@@ -59,12 +63,12 @@ impl ActionEvent {
             .unwrap_or(0);
         Self {
             event_id,
-            owner_id,
-            preview_id,
-            session_id,
-            game_id,
-            feature_id,
-            environment: environment.to_owned(),
+            owner_id: context.owner_id,
+            preview_id: context.preview_id,
+            session_id: context.session_id,
+            game_id: context.game_id,
+            feature_id: context.feature_id,
+            environment: context.environment,
             action_kind: action_kind.to_owned(),
             status: status.to_owned(),
             summary: summary.chars().take(200).collect(),
@@ -223,12 +227,14 @@ mod tests {
     fn event(kind: &str, status: &str) -> ActionEvent {
         ActionEvent::new(
             format!("{kind}-{status}"),
-            Some("owner".into()),
-            Some("preview".into()),
-            "fixture-session".into(),
-            "games.pokemon.emerald".into(),
-            "features.gen3.rng".into(),
-            "fixture",
+            EventContext {
+                owner_id: Some("owner".into()),
+                preview_id: Some("preview".into()),
+                session_id: "fixture-session".into(),
+                game_id: "games.pokemon.emerald".into(),
+                feature_id: "features.gen3.rng".into(),
+                environment: "fixture".into(),
+            },
             kind,
             status,
             "4-byte fixture mutation",

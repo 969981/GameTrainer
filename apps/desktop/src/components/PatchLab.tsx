@@ -99,7 +99,7 @@ export function PatchLabPage() {
             </div>
             <Badge>{status.data?.connected ? "ISOLATED" : "DETACHED"}</Badge>
           </div>
-          <Button variant="outline" block disabled={!desktop || busy || blocked}
+          <Button variant="outline" className="w-full" disabled={!desktop || busy || blocked}
             onClick={() => start.mutate()}><Activity size={15} />
             {status.data?.connected ? "重置隔离会话" : "开始隔离测试"}
           </Button>
@@ -109,7 +109,7 @@ export function PatchLabPage() {
             <small>仅允许 1–8 位十六进制字符，可使用 0x 前缀。地址由可信 Rust 模块固定指定。</small>
           </label>
           {seed === null && <p className="error-text" role="alert">请输入合法的 32 位十六进制 Seed。</p>}
-          <div className="m2-actions"><Button block disabled={!desktop || !status.data?.connected || seed === null || !!preview || blocked || busy}
+          <div className="m2-actions"><Button className="w-full" disabled={!desktop || !status.data?.connected || seed === null || !!preview || blocked || busy}
             onClick={() => { if (seed !== null) makePreview.mutate(seed); }}><ShieldCheck size={15} /> 生成后端预览</Button></div>
           {status.data?.connected && <div className="m2-current">
             <span>当前测试内存值</span><code>{hexSeed(status.data.fixture?.seed ?? 0)}</code>
@@ -145,7 +145,7 @@ export function PatchLabPage() {
             <div className="m2-active-heading"><Badge>{patch.status.toUpperCase()}</Badge><strong>受控补丁已登记</strong></div>
             <code title={patch.owner_id}>{patch.owner_id}</code>
             <p>只有当前数据仍与该补丁写入值相同，且会话身份没有变化时才允许恢复。</p>
-            <Button variant="outline" block disabled={busy} onClick={() => restore.mutate(patch.owner_id)}>
+            <Button variant="outline" className="w-full" disabled={busy} onClick={() => restore.mutate(patch.owner_id)}>
               <RotateCcw size={15} /> 验证并恢复原始值
             </Button>
           </div>) : <div className="m2-empty">
