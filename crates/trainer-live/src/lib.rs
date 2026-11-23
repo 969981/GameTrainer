@@ -8,7 +8,7 @@ use sha1::{Digest as _, Sha1};
 use sha2::Sha256;
 use std::time::{Duration, Instant};
 use thiserror::Error;
-use trainer_rs::{matches_anchor, parse_header, RsProfile};
+use trainer_rs::{matches_anchor, parse_header};
 use trainer_rsp::{RspClient, RspError};
 use trainer_storage::{ActionEvent, AuditError, AuditStore, EventContext};
 use uuid::Uuid;
@@ -131,6 +131,7 @@ struct Plan {
     feature: Feature,
     spans: Vec<Span>,
 }
+#[derive(Clone)]
 struct Owned {
     owner: String,
     feature: Feature,
@@ -660,7 +661,7 @@ impl LiveEditor {
         })
     }
     pub fn restore(&mut self) -> Result<LiveReceipt, LiveError> {
-        let owned = self.active.as_ref().ok_or(LiveError::Missing)?;
+        let owned = self.active.as_ref().ok_or(LiveError::Missing)?.clone();
         if !self.rsp.is_paused() {
             self.rsp.interrupt()?;
         }
