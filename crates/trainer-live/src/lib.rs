@@ -179,7 +179,6 @@ impl LiveEditor {
             .collect::<Vec<_>>();
         if matching.is_empty(){return Err(LiveError::UnsupportedRom);}
         matching.sort_by_key(|entry|entry.rom_bytes);
-        matching.dedup_by_key(|entry|entry.rom_bytes);
         // mGBA limits a GDB memory packet to 512 bytes. Hashing is streamed with
         // bounded reads; no ROM bytes or game save are persisted to SQLite.
         let mut sha=Sha1::new();
@@ -217,6 +216,12 @@ impl LiveEditor {
         identity
     }
     pub fn has_active(&self)->bool{self.active.is_some()}
+    pub fn disconnect(&mut self)->Result<(),LiveError>{
+        if self.active.is_some(){return Err(LiveError::Busy);}
+        self.preview=None;
+        if self.rsp.is_paused(){self.rsp.resume()?;}
+        Ok(())
+    }
     fn verify_identity(&mut self)->Result<(),LiveError>{
         if !self.rsp.is_paused(){return Err(LiveError::NotPaused);}
         let data=self.rsp.read(ROM_BASE,0xC0)?;
@@ -401,14 +406,20 @@ impl LiveEditor {
             }
         }
         let owned=self.active.take().ok_or(LiveError::Missing)?;
-        for span in &owned.spans{
+        let validation=owned.spans.iter().try_for_each(|span| -> Result<(),LiveError> {
             if self.rsp.read(span.address,span.after.len())?!=span.after {
-                self.active=Some(owned);
-                return Err(LiveError::Conflict);
-            }
+                Err(LiveError::Conflict)
+            } else {Ok(())}
+        });
+        if let Err(error)=validation {
+            self.active=Some(owned);
+            return Err(error);
         }
-        self.event("restore_intent","pending",owned.feature,Some(&owned.owner),None,
-            "Live guest restore intent persisted",None)?;
+        if let Err(error)=self.event("restore_intent","pending",owned.feature,Some(&owned.owner),None,
+            "Live guest restore intent persisted",None){
+            self.active=Some(owned);
+            return Err(error);
+        }
         // Reverse order is essential: unhook dispatch pointer before cave cleanup.
         let mut safe=true;
         for span in owned.spans.iter().rev(){
