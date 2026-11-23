@@ -2,7 +2,7 @@
 date: 2026-11-23
 project: GameTrainer
 type: implementation-note
-status: ci-under-review-live-rom-not-tested
+status: ci-passed-real-emulator-not-tested
 tags: [M4, FRLG, Gen3, mGBA, GDB, Hook, Capture]
 ---
 
@@ -62,3 +62,11 @@ M4 允许在 Rust 停机事务里发送**真实 GDB Guest 写包**，但**源包
 - SaveState、ROM Reload、模拟器崩溃、中途 GDB 失联、SQLite 写失败、第三方修改、部分恢复失败的安全诊断。UI 操作轨迹和恢复证据需要单独保存。
 
 关联：[M3](m3-live-gdb-experimental.md) · [ADR-0006](decisions/0006-m4-frlg-experimental-live.md) · [测试矩阵](testing.md) · [[2026-11-23]]。
+
+## 2026-11-23 M4 CI 与 Windows 调试版验收记录
+
+- [GitHub Actions #45121396498](https://github.com/969981/GameTrainer/actions/runs/45121396498)：Rust Core、React UI/Chromium、Windows Tauri 2 **三组都成功**。Rust 57 项单元测试，前端 ESLint/TypeScript/Vitest 与三档 Chromium E2E 通过。
+- Windows `cargo check -p game-trainer-desktop`、`cargo test -p game-trainer-desktop --lib`、`cargo build -p game-trainer-desktop` 成功，产出 [M4 debug EXE ZIP Artifact](https://github.com/969981/GameTrainer/actions/runs/45121396498/artifacts/14794430558)。Artifact 的展示名 `gametrainer-m0-m1-win64-debug` 为 CI 的历史命名，不代表旧版本代码。
+- 本次构建源码 SHA `c0f42ab7024f881757c7783f30edeb2c2df68646`，后续仅补充文档 [skip ci]，未改编译源码。
+- **未完成**：Windows 图形界面人工点击/连接 mGBA GDB、用本人合法原版 16 种 ROM 的 GameCode/Rev/SHA1 验证、真实捕捉/穿墙/野生 Hook 表现、SaveState/ROM Reload、恢复失败注入。绝不把 57 项 Rust 合成/单元测试当成 GBA 实机验收。
+

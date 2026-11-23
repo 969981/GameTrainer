@@ -1,6 +1,9 @@
 # Changelog
 
-## 2026-11-23 — M4 FireRed / LeafGreen v2.0.4 guarded GDB writes
+## 2026-11-23 — M4 FireRed / LeafGreen v2.0.4 guarded GDB writes (CI green)
+
+- [CI #45121396498](https://github.com/969981/GameTrainer/actions/runs/45121396498) passed: 57 Rust tests, frontend/unit/Chromium validation and Windows Tauri 2 debug executable build.
+- [Windows M4 x64 debug ZIP](https://github.com/969981/GameTrainer/actions/runs/45121396498/artifacts/14794430558) generated; actual mGBA retail-ROM gameplay verification remains open.
 
 - Added 16 original ROM SHA1 profiles, Rust `trainer-frlg`, GDB-paused capture/wall transactions and SHA256-pinned 116-byte user-provided experimental wild Seed Hook.
 - Added separate M4 Tauri IPC, SQLite live audit and a React FireRed/LeafGreen runtime panel, including real guest diff preview, confirmation and verified restoration. M3/M4 sessions are mutually exclusive.

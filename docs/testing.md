@@ -105,3 +105,10 @@
 - [ ] UI 手工验收：端口、Profile SHA1、一次性确认、恢复按钮、邮箱命中数、9 款游戏切换不会复用状态。
 
 [M4 手册](m4-frlg-v204-live.md) · [ADR-0006](decisions/0006-m4-frlg-experimental-live.md)。
+
+## M4 · 2026-11-23 自动化验证完成
+
+- [x] [CI #45121396498](https://github.com/969981/GameTrainer/actions/runs/45121396498)：Rust 57 个单元测试；fmt/Clippy -D warnings；前端 ESLint、TypeScript、Vitest，Chromium 1100/1366/1500 像素布局测试；Windows Tauri check/test/debug EXE。
+- [x] Debug EXE 文件检查为 Windows PE 格式（MZ），来自成功的 [Windows x64 构建 Artifact](https://github.com/969981/GameTrainer/actions/runs/45121396498/artifacts/14794430558)。
+- [ ] 正式功能验收仍待用户 Windows+mGBA+合法原版 ROM 的运行视频、GDB 状态及 SQLite 恢复证据。
+

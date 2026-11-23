@@ -6,6 +6,8 @@
 
 ## M4 · FireRed / LeafGreen v2.0.4（16 零售版 Profile）
 
+**M4 构建验证 2026-11-23**：[CI #45121396498](https://github.com/969981/GameTrainer/actions/runs/45121396498) 三组任务全部通过：Rust 57 项单元测试、前端自动化和响应式 Chromium 检查、Windows Tauri 2 check + desktop Rust test + debug EXE 编译。[Windows x64 测试构建 Artifact](https://github.com/969981/GameTrainer/actions/runs/45121396498/artifacts/14794430558)（工作流保留历史 artifact 名 `gametrainer-m0-m1-win64-debug`，内容为 M4 当前代码编译的 `game-trainer-desktop.exe`）。**真实 FireRed/LeafGreen ROM 游戏效果及 Hook 卸载仍未实机验证。**
+
 - [M4 架构、受控 Guest 写入与实验 Hook 使用说明](docs/m4-frlg-v204-live.md) · [ADR-0006](docs/decisions/0006-m4-frlg-experimental-live.md)。
 - 已接入完整 ROM SHA1 白名单 16 版：FireRed/LeafGreen 美/日 Rev0/1、德/法/意/西 Rev0。新增 Rust `trainer-frlg`、Tauri M4 独立 Session、React 真实 GDB 面板，游戏库从 7 款增至 9 款。
 - 已编写实际 GDB Guest 写入：固定 ROM 原指令核对与 100% 捕捉、穿墙 Halfword 事务；v2.0.4 116B 固定 SHA256 Payload 的一次性普通野生 Seed Hook（普通 `flags=1` / Repel 修复）。
