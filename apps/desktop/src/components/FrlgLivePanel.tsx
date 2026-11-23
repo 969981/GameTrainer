@@ -22,6 +22,7 @@ export function FrlgLivePanel() {
   const [seed, setSeed] = useState("00000000");
   const [preview, setPreview] = useState<FrlgDiff | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [armConfirmed, setArmConfirmed] = useState(false);
   const [receipt, setReceipt] = useState<FrlgReceipt | null>(null);
   const [mail, setMail] = useState<FrlgMailbox | null>(null);
 
@@ -60,7 +61,7 @@ export function FrlgLivePanel() {
   });
   const arm = useMutation({
     mutationFn: frlgArmWild,
-    onSuccess: result => { setMail(result); refresh(); },
+    onSuccess: result => { setMail(result); setArmConfirmed(false); refresh(); },
     onError: refresh,
   });
   const pause = useMutation({ mutationFn: frlgPause, onSuccess: refresh });
@@ -148,7 +149,10 @@ export function FrlgLivePanel() {
             <label htmlFor="frlg-seed">目标 Seed（8 位十六进制）</label>
             <input id="frlg-seed" value={seed} maxLength={10} disabled={busy}
               onChange={e => setSeed(e.target.value)} placeholder="00000000"/>
-            <Button disabled={busy || !validSeed || !confirmed} onClick={() => arm.mutate(Number.parseInt(selectedSeed,16))}>
+            <label className="m2-confirm"><input type="checkbox" checked={armConfirmed} onChange={e => setArmConfirmed(e.target.checked)}/>
+              再次确认：仅对备份后的离线单机进度注入一次野生 Seed
+            </label>
+            <Button disabled={busy || !validSeed || !armConfirmed} onClick={() => arm.mutate(Number.parseInt(selectedSeed,16))}>
               <ArrowDownToLine size={15}/> 让下一次普通野生遭遇使用此 Seed
             </Button>
             <small>单次模式。Hook 只接受 flags==1 的普通步行/冲浪等路径；命中后会自动清除待命并绕过本次 Repel。需要重新待命才能再次触发。</small>
