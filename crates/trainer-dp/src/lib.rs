@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub mod m10;
+pub mod m11;
 
 pub const SOURCE_VERSION: &str = "0.8.14";
 const PROFILES: &str = include_str!(concat!(
