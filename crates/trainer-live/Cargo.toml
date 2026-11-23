@@ -1,0 +1,16 @@
+[package]
+name = "trainer-live"
+version.workspace = true
+edition.workspace = true
+description = "Verified ROM profile live patch transactions over paused mGBA GDB"
+
+[dependencies]
+trainer-rsp = { path = "../trainer-rsp" }
+trainer-rs = { path = "../trainer-rs" }
+trainer-storage = { path = "../trainer-storage" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+sha1 = "0.10"
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
