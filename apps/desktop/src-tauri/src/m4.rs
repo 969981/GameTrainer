@@ -125,9 +125,7 @@ pub async fn m4_frlg_arm_wild(
     .map_err(|e| e.to_string())?
 }
 #[tauri::command]
-pub async fn m4_frlg_restore(
-    state: State<'_, FrlgState>,
-) -> Result<Receipt, String> {
+pub async fn m4_frlg_restore(state: State<'_, FrlgState>) -> Result<Receipt, String> {
     let inner = Arc::clone(&state.inner);
     tauri::async_runtime::spawn_blocking(move || {
         let mut guard = inner.lock().map_err(|_| "FRLG 状态锁异常".to_owned())?;
@@ -159,9 +157,7 @@ pub fn m4_frlg_disconnect(state: State<'_, FrlgState>) -> Result<(), String> {
     Ok(())
 }
 #[tauri::command]
-pub async fn m4_frlg_pause(
-    state: State<'_, FrlgState>,
-) -> Result<Status, String> {
+pub async fn m4_frlg_pause(state: State<'_, FrlgState>) -> Result<Status, String> {
     let inner = Arc::clone(&state.inner);
     tauri::async_runtime::spawn_blocking(move || {
         let mut guard = inner.lock().map_err(|_| "FRLG 状态锁异常".to_owned())?;
@@ -190,10 +186,7 @@ pub fn m4_frlg_mailbox(state: State<'_, FrlgState>) -> Result<WildMailbox, Strin
 }
 #[tauri::command]
 pub fn m4_frlg_history(state: State<'_, FrlgState>) -> Result<Vec<ActionEvent>, String> {
-    let path = state
-        .audit_file
-        .as_ref()
-        .ok_or("审计目录不可用")?;
+    let path = state.audit_file.as_ref().ok_or("审计目录不可用")?;
     let audit = AuditStore::open_file(path).map_err(|e| e.to_string())?;
     audit.list("live-frlg", 100).map_err(|e| e.to_string())
 }

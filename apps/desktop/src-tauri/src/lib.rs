@@ -265,19 +265,19 @@ pub fn run() {
         m3::m3_cancel_live_preview,
         m3::m3_disconnect_live,
         m3::m3_live_history,
-            m4::m4_frlg_profiles,
-            m4::m4_frlg_status,
-            m4::m4_frlg_connect,
-            m4::m4_frlg_preview,
-            m4::m4_frlg_apply,
-            m4::m4_frlg_arm_wild,
-            m4::m4_frlg_restore,
-            m4::m4_frlg_cancel,
-            m4::m4_frlg_disconnect,
-            m4::m4_frlg_pause,
-            m4::m4_frlg_resume,
-            m4::m4_frlg_mailbox,
-            m4::m4_frlg_history
+        m4::m4_frlg_profiles,
+        m4::m4_frlg_status,
+        m4::m4_frlg_connect,
+        m4::m4_frlg_preview,
+        m4::m4_frlg_apply,
+        m4::m4_frlg_arm_wild,
+        m4::m4_frlg_restore,
+        m4::m4_frlg_cancel,
+        m4::m4_frlg_disconnect,
+        m4::m4_frlg_pause,
+        m4::m4_frlg_resume,
+        m4::m4_frlg_mailbox,
+        m4::m4_frlg_history
     ]);
     builder
         .run(tauri::generate_context!())

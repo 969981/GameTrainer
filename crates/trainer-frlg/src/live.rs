@@ -288,7 +288,7 @@ impl Editor {
                 let start = (span.address as i64 - at as i64).max(0) as usize;
                 let limit = ((span.address as i64 + span.before.len() as i64 - at as i64)
                     .min(count as i64))
-                    .max(0) as usize;
+                .max(0) as usize;
                 for index in start..limit {
                     let pos = (at as u64 + index as u64 - span.address as u64) as usize;
                     if data[index] != span.after[pos] && data[index] != span.before[pos] {
@@ -668,7 +668,9 @@ impl Editor {
             active_hook: 1,
             last_trigger: mail[6],
             hit_count: u32::from_le_bytes(mail[8..12].try_into().map_err(|_| LiveError::Conflict)?),
-            last_old_seed: u32::from_le_bytes(mail[12..16].try_into().map_err(|_| LiveError::Conflict)?),
+            last_old_seed: u32::from_le_bytes(
+                mail[12..16].try_into().map_err(|_| LiveError::Conflict)?,
+            ),
         })
     }
     pub fn wild_mailbox(&mut self) -> Result<WildMailbox, LiveError> {
@@ -686,7 +688,9 @@ impl Editor {
             active_hook: b[5],
             last_trigger: b[6],
             hit_count: u32::from_le_bytes(b[8..12].try_into().map_err(|_| LiveError::Conflict)?),
-            last_old_seed: u32::from_le_bytes(b[12..16].try_into().map_err(|_| LiveError::Conflict)?),
+            last_old_seed: u32::from_le_bytes(
+                b[12..16].try_into().map_err(|_| LiveError::Conflict)?,
+            ),
         })
     }
     pub fn restore(&mut self) -> Result<Receipt, LiveError> {
@@ -712,9 +716,12 @@ impl Editor {
         for span in &owned.spans {
             let actual = self.rsp.read(span.address, span.after.len())?;
             if span.address == MAIL {
-                if feature != Feature::Wild || actual[7] != 0 ||
-                    !matches!(actual[4], 0 | 1) || !matches!(actual[5], 0 | 1) ||
-                    !matches!(actual[6], 0 | 1) {
+                if feature != Feature::Wild
+                    || actual[7] != 0
+                    || !matches!(actual[4], 0 | 1)
+                    || !matches!(actual[5], 0 | 1)
+                    || !matches!(actual[6], 0 | 1)
+                {
                     self.owner = Some(owned);
                     return Err(LiveError::Conflict);
                 }

@@ -64,8 +64,7 @@ pub fn profile_from_header(header: &[u8]) -> Result<FrlgRomProfile, ProfileError
     if header.len() < 0xBD {
         return Err(ProfileError::Unsupported);
     }
-    let code = std::str::from_utf8(&header[0xAC..0xB0])
-        .map_err(|_| ProfileError::Unsupported)?;
+    let code = std::str::from_utf8(&header[0xAC..0xB0]).map_err(|_| ProfileError::Unsupported)?;
     profile_for(code, header[0xBC])
 }
 
@@ -94,7 +93,14 @@ mod tests {
     }
     #[test]
     fn unknown_hacks_and_unverified_revisions_are_rejected() {
-        for (code, rev) in [("AXVE", 0), ("BPEE", 0), ("BPRE", 2), ("BPRD", 1), ("BPGE", 7), ("BPRZ", 0)] {
+        for (code, rev) in [
+            ("AXVE", 0),
+            ("BPEE", 0),
+            ("BPRE", 2),
+            ("BPRD", 1),
+            ("BPGE", 7),
+            ("BPRZ", 0),
+        ] {
             assert!(profile_for(code, rev).is_err());
         }
         assert_eq!(profile_for("BPRE", 0).unwrap().crc32, "DD88761C");
