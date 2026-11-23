@@ -2,7 +2,7 @@
 
 > 多游戏、跨运行时的 Windows 桌面研究与修改工具（M0 已实现，M1 只读接入验证阶段）
 
-**当前状态：M0 自动化测试通过，M1 Emerald/mGBA 只读原型代码已实现。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**没有在真实 Windows 桌面上亲自启动 WebView2，也没有用真实 mGBA + ROM 完成内存读取验证；没有写入、Hook、反作弊绕过。**
+**当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**没有在真实 Windows 桌面上亲自启动 WebView2，也没有用真实 mGBA + ROM 完成内存读取验证；没有写入、Hook、反作弊绕过。**
 
 ## 产品目标
 
@@ -53,6 +53,9 @@ pnpm --filter @gametrainer/desktop test:e2e  # 首先安装 Playwright Chromium
 - 桌面「补丁实验室」可在隔离的 Rust 测试内存中完成 Seed 预览 → 明确确认 → 应用 → 安全恢复；「操作历史」区分真实与模拟实验。
 - **真实 mGBA 和其他游戏进程仍只读**；M2 尚未实机验证，不能把 Fixture 的成功等同于真实游戏修改。
 
+- [M2 CI 全部通过（Rust 32 项、前端单测与三尺寸浏览器检查、Windows Tauri EXE）](https://github.com/969981/GameTrainer/actions/runs/45109373457)
+- [M2 Windows CI 调试版](https://github.com/969981/GameTrainer/actions/runs/45109373457/artifacts/14788604154) · [M2 三尺寸页面截图](https://github.com/969981/GameTrainer/actions/runs/45109373457/artifacts/14789250532)
+
 ## 文档入口
 
 | 文档 | 用途 |
@@ -89,7 +92,7 @@ profiles/                    # 每游戏每版本隔离配置
 docs/                         # Obsidian 友好 Markdown 文档
 ```
 
-**路线：** M0 UI + Mock Registry（CI 验收完成，Windows GUI 实操待验证）→ M1 Emerald/mGBA 只读（实现/编译测试通过，真实 ROM 待验）→ M2 安全修改与审计 → M3 更多 Gen3 功能 → M4 Gen4/5/6 与 PC Adapter 验证 → M5 日记与插件管理 → M6 可选 Native Agent/MinHook。
+**路线：** M0 UI + Mock Registry（CI 验收完成，Windows GUI 实操待验证）→ M1 Emerald/mGBA 只读（实现/编译测试通过，真实 ROM 待验）→ M2 Fixture-only 安全事务与审计 → M3 更多 Gen3 功能 → M4 Gen4/5/6 与 PC Adapter 验证 → M5 日记与插件管理 → M6 可选 Native Agent/MinHook。
 
 ## 许可证提醒
 

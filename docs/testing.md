@@ -37,3 +37,11 @@
 - SQLite AuditStore：先持久化 intent、模拟/真实事件隔离、重启保留不确定事件且不自动恢复。
 - React 浏览器：补丁实验室不能伪造后端成功、无法在浏览器内实际应用。
 - Windows Tauri/真实 mGBA + ROM 分别验收；详见 [M2 说明](m2-safe-patch.md)。
+
+## M2 CI 验收结果（2026-11-23）
+- [x] 32 项 Rust 单测：Core 7 + mGBA 9 + Patch 13 + SQLite 3。
+- [x] React/TypeScript/ESLint/Vitest/Vite。
+- [x] Playwright Chromium 1100、1366、1500px 游戏库/Gen6/PC/M2 页面与 12 张截图。
+- [x] Windows Tauri check、Rust 桌面命令测试、调试 EXE 构建。
+- [ ] Windows WebView2 GUI 人工交互验收、真实 mGBA/ROM 验证与任何 live 写入。
+- [CI 实际证据](https://github.com/969981/GameTrainer/actions/runs/45109373457)。

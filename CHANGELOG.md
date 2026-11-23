@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026-11-23 — M2 safe mutation prototype (Fixture only)
+
+- CI verified: 32 Rust unit tests, React unit/build, Playwright 1100/1366/1500px browser layout and Windows Tauri M2 fixture command/EXE.
+- [Full green CI](https://github.com/969981/GameTrainer/actions/runs/45109373457); live game writes remain disabled.
 - Add Rust PatchManager: short one-time preview, identity validation, conflict checks, read-back, owner-scoped restore.
 - Add SQLite AuditStore: WAL+FULL sync, write intent before mutation and separated fixture/live history.
 - Add Tauri fixture commands and React preview/confirm/apply/restore screen. Actual mGBA memory remains read-only.

@@ -1,7 +1,7 @@
 # M2 · 安全补丁事务与 SQLite 审计
 
 日期：2026-11-23
-状态：首轮 Fixture-only Rust/Tauri/React 实现。真实 mGBA 与其他游戏进程依旧只读；完整 ROM 身份和 Windows 实机尚未通过验收。
+状态：Fixture-only Rust/Tauri/React 实现并经 CI 验证通过。真实 mGBA 与其他游戏进程依旧只读；完整 ROM 身份和 Windows 实机尚未通过验收。
 
 ## 实现架构
 
@@ -40,6 +40,13 @@ SQLite `environment` 只能是 `fixture` / `live`；当前仅 fixture 会产生�
 5. 使用 Owner ID 执行恢复：仅当前值仍属该补丁时恢复 0x12345678，回执 `Restored`。
 6. 在 **操作历史 → 隔离实验**查看 SQLite 事件；**真实操作**应仍为空。
 7. 重启 app，检查旧 token/owner 不会自动重放，未闭合 intent 只用于审计提醒；没有 SQLite 时拒绝 M2 事务。
+
+## 2026-11-23 自动化验收
+
+- [CI #45109373457](https://github.com/969981/GameTrainer/actions/runs/45109373457)：Rust cargo fmt / Clippy / 单测全部通过。GameRegistry 7 项 + mGBA Core 9 项 + PatchManager 13 项 + AuditStore 3 项，总计 **32** 项 Rust 单元测试。
+- React：ESLint、TypeScript、Vitest 单测、Vite Web 构建均通过；Playwright Chromium 1100/1366/1500px 三组导航/横向溢出检查通过，包含 **12 张截图**（M0 页面与 M2 实验室）。
+- Windows：Tauri Shell `cargo check`、桌面 Rust 命令单测（含 M2 fixture 流程）、Windows debug EXE 构建及 Artifact 上传均通过。
+- **仍未验证：**Windows WebView2 GUI 手动操作、真实 mGBA ROM/Seed 读取或写入；M2 对真实游戏的写入仍是 Rust 层关闭状态。
 
 ## 进一步解锁真实写入的前提（本次未实现）
 
