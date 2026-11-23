@@ -5,6 +5,7 @@ import { FrlgLivePanel } from "@/components/FrlgLivePanel";
 import { HgssPanel } from "@/components/HgssPanel";
 import { DiamondPearlPanel } from "@/components/DiamondPearlPanel";
 import { DiamondPearlM10IdentityPanel } from "@/components/DiamondPearlM10IdentityPanel";
+import { DiamondPearlM11LivePatchLab } from "@/components/DiamondPearlM11LivePatchLab";
 import { HgssM6ValidationPanel } from "@/components/HgssM6ValidationPanel";
 import { HgssM7SafetyPanel } from "@/components/HgssM7SafetyPanel";
 import { HgssM8RomIdentityPanel } from "@/components/HgssM8RomIdentityPanel";
@@ -102,6 +103,7 @@ export function RuntimePage({ catalog }: { catalog: GameCatalog }) {
     <HgssPanel />
     <DiamondPearlPanel />
     <DiamondPearlM10IdentityPanel />
+    <DiamondPearlM11LivePatchLab />
     <HgssM6ValidationPanel />
     <HgssM7SafetyPanel />
     <HgssM8RomIdentityPanel />
