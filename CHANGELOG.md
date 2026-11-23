@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-23 — M0 automated validation and M1 read-only prototype
+
+- Windows Tauri icon-resource issue fixed; `cargo check`, desktop Rust `get_catalog` test, debug EXE `cargo build` succeeded.
+- M0: Chromium Playwright 1100/1366/1500px screenshots, cross-game navigation and no horizontal overflow — all passed.
+- M1: add `trainer-mgba` with six retail Emerald Rev0 profiles, partial ROM anchor verification and 9 synthesized read-only Seed/session unit tests.
+- M1: add `trainer-runtime-win` Win32 read-only discovery/mapping, guarded Tauri IPC and read-only React RNG panel.
+- [All three CI jobs passed: #45107272587](https://github.com/969981/GameTrainer/actions/runs/45107272587) — Rust 16 tests, UI 10 tests, Chromium E2E, Windows EXE artifact.
+- Live Windows WebView2 GUI, true front-end-to-Tauri IPC flow, actual mGBA ROM memory reads and full ROM CRC are not validated yet. No memory writes or hooks.
+
 ## 2026-11-23 — M0 Mock platform scaffold
 
 - Add Rust `trainer-core` typed GameRegistry and Tauri 2 read-only commands.
@@ -18,4 +27,4 @@
 - Add logging, SQLite audit and optional Obsidian development journal designs.
 - Provide roadmap, test matrix, ADR, mock manifests, and theme tokens.
 
-This release contains plans and Mock examples only. No working game modification engine has been committed.
+This repository contains a Windows-compilable desktop shell and read-only emulator connection prototype. No ROM memory mutation/Hook has been implemented or validated.

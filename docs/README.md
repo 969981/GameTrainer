@@ -4,6 +4,7 @@
 
 ## 工程实施
 - [M0 工程与 CI 验证](m0-implementation.md) · [[m0-implementation]]
+- [M1 Emerald/mGBA 只读实现、实机验收清单](m1-readonly.md) · [[m1-readonly]]
 
 ## 核心设计
 - [总体架构](architecture.md) · [[architecture]]

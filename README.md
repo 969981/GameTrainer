@@ -1,8 +1,8 @@
 # GameTrainer Studio
 
-> 多游戏、跨运行时的 Windows 桌面修改与研究工具（规划阶段）
+> 多游戏、跨运行时的 Windows 桌面研究与修改工具（M0 已实现，M1 只读接入验证阶段）
 
-**当前状态：M0 已实现（Mock）。** 仓库已包含 Rust GameRegistry、Tauri 2 只读 IPC、React V3 动态工作台、五类游戏 Fixture 和自动化测试；**仍未实现真实进程连接、游戏内存读写、Hook 或 Windows GUI 实机验证**。所有示例游戏与配置均为 Mock，不能作为已验证的游戏 Profile。
+**当前状态：M0 自动化测试通过，M1 Emerald/mGBA 只读原型代码已实现。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**没有在真实 Windows 桌面上亲自启动 WebView2，也没有用真实 mGBA + ROM 完成内存读取验证；没有写入、Hook、反作弊绕过。**
 
 ## 产品目标
 
@@ -27,14 +27,24 @@ pnpm dev                         # 浏览器 Mock
 pnpm desktop                     # Windows Tauri 2 开发启动（需要 Rust/MSVC/WebView2）
 pnpm lint && pnpm typecheck && pnpm test && pnpm build
 cargo fmt --all -- --check
-cargo clippy -p trainer-core --all-targets -- -D warnings
-cargo test -p trainer-core
+cargo clippy -p trainer-core -p trainer-mgba --all-targets -- -D warnings
+cargo test -p trainer-core -p trainer-mgba
+pnpm --filter @gametrainer/desktop test:e2e  # 首先安装 Playwright Chromium
 ```
 
 - [React/Tauri 应用目录](apps/desktop/) · [Rust 核心注册中心](crates/trainer-core/src/lib.rs)
 - [五类游戏平台共享 Fixture](fixtures/m0-registry.json) · [M0 实施与测试记录](docs/m0-implementation.md)
-- [通过的 CI（Rust 7 项、前端 9 项）](https://github.com/969981/GameTrainer/actions/runs/45104751458)
-- 注意：`pnpm dev` 是浏览器 Mock；`pnpm desktop` 尚需 Windows GUI 实测，不能视为已经验证。
+- [最新完整 CI（Rust 16 项、React 10 项、Chromium 3 个尺寸/9 张截图、Windows Shell/Test/EXE）](https://github.com/969981/GameTrainer/actions/runs/45107272587)
+- [Windows 调试 EXE Artifact](https://github.com/969981/GameTrainer/actions/runs/45107272587/artifacts/14787309682)（CI 产物，非正式安装器）
+- [Chromium 三尺寸截图 Artifact](https://github.com/969981/GameTrainer/actions/runs/45107272587/artifacts/14788062150)
+- 注意：`pnpm dev` 只能浏览 Mock；`pnpm desktop` 才启用 Tauri Windows 只读 IPC；Windows GUI、真实 mGBA + Emerald ROM 必须另行实机验证。
+
+## M1 · Emerald/mGBA 只读接入
+
+- [源码/限制与本机验证说明](docs/m1-readonly.md) · [只读 ROM/Seed 解析核心](crates/trainer-mgba/src/lib.rs) · [Windows Runtime](crates/trainer-runtime-win/src/windows.rs) · [Tauri IPC](apps/desktop/src-tauri/src/lib.rs)
+- 桌面版运行后：启动 mGBA → 进入「运行时」→ 刷新进程 → 选择 PID → **只读连接** → 在 Emerald 的「RNG / Seed」查看 Current Seed、Initial Seed 与 Advances。
+- 已配置六种 Rev0 ROM GameCode（BPEJ/BPEE/BPED/BPEF/BPEI/BPES）。现在只有**部分源代码锚点验证**，没有全 ROM CRC 或全部锚点，所以绝不开放写入。
+- 暂未经过真实 mGBA 版本、合法原版 ROM、实际存储映射/ROM Reload 测试；候选不确定时应失败关闭，而不是猜地址。
 
 ## 文档入口
 
@@ -42,6 +52,7 @@ cargo test -p trainer-core
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | AI 编程代理统一执行规范 |
 | [docs/m0-implementation.md](docs/m0-implementation.md) | M0 已实现工程、测试证据和待办 |
+| [docs/m1-readonly.md](docs/m1-readonly.md) | Emerald/mGBA 只读连接原型与实机验收计划 |
 | [docs/architecture.md](docs/architecture.md) | 分层架构与依赖方向 |
 | [docs/extensions.md](docs/extensions.md) | Gen3–Gen6 / PC Native 扩展与模块清单 |
 | [docs/ui/README.md](docs/ui/README.md) | V3 导航、布局、页面与设计令牌 |
@@ -55,10 +66,10 @@ cargo test -p trainer-core
 ## 预计项目结构（非已实现）
 
 ```text
-apps/desktop/                 # React/Vite UI + Tauri Shell
-crates/trainer-core/          # Registry、session、capability
-crates/trainer-runtime-win/   # Win32 外部进程
-crates/trainer-runtime-mgba/  # 模拟器适配
+apps/desktop/                 # React/Vite UI + Tauri Shell（M0/M1 已有）
+crates/trainer-core/          # Registry、只读 Session DTO（已实现）
+crates/trainer-runtime-win/   # Win32 mGBA 只读外部进程访问（代码已提交，未实机验证）
+crates/trainer-mgba/          # Emerald ROM/Seed 只读解码及会话（已有测试）
 crates/trainer-patch/         # preview/apply/restore
 crates/trainer-storage/       # SQLite、日志
 games/pokemon/gen3/          # 世代共享 codec / adapter
@@ -71,7 +82,7 @@ profiles/                    # 每游戏每版本隔离配置
 docs/                         # Obsidian 友好 Markdown 文档
 ```
 
-**路线：** M0 UI + Mock Registry（核心 CI 已通过，Windows GUI 待验收）→ M1 Emerald/mGBA 只读 → M2 安全修改与审计 → M3 更多 Gen3 功能 → M4 Gen4/5/6 与 PC Adapter 验证 → M5 日记与插件管理 → M6 可选 Native Agent/MinHook。
+**路线：** M0 UI + Mock Registry（CI 验收完成，Windows GUI 实操待验证）→ M1 Emerald/mGBA 只读（实现/编译测试通过，真实 ROM 待验）→ M2 安全修改与审计 → M3 更多 Gen3 功能 → M4 Gen4/5/6 与 PC Adapter 验证 → M5 日记与插件管理 → M6 可选 Native Agent/MinHook。
 
 ## 许可证提醒
 

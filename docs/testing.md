@@ -22,3 +22,12 @@
 - OS、架构、Runtime/模拟器版本、游戏版本/哈希（合法分享范围内）。
 - 测试条件、步骤、预期、观察、日志文件位置、结果和已知限制。
 - Mock/静态测试/集成测试/Windows 实机需要分别标注，不能互相替代。
+
+## 2026-11-23 已执行测试（CI，不代表实机 mGBA）
+- [x] `trainer-core` 7 项 + `trainer-mgba` 9 项合成单元测试。
+- [x] React/Vitest 10 项，ESLint、TypeScript 和 Web Build。
+- [x] Playwright Chromium：1100/1366/1500px 3 条 E2E，共 9 张截图，游戏库/Gen6/PC 切换与横向溢出检查。
+- [x] Windows `cargo check -p game-trainer-desktop`、`cargo test -p game-trainer-desktop --lib`（Rust get_catalog）和 `cargo build -p game-trainer-desktop`。
+- [ ] Windows 原生 WebView2 GUI 启动及 React→Tauri IPC 实测。
+- [ ] mGBA + Emerald Rev0 的真实 ROM/Seed 地址、读数、Reload/候选歧义验证。
+- 证据：[CI #45107272587](https://github.com/969981/GameTrainer/actions/runs/45107272587)。
