@@ -116,12 +116,20 @@ pub(crate) fn read_named_pipe<const N: usize>(pipe_path: &str) -> Result<([u8; N
     }
     let name = utf16(pipe_path);
     if unsafe { WaitNamedPipeW(name.as_ptr(), 1500) } == 0 {
-        return Err("DeSmuME in-core diagnostic pipe missing; rebuild with GDB_STUB + GT_HGSS_M8_BRIDGE".into());
+        return Err(
+            "DeSmuME in-core diagnostic pipe missing; rebuild with GDB_STUB + GT_HGSS_M8_BRIDGE"
+                .into(),
+        );
     }
     let file = Owned(unsafe {
         CreateFileW(
-            name.as_ptr(), FILE_GENERIC_READ, 0, null_mut(),
-            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, null_mut(),
+            name.as_ptr(),
+            FILE_GENERIC_READ,
+            0,
+            null_mut(),
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            null_mut(),
         )
     });
     if file.0 == INVALID_HANDLE_VALUE {
@@ -136,8 +144,13 @@ pub(crate) fn read_named_pipe<const N: usize>(pipe_path: &str) -> Result<([u8; N
     while filled < bytes.len() {
         let mut count = 0u32;
         let success = unsafe {
-            ReadFile(file.0, bytes[filled..].as_mut_ptr().cast(),
-                (N - filled) as u32, &mut count, null_mut())
+            ReadFile(
+                file.0,
+                bytes[filled..].as_mut_ptr().cast(),
+                (N - filled) as u32,
+                &mut count,
+                null_mut(),
+            )
         };
         if success == 0 || count == 0 {
             return Err("DeSmuME diagnostic pipe disconnected or short read".into());
