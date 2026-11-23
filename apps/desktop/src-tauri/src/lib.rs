@@ -15,10 +15,7 @@ fn get_session_snapshot() -> SessionSnapshot {
 
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            get_catalog,
-            get_session_snapshot
-        ])
+        .invoke_handler(tauri::generate_handler![get_catalog, get_session_snapshot])
         .run(tauri::generate_context!())
         .expect("failed to run GameTrainer Studio");
 }

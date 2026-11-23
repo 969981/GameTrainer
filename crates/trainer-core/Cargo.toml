@@ -2,7 +2,6 @@
 name = "trainer-core"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 description = "Typed read-only game/feature catalog and registry for GameTrainer Studio"
 
 [dependencies]

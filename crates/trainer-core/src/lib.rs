@@ -6,8 +6,10 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub const CATALOG_SCHEMA_VERSION: u32 = 1;
-pub const M0_CATALOG_JSON: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures/m0-registry.json"));
+pub const M0_CATALOG_JSON: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../fixtures/m0-registry.json"
+));
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]

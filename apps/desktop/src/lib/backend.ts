@@ -11,7 +11,7 @@ export async function getCatalog(): Promise<GameCatalog> {
     // A failed Tauri invocation must surface as an error, not fake a successful Mock fallback.
     return invoke<GameCatalog>("get_catalog");
   }
-  return mockFixture as GameCatalog;
+  return mockFixture as unknown as GameCatalog;
 }
 
 export async function getSessionSnapshot(): Promise<SessionSnapshot> {
