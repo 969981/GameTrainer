@@ -77,7 +77,7 @@ describe("M0 dynamic AppShell", () => {
     mount({ ...baseCatalog, games: [...baseCatalog.games, sixth] });
     fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon FireRed (Extension)" }));
     expect(screen.getByRole("button", { name: "FireRed Extension Seed" })).toBeInTheDocument();
-    expect(screen.getByText(/10 Game Adapters/)).toBeInTheDocument();
+    expect(screen.getByText(/12 Game Adapters/)).toBeInTheDocument();
   });
 
   it("never produces live RNG values in browser Mock", () => {

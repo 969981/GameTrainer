@@ -251,7 +251,7 @@ mod tests {
     #[test]
     fn loads_five_platforms_and_five_independent_gen3_games() {
         let registry = GameRegistry::mock().expect("valid M0 fixture");
-        assert_eq!(registry.snapshot().games.len(), 9);
+        assert_eq!(registry.snapshot().games.len(), 11);
         for platform in [
             PlatformFamily::Gen3,
             PlatformFamily::Gen4,
@@ -263,6 +263,8 @@ mod tests {
                 registry.list_by_platform(&platform).len(),
                 if platform == PlatformFamily::Gen3 {
                     5
+                } else if platform == PlatformFamily::Gen4 {
+                    3
                 } else {
                     1
                 }
@@ -279,7 +281,7 @@ mod tests {
         new_game.game_id = "games.pokemon.firered.extension".into();
         new_game.name = "Pokémon FireRed Extension".into();
         registry.register(&AddedGame(new_game)).unwrap();
-        assert_eq!(registry.snapshot().games.len(), 10);
+        assert_eq!(registry.snapshot().games.len(), 12);
         assert_eq!(registry.list_by_platform(&PlatformFamily::Gen3).len(), 6);
     }
 
@@ -318,7 +320,7 @@ mod tests {
             registry.register(&AddedGame(existing)),
             Err(RegistryError::GameId(_))
         ));
-        assert_eq!(registry.snapshot().games.len(), 9);
+        assert_eq!(registry.snapshot().games.len(), 11);
     }
 
     #[test]

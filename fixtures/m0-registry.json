@@ -17,9 +17,9 @@
     },
     {
       "runtime_id": "runtimes.nds.future",
-      "name": "NDS · Provider（规划）",
+      "name": "NDS · DeSmuME 外部只读（M5）",
       "status": "planned",
-      "description": "Gen4/Gen5 后续适配"
+      "description": "M5 Windows DeSmuME ReadProcessMemory 只读 Seed/MT，未经实机验收；尚未开放 Guest 写入"
     },
     {
       "runtime_id": "runtimes.3ds.future",
@@ -758,6 +758,202 @@
           "status": "planned",
           "required_capabilities": [
             "patch.apply"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.heartgold",
+      "name": "Pokémon HeartGold",
+      "platform_family": "gen4",
+      "target_platform": "nds",
+      "summary": "心金 v1.4.5.1 · 7 原版 Profile · M5 DeSmuME 外部只读 RNG/MT · 写入关闭",
+      "icon": "sparkles",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.hgss.rng",
+          "name": "RNG / MT 只读观察",
+          "group": "研究",
+          "description": "DeSmuME 真实只读 Seed、MT[0]、MT Index、Delay 和训练家 ID；不计算未证实的 Advances",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.capture",
+          "name": "100% 捕捉（待安全验证）",
+          "group": "修改规划",
+          "description": "Overlay12 捕捉半字与 ARMED/ACTIVE 生命周期已有源码；M5 无 NDS 写入实现",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.wall",
+          "name": "穿墙与训练家视线（待验证）",
+          "group": "修改规划",
+          "description": "ARM9 原指令、签名和语言差异可供审查，未开放改写",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.mt",
+          "name": "蛋 RNG / MT 预测",
+          "group": "研究",
+          "description": "624 项 MT19937、PID/不变石逻辑来自源码；M5 尚未提供完整预测 UI",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.warp",
+          "name": "城都/关都传送目录",
+          "group": "地图",
+          "description": "仅源包候选目录和精确坐标研究，不执行 NDS Warp Hook",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.events",
+          "name": "神兽、雪拉比、阿尔宙斯事件",
+          "group": "剧情研究",
+          "description": "剧情 Flag/脚本只读规划，禁止现场改变存档状态",
+          "icon": "file-code",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.battle",
+          "name": "战斗 Overlay12 调用链",
+          "group": "逆向研究",
+          "description": "12 ROM Thumb BL 静态审计和 250ms CE 采样证据；非真实逐指令 Trace；必中、必会心等 Hook 未移植",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.soulsilver",
+      "name": "Pokémon SoulSilver",
+      "platform_family": "gen4",
+      "target_platform": "nds",
+      "summary": "魂银 v1.4.5.1 · 7 原版 Profile · M5 DeSmuME 外部只读 RNG/MT · 写入关闭",
+      "icon": "shield",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.hgss.rng",
+          "name": "RNG / MT 只读观察",
+          "group": "研究",
+          "description": "DeSmuME 真实只读 Seed、MT[0]、MT Index、Delay 和训练家 ID；不计算未证实的 Advances",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.capture",
+          "name": "100% 捕捉（待安全验证）",
+          "group": "修改规划",
+          "description": "Overlay12 捕捉半字与 ARMED/ACTIVE 生命周期已有源码；M5 无 NDS 写入实现",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.wall",
+          "name": "穿墙与训练家视线（待验证）",
+          "group": "修改规划",
+          "description": "ARM9 原指令、签名和语言差异可供审查，未开放改写",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.mt",
+          "name": "蛋 RNG / MT 预测",
+          "group": "研究",
+          "description": "624 项 MT19937、PID/不变石逻辑来自源码；M5 尚未提供完整预测 UI",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.warp",
+          "name": "城都/关都传送目录",
+          "group": "地图",
+          "description": "仅源包候选目录和精确坐标研究，不执行 NDS Warp Hook",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.events",
+          "name": "神兽、雪拉比、阿尔宙斯事件",
+          "group": "剧情研究",
+          "description": "剧情 Flag/脚本只读规划，禁止现场改变存档状态",
+          "icon": "file-code",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.hgss.battle",
+          "name": "战斗 Overlay12 调用链",
+          "group": "逆向研究",
+          "description": "12 ROM Thumb BL 静态审计和 250ms CE 采样证据；非真实逐指令 Trace；必中、必会心等 Hook 未移植",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
           ],
           "parameter_schema": []
         }

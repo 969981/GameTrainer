@@ -2,6 +2,7 @@ import { Activity, ArrowRight, BookOpenText, Check, Cpu, FileWarning, Gamepad2, 
 import { useState } from "react";
 import { M3LivePanel } from "@/components/M3LivePanel";
 import { FrlgLivePanel } from "@/components/FrlgLivePanel";
+import { HgssPanel } from "@/components/HgssPanel";
 import { EmeraldRngLivePanel, MgbaConnection, RubySapphireLivePanel, RubySapphireProfileCatalog } from "@/components/MgbaConnection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ function FeatureDetail({ game, feature, onBack }: { game: GameDescriptor; featur
     {feature.feature_id === "features.gen3.rng" &&
       (game.game_id === "games.pokemon.ruby" || game.game_id === "games.pokemon.sapphire") &&
       <RubySapphireLivePanel gameId={game.game_id} />}
+    {feature.feature_id === "features.hgss.rng" && <HgssPanel />}
     <Card><CardHeader><h3>参数与预览</h3></CardHeader><CardContent>
       {feature.parameter_schema.length ? <div className="parameter-fields">{feature.parameter_schema.map((field) => <label className="parameter-field" key={field.id}><span>{field.label}</span><input disabled aria-label={field.label} placeholder={field.placeholder} /><small>仅示意，不能修改游戏</small></label>)}</div> : <p className="muted-copy">尚无可执行参数，等待正式 FeaturePack 实现。</p>}
       <div className="preview-placeholder"><FileWarning size={20} /><div><strong>修改预览不可用</strong><p>M2 才会实现后端 preview → apply → restore 与审计。</p></div></div>
@@ -92,6 +94,7 @@ export function RuntimePage({ catalog }: { catalog: GameCatalog }) {
     <RubySapphireProfileCatalog />
     <M3LivePanel />
     <FrlgLivePanel />
+    <HgssPanel />
     <div className="runtime-list">{catalog.runtimes.map((runtime) => <Card key={runtime.runtime_id}><CardContent className="runtime-row"><span className="feature-icon"><MonitorCog size={22} /></span><div><strong>{runtime.name}</strong><small>{runtime.description}</small><code>{runtime.runtime_id}</code></div><Badge>PLANNED</Badge></CardContent></Card>)}</div>
   </div>;
 }

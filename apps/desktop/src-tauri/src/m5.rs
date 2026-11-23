@@ -1,6 +1,6 @@
 //! M5 NDS / DeSmuME read-only bridge. It intentionally has no write commands.
 use std::sync::Mutex;
-use tauri::State;
+use tauri::{Manager, State};
 use trainer_hgss::{retail_profiles, HgssProfile};
 
 #[cfg(windows)]
