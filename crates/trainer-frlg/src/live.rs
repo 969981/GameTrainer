@@ -151,11 +151,13 @@ fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|x| format!("{x:02x}")).collect()
 }
 fn unhex(src: &str) -> Result<Vec<u8>, LiveError> {
-    if src.len() % 2 != 0 {
+    if !src.len().is_multiple_of(2) {
         return Err(LiveError::Conflict);
     }
     src.as_bytes()
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|p| {
             let s = std::str::from_utf8(p).map_err(|_| LiveError::Conflict)?;
             u8::from_str_radix(s, 16).map_err(|_| LiveError::Conflict)
@@ -289,12 +291,12 @@ impl Editor {
                 let limit = ((span.address as i64 + span.before.len() as i64 - at as i64)
                     .min(count as i64))
                 .max(0) as usize;
-                for index in start..limit {
+                for (index, byte) in data.iter_mut().enumerate().take(limit).skip(start) {
                     let pos = (at as u64 + index as u64 - span.address as u64) as usize;
-                    if data[index] != span.after[pos] && data[index] != span.before[pos] {
+                    if *byte != span.after[pos] && *byte != span.before[pos] {
                         return Err(LiveError::Conflict);
                     }
-                    data[index] = span.before[pos];
+                    *byte = span.before[pos];
                 }
             }
             sha.update(&data);
@@ -711,24 +713,29 @@ impl Editor {
             }
         }
         let owned = self.owner.take().ok_or(LiveError::Missing)?;
-        // A live wild one-shot changes mailbox counters and mode as intended.
-        // Validate the entire ROM owner before changing the entry pointer.
-        for span in &owned.spans {
+        // A one-shot wild encounter intentionally changes the mailbox counters.
+        // Check all spans before removing the owner to preserve the restore
+        // capability after any transport failure or alien bytes.
+        let validation = owned.spans.iter().try_for_each(|span| -> Result<(), LiveError> {
             let actual = self.rsp.read(span.address, span.after.len())?;
             if span.address == MAIL {
                 if feature != Feature::Wild
+                    || actual.len() != 16
                     || actual[7] != 0
                     || !matches!(actual[4], 0 | 1)
                     || !matches!(actual[5], 0 | 1)
                     || !matches!(actual[6], 0 | 1)
                 {
-                    self.owner = Some(owned);
                     return Err(LiveError::Conflict);
                 }
             } else if actual != span.after && actual != span.before {
-                self.owner = Some(owned);
                 return Err(LiveError::Conflict);
             }
+            Ok(())
+        });
+        if let Err(error) = validation {
+            self.owner = Some(owned);
+            return Err(error);
         }
         if let Err(error) = self.event(
             "restore_intent",
