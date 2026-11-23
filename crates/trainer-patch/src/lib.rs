@@ -370,10 +370,7 @@ impl PatchManager {
         }
         if matches!(&current, Ok(bytes) if bytes == &active.spec.desired) && still_same_identity {
             if target.write(active.spec.address, &active.original).is_ok()
-                && target
-                    .read(active.spec.address, active.original.len())
-                    .as_deref()
-                    == Ok(active.original.as_slice())
+                && matches!(target.read(active.spec.address, active.original.len()), Ok(bytes) if bytes.as_slice() == active.original.as_slice())
                 && self.validate_identity(target, &active.identity).is_ok()
             {
                 self.event(
@@ -442,10 +439,7 @@ impl PatchManager {
             None,
         )?;
         if target.write(active.spec.address, &active.original).is_err()
-            || target
-                .read(active.spec.address, active.original.len())
-                .as_deref()
-                != Ok(active.original.as_slice())
+            || !matches!(target.read(active.spec.address, active.original.len()), Ok(bytes) if bytes.as_slice() == active.original.as_slice())
             || self.validate_identity(target, &active.identity).is_err()
         {
             active.status = PatchStatus::RestoreFailed;
