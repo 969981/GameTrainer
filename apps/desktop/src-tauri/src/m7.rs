@@ -1,7 +1,7 @@
 //! M7: two independent DeSmuME GDB observations. Always READ ONLY.
- //! The two local TCP endpoints are user-selected; there is no secure proof
- //! that they are from one DeSmuME PID or share a simultaneous stop epoch.
- //! Never promote this report to guest-write authorization.
+//! The two local TCP endpoints are user-selected; there is no secure proof
+//! that they are from one DeSmuME PID or share a simultaneous stop epoch.
+//! Never promote this report to guest-write authorization.
 use trainer_hgss::{
     m6::{inspect, GuestReader, OverlayReport},
     m7::{preflight, CpuStopObservation, M7Preflight},
@@ -12,22 +12,25 @@ use trainer_rsp::RspClient;
 struct BoundedReader<'a>(&'a mut RspClient);
 impl GuestReader for BoundedReader<'_> {
     fn read_guest(&mut self, guest: u32, bytes: usize) -> Result<Vec<u8>, String> {
-        if bytes > 34 { return Err("M7 refused an unbounded guest read".into()); }
+        if bytes > 34 {
+            return Err("M7 refused an unbounded guest read".into());
+        }
         self.0.read(guest, bytes).map_err(|e| e.to_string())
     }
 }
 
-fn stop_observation(
-    cpu: &str,
-    port: u16,
-) -> (CpuStopObservation, Option<RspClient>) {
+fn stop_observation(cpu: &str, port: u16) -> (CpuStopObservation, Option<RspClient>) {
     match RspClient::connect_local(port) {
         Ok(mut stub) if stub.is_paused() => {
             let pc_first = stub.pc();
             let pc_second = stub.pc();
             let (first, second, error) = match (pc_first, pc_second) {
                 (Ok(a), Ok(b)) if a == b => (Some(a), Some(b), None),
-                (Ok(a), Ok(b)) => (Some(a), Some(b), Some("PC changed during stop probe".into())),
+                (Ok(a), Ok(b)) => (
+                    Some(a),
+                    Some(b),
+                    Some("PC changed during stop probe".into()),
+                ),
                 (Err(e), _) | (_, Err(e)) => (None, None, Some(format!("GDB register read: {e}"))),
             };
             let result = CpuStopObservation {
@@ -40,10 +43,14 @@ fn stop_observation(
             };
             (result, Some(stub))
         }
-        Ok(_) => (CpuStopObservation::unobserved(
-            cpu, port, "GDB did not return a stopped CPU"), None),
-        Err(e) => (CpuStopObservation::unobserved(
-            cpu, port, &format!("GDB stop handshake failed: {e}")), None),
+        Ok(_) => (
+            CpuStopObservation::unobserved(cpu, port, "GDB did not return a stopped CPU"),
+            None,
+        ),
+        Err(e) => (
+            CpuStopObservation::unobserved(cpu, port, &format!("GDB stop handshake failed: {e}")),
+            None,
+        ),
     }
 }
 
@@ -52,7 +59,9 @@ fn read_overlay(
     profile: &HgssProfile,
     observation: &CpuStopObservation,
 ) -> Option<OverlayReport> {
-    if !observation.consistent() { return None; }
+    if !observation.consistent() {
+        return None;
+    }
     let pc = observation.pc_second?;
     inspect(&mut BoundedReader(stub), profile, pc).ok()
 }
@@ -67,8 +76,8 @@ pub async fn m7_hgss_preflight(
     if arm9_port < 1024 || arm7_port < 1024 || arm9_port == arm7_port {
         return Err("ARM9/ARM7 must use two distinct localhost GDB ports >= 1024".into());
     }
-    let profile = profile_for(&game_code, revision)
-        .ok_or("ROM Code/Revision not in the HGSS manifest")?;
+    let profile =
+        profile_for(&game_code, revision).ok_or("ROM Code/Revision not in the HGSS manifest")?;
     if !profile.static_audit_1451 || profile.write_allowed {
         return Err("M7 requires one of the 12 audited original HGSS profiles".into());
     }
@@ -93,8 +102,8 @@ mod tests {
     use super::*;
     #[test]
     fn static_m7_audit_excludes_us_legacy_and_korean() {
-        assert!(profile_for("IPKJ",0).unwrap().static_audit_1451);
-        assert!(!profile_for("IPKE",0).unwrap().static_audit_1451);
-        assert!(profile_for("IPKK",0).is_none());
+        assert!(profile_for("IPKJ", 0).unwrap().static_audit_1451);
+        assert!(!profile_for("IPKE", 0).unwrap().static_audit_1451);
+        assert!(profile_for("IPKK", 0).is_none());
     }
 }
