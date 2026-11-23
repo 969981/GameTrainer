@@ -149,7 +149,14 @@ fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02X}")).collect()
 }
 fn capture_addresses(code: &str) -> Option<[u32; 2]> {
-    Some(match code.as_bytes().get(3)? {
+    let code_bytes = code.as_bytes();
+    if code_bytes.len() != 4
+        || &code_bytes[..2] != b"AX"
+        || !matches!(code_bytes[2], b'V' | b'P')
+    {
+        return None;
+    }
+    Some(match code_bytes[3] {
         b'E' => [0x0802B8A6, 0x0802B8C8],
         b'J' => [0x08028AD2, 0x08028AF4],
         b'D' | b'F' => [0x0802BA7A, 0x0802BA9C],
