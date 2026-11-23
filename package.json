@@ -1,0 +1,14 @@
+{
+  "name": "gametrainer-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.19.0",
+  "scripts": {
+    "dev": "pnpm --filter @gametrainer/desktop dev",
+    "desktop": "pnpm --filter @gametrainer/desktop tauri dev",
+    "build": "pnpm --filter @gametrainer/desktop build",
+    "test": "pnpm --filter @gametrainer/desktop test",
+    "lint": "pnpm --filter @gametrainer/desktop lint",
+    "typecheck": "pnpm --filter @gametrainer/desktop typecheck"
+  }
+}

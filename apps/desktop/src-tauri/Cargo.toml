@@ -1,0 +1,19 @@
+[package]
+name = "game-trainer-desktop"
+version.workspace = true
+edition.workspace = true
+build = "build.rs"
+publish = false
+
+[lib]
+name = "game_trainer_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+trainer-core = { path = "../../../crates/trainer-core" }
+serde.workspace = true
+serde_json.workspace = true
