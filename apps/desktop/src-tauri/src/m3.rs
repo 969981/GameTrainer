@@ -32,7 +32,11 @@ pub fn m3_live_status(state: State<'_, LiveState>) -> Result<Option<LiveIdentity
 pub async fn m3_live_connect(
     port: u16,
     state: State<'_, LiveState>,
+    frlg: State<'_, crate::m4::FrlgState>,
 ) -> Result<LiveIdentity, String> {
+    if crate::m4::m4_frlg_status(frlg)?.is_some() {
+        return Err("火红/叶绿 M4 已占用 GDB 会话，请先安全断开".into());
+    }
     let session = Arc::clone(&state.inner);
     let file = state
         .audit_file

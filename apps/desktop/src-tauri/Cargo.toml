@@ -20,6 +20,7 @@ trainer-rs = { path = "../../../crates/trainer-rs" }
 trainer-runtime-win = { path = "../../../crates/trainer-runtime-win" }
 trainer-patch = { path = "../../../crates/trainer-patch" }
 trainer-live = { path = "../../../crates/trainer-live" }
+trainer-frlg = { path = "../../../crates/trainer-frlg" }
 trainer-storage = { path = "../../../crates/trainer-storage" }
 serde.workspace = true
 serde_json.workspace = true

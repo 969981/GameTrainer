@@ -5,6 +5,7 @@ use trainer_core::{GameCatalog, GameRegistry, SessionSnapshot};
 
 mod m2;
 mod m3;
+mod m4;
 
 #[tauri::command]
 fn get_catalog() -> Result<GameCatalog, String> {
@@ -198,6 +199,7 @@ pub fn run() {
     let builder = tauri::Builder::default().setup(|app| {
         m2::install(app);
         m3::install(app);
+        m4::install(app);
         Ok(())
     });
     #[cfg(windows)]
@@ -228,7 +230,20 @@ pub fn run() {
             m3::m3_restore_live_patch,
             m3::m3_cancel_live_preview,
             m3::m3_disconnect_live,
-            m3::m3_live_history
+            m3::m3_live_history,
+            m4::m4_frlg_profiles,
+            m4::m4_frlg_status,
+            m4::m4_frlg_connect,
+            m4::m4_frlg_preview,
+            m4::m4_frlg_apply,
+            m4::m4_frlg_arm_wild,
+            m4::m4_frlg_restore,
+            m4::m4_frlg_cancel,
+            m4::m4_frlg_disconnect,
+            m4::m4_frlg_pause,
+            m4::m4_frlg_resume,
+            m4::m4_frlg_mailbox,
+            m4::m4_frlg_history
         ]);
     #[cfg(not(windows))]
     let builder = builder.invoke_handler(tauri::generate_handler![
@@ -249,7 +264,20 @@ pub fn run() {
         m3::m3_restore_live_patch,
         m3::m3_cancel_live_preview,
         m3::m3_disconnect_live,
-        m3::m3_live_history
+        m3::m3_live_history,
+            m4::m4_frlg_profiles,
+            m4::m4_frlg_status,
+            m4::m4_frlg_connect,
+            m4::m4_frlg_preview,
+            m4::m4_frlg_apply,
+            m4::m4_frlg_arm_wild,
+            m4::m4_frlg_restore,
+            m4::m4_frlg_cancel,
+            m4::m4_frlg_disconnect,
+            m4::m4_frlg_pause,
+            m4::m4_frlg_resume,
+            m4::m4_frlg_mailbox,
+            m4::m4_frlg_history
     ]);
     builder
         .run(tauri::generate_context!())

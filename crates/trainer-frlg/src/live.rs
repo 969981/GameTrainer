@@ -212,6 +212,18 @@ impl Editor {
             owner: None,
         })
     }
+    pub fn pause(&mut self) -> Result<(), LiveError> {
+        if !self.rsp.is_paused() {
+            self.rsp.interrupt()?;
+        }
+        Ok(())
+    }
+    pub fn resume(&mut self) -> Result<(), LiveError> {
+        if self.rsp.is_paused() {
+            self.rsp.resume()?;
+        }
+        Ok(())
+    }
     pub fn has_owner(&self) -> bool {
         self.owner.is_some()
     }
