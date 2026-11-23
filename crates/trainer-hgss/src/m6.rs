@@ -53,7 +53,9 @@ fn decoded_hex(s: &str) -> Result<Vec<u8>, String> {
         return Err("signature must be exactly 16 bytes".into());
     }
     s.as_bytes()
-        .as_chunks::<2>().0.iter()
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|b| {
             let pair = std::str::from_utf8(b).map_err(|_| "non-ascii signature")?;
             u8::from_str_radix(pair, 16).map_err(|_| "invalid signature hex".into())
