@@ -62,20 +62,20 @@ export function DiamondPearlM11LivePatchLab(){
     }catch(e){setCopyError(String(e));}
   }
   return <Card><CardHeader><div className="section-row">
-    <h3>M11 · 珍珠真实 Guest 16-bit 补丁实验台</h3>
+    <h3>M11 · 珍珠真实 Guest 指令／72B Cave 实验台</h3>
     <Badge>MANUAL / EXPERIMENTAL</Badge>
   </div></CardHeader><CardContent>
     <div className="m2-safety-banner"><AlertTriangle size={18}/><div>
       <strong>这会真实修改 DeSmuME 的 ARM9 Guest 指令，不是模拟功能</strong>
-      <p>目前只接入源码有完整 ROM 指纹的 APAE/APAI 穿墙和 APAE 英文捕捉。需要双 GDB 手动暂停、
+      <p>接入 APAE/APAI 穿墙和无执行入口的 72B Cave 试验写入／清理，以及 APAE 英文捕捉。需要双 GDB 手动暂停、
         进程与 ROM M10 SHA256 绑定、ROM 加载时 JIT 关闭、原指令与周围指令签名匹配、
         本地持久化所有权日志。即使如此也没有两个 CPU 原子安全点或 JIT 运行期缓存保证：
-        **使用前备份 SAV 和 DeSmuME 即时存档，可能崩溃或无法自动恢复**。</p>
+        **使用前备份 SAV 和 DeSmuME 即时存档，可能崩溃或无法自动恢复**。72B Cave 测试只暂存 NOP/BX LR 指令，不执行原 CT 的 0x5A/0xA5 回调。</p>
     </div></div>
     <div className="m2-actions">
       <label className="parameter-field"><span>原版珍珠 ROM（严格）</span>
         <select aria-label="M11 ROM" value={version} disabled={busy}
-          onChange={e=>{setVersion(e.target.value);invalidate();}}>
+          onChange={e=>{setVersion(e.target.value);if(e.target.value==="APAI:5"&&feature==="capture_english")setFeature("wall_collision");invalidate();}}>
           {verified.map(p=><option key={p.game_code} value={p.game_code+":"+p.revision}>
             {p.game} {p.language} {p.game_code} Rev{p.revision}
           </option>)}
@@ -85,6 +85,7 @@ export function DiamondPearlM11LivePatchLab(){
         <select aria-label="M11 Feature" value={feature} disabled={busy}
           onChange={e=>{setFeature(e.target.value as M11Feature);invalidate();}}>
           <option value="wall_collision">穿墙 · PlayerAvatar Collision</option>
+          <option value="cave_stage">72B Cave 写入／清理 · NOP/BX LR，无调用点</option>
           {version==="APAE:13"&&<option value="capture_english">100% 捕捉 · 英文 Battle Overlay</option>}
         </select>
       </label>
@@ -151,10 +152,10 @@ export function DiamondPearlM11LivePatchLab(){
         请保留日志并检查 RAM/即时存档。</p>
     </div>}
     <div className="m2-safety-banner"><LockKeyhole size={16}/><div>
-      <strong>传送、会心／命中／OHKO、Guest 72B Cave 仍未开放真实热清理</strong>
+      <strong>传送、会心／命中／OHKO 和 Guest Thumb 动态执行仍未开放</strong>
       <p>这些功能涉及完整 Thumb 跳板、JIT 指令缓存和 Overlay11 生命周期，
         仅靠双 GDB 暂停以及 PC 不在 Cave 不能证明没有待返回的调用栈；
-        尚需额外的模拟器内核安全点和恢复故障注入。</p>
+        因此本轮 Cave 功能仅在四处原版调用入口未被改写时暂存和按所有权清零，不会改动调用入口。真正动态 Thumb Hook 仍需模拟器内核安全点和恢复故障注入。</p>
     </div></div>
     {desktop&&!warningDismissed&&<div className="m2-actions">
       <Button size="sm" variant="outline" onClick={()=>setWarningDismissed(true)}>
