@@ -374,17 +374,17 @@ impl PatchManager {
             && matches!(target.read(active.spec.address, active.original.len()), Ok(bytes) if bytes.as_slice() == active.original.as_slice())
             && self.validate_identity(target, &active.identity).is_ok()
         {
-                self.event(
-                    &active.identity,
-                    active.spec.feature_id,
-                    None,
-                    Some(&active.owner_id),
-                    "rollback_confirmed",
-                    "ok",
-                    "Exact fixture bytes restored after failed apply",
-                    Some(reason),
-                )?;
-                return Err(original_error);
+            self.event(
+                &active.identity,
+                active.spec.feature_id,
+                None,
+                Some(&active.owner_id),
+                "rollback_confirmed",
+                "ok",
+                "Exact fixture bytes restored after failed apply",
+                Some(reason),
+            )?;
+            return Err(original_error);
         }
         active.status = PatchStatus::RestoreFailed;
         let _ = self.event(
