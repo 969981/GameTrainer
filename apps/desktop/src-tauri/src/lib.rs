@@ -121,3 +121,17 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("failed to run GameTrainer Studio");
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn readonly_catalog_command_returns_rust_registry() {
+        let catalog = get_catalog().expect("valid Rust Mock registry");
+        assert_eq!(catalog.games.len(), 5);
+        assert!(catalog.read_only);
+        assert_eq!(catalog.source, "mock");
+    }
+}

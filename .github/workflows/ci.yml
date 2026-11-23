@@ -81,3 +81,14 @@ jobs:
         run: pnpm build
       - name: Check Tauri Windows shell
         run: cargo check -p game-trainer-desktop
+      - name: Test desktop catalog command
+        run: cargo test -p game-trainer-desktop --lib
+      - name: Compile launchable Windows EXE
+        run: cargo build -p game-trainer-desktop
+      - name: Upload desktop smoke-test EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: gametrainer-m0-m1-win64-debug
+          path: target/debug/game-trainer-desktop.exe
+          if-no-files-found: error
+          retention-days: 7
