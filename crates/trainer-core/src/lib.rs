@@ -91,6 +91,7 @@ pub struct GameCatalog {
 #[serde(rename_all = "snake_case")]
 pub enum SessionState {
     Detached,
+    AttachedReadOnly,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
