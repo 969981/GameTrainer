@@ -44,12 +44,12 @@ export interface GameCatalog {
   games: GameDescriptor[];
 }
 export interface SessionSnapshot {
-  state: "detached";
+  state: "detached" | "attached_read_only";
   read_only: true;
-  session_id: null;
-  game_id: null;
-  runtime_id: null;
-  profile_id: null;
+  session_id: string | null;
+  game_id: string | null;
+  runtime_id: string | null;
+  profile_id: string | null;
   message: string;
 }
 export const PLATFORMS: { id: "all" | PlatformFamily; label: string; subtitle: string }[] = [

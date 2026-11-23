@@ -25,6 +25,7 @@ export default function App({ catalogOverride }: { catalogOverride?: GameCatalog
     queryKey: ["session", "m0"],
     queryFn: getSessionSnapshot,
     retry: false,
+    refetchInterval: 2000,
   });
   const catalog = catalogOverride ?? data;
   const game = catalog ? findGame(catalog, selectedGameId) : undefined;

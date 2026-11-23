@@ -164,25 +164,26 @@ export function AppHeader({ game }: { game?: GameDescriptor }) {
 export function SessionInspector({ session, game }: { session?: SessionSnapshot; game?: GameDescriptor }) {
   const inspectorOpen = useWorkspace((state) => state.inspectorOpen);
   const toggleInspector = useWorkspace((state) => state.toggleInspector);
+  const attached = session?.state === "attached_read_only";
   return (
     <aside className={"inspector " + (inspectorOpen ? "inspector-open" : "")} aria-label="会话检查器">
       <div className="inspector-title"><div><span className="eyebrow">SESSION INSPECTOR</span><h3>连接与诊断</h3></div>
         <button type="button" className="inspector-close" onClick={toggleInspector} aria-label="关闭会话检查器">×</button>
       </div>
-      <div className="inspector-status"><span className="status-dot" /><span>未连接</span><Badge>只读</Badge></div>
+      <div className="inspector-status"><span className="status-dot" /><span>{attached ? "已连接 · 只读" : "未连接"}</span><Badge>只读</Badge></div>
       <dl className="detail-list">
         <div><dt>目标游戏</dt><dd>{game?.name ?? "未选择"}</dd></div>
-        <div><dt>Session ID</dt><dd>—</dd></div>
-        <div><dt>Runtime</dt><dd>未启动</dd></div>
+        <div><dt>Session ID</dt><dd>{session?.session_id ?? "—"}</dd></div>
+        <div><dt>Runtime</dt><dd>{session?.runtime_id ?? "未启动"}</dd></div>
         <div><dt>ROM / EXE</dt><dd>未验证</dd></div>
-        <div><dt>Profile</dt><dd>无</dd></div>
+        <div><dt>Profile</dt><dd>{session?.profile_id ?? "无"}</dd></div>
         <div><dt>写入能力</dt><dd className="text-warning">禁用</dd></div>
       </dl>
       <div className="inspector-message"><ShieldAlert size={18} />
         <span>{session?.message ?? "未连接后端。当前仅为 Mock 目录。"}</span>
       </div>
-      <div className="sidebar-heading">M0 运行限制</div>
-      <div className="inspector-note">不扫描进程、不挂载模拟器、不读取游戏内存，也没有任何修改或 Hook 命令。所有显示均来自测试目录。</div>
+      <div className="sidebar-heading">只读连接约束</div>
+      <div className="inspector-note">M1 只支持 mGBA Emerald 只读探测和 Seed 观察；无写入、Patch 或 Hook 命令。所有未知 ROM 与内存映射均拒绝连接。</div>
     </aside>
   );
 }

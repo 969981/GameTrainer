@@ -229,3 +229,13 @@ code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; overflow
   .app-footer span:last-child { display: none; }
   .settings-row { flex-wrap: wrap; }
 }
+
+/* M1 read-only runtime & RNG readout */
+.process-row { display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:14px 0;border-bottom:1px solid var(--border); }
+.process-row > span { flex:1;min-width:150px;font-weight:600; }
+.process-row code { color:var(--muted);font-size:12px; }
+.connected-line { display:flex;flex-wrap:wrap;align-items:center;gap:12px;color:var(--success);margin-bottom:15px; }
+.connected-line button { margin-left:auto; }
+.rng-metric { border:1px solid var(--border);background:var(--surface-2);border-radius:12px;padding:18px;min-width:0; }
+.rng-metric span { color:var(--muted);display:block;font-size:12px; }
+.rng-metric strong { font-family:Consolas,"Cascadia Code",monospace;display:block;font-size:18px;margin-top:9px;overflow-wrap:anywhere; }

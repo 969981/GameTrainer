@@ -64,6 +64,14 @@ describe("M0 dynamic AppShell", () => {
     expect(screen.getByText(/6 Game Adapters/)).toBeInTheDocument();
   });
 
+  it("never produces live RNG values in browser Mock", () => {
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon Emerald" }));
+    fireEvent.click(screen.getByRole("button", { name: "RNG / Seed" }));
+    expect(screen.getByText(/尚未连接经过身份验证的 Emerald 只读会话/)).toBeInTheDocument();
+    expect(screen.queryByText(/0x1234ABCD/)).not.toBeInTheDocument();
+  });
+
   it("keeps feature mutation disabled even after selecting a Mock feature", () => {
     mount();
     fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon Emerald" }));
