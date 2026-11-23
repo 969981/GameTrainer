@@ -289,10 +289,25 @@ impl RsReadOnlySession {
         if self.invalidated {
             return Err(RsError::Invalidated);
         }
-        if reader.fingerprint().map_err(|_| RsError::StaleSession)? != self.fingerprint {
+        if !matches!(reader.fingerprint(), Ok(fingerprint) if fingerprint == self.fingerprint) {
             self.invalidated = true;
             return Err(RsError::StaleSession);
         }
+        // Any short/failed guest read also invalidates this target session.
+        let current_seed = match read_u32(reader, self.profile.seed_address) {
+            Ok(seed) => seed,
+            Err(error) => {
+                self.invalidated = true;
+                return Err(error);
+            }
+        };
+        let timer = match read_u16(reader, self.profile.timer_address) {
+            Ok(timer) => timer,
+            Err(error) => {
+                self.invalidated = true;
+                return Err(error);
+            }
+        };
         let result = RsSeedSnapshot {
             session_id: self.session_id.clone(),
             epoch: self.epoch,
@@ -300,12 +315,12 @@ impl RsReadOnlySession {
             game_code: self.profile.game_code.clone(),
             revision: self.profile.revision,
             language: self.profile.language.clone(),
-            current_seed: read_u32(reader, self.profile.seed_address)?,
-            timer: read_u16(reader, self.profile.timer_address)?,
+            current_seed,
+            timer,
             verification: "header_revision_boot_anchor_only".into(),
             read_only: true,
         };
-        if reader.fingerprint().map_err(|_| RsError::StaleSession)? != self.fingerprint {
+        if !matches!(reader.fingerprint(), Ok(fingerprint) if fingerprint == self.fingerprint) {
             self.invalidated = true;
             return Err(RsError::StaleSession);
         }
@@ -471,4 +486,14 @@ mod tests {
         reader.id.borrow_mut().game_code = "AXVE".to_owned();
         assert!(session.snapshot(&reader).is_err());
     }
+    #[test]
+    fn guest_read_error_permanently_invalidates_session() {
+        let profile = profile_for("AXVE", 2).unwrap();
+        let mut reader = Mock::new(&profile);
+        let mut session = RsReadOnlySession::attach(&reader).unwrap();
+        reader.bytes.remove(&profile.seed_address);
+        assert!(matches!(session.snapshot(&reader), Err(RsError::Read(_, _))));
+        assert!(matches!(session.snapshot(&reader), Err(RsError::Invalidated)));
+    }
+
 }
