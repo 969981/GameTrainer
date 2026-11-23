@@ -11,7 +11,7 @@ const GBA_ROM: u32 = 0x0800_0000;
 const GBA_EWRAM: u32 = 0x0200_0000;
 const GBA_IWRAM: u32 = 0x0300_0000;
 const ROM_HEADER_SIZE: usize = 0xC0;
-const SESSION_COUNTER: AtomicU64 = AtomicU64::new(1);
+static SESSION_COUNTER: AtomicU64 = AtomicU64::new(1);
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RuntimeFingerprint {
