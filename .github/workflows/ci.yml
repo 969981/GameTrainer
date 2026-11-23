@@ -1,0 +1,49 @@
+name: M0 Continuous Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-core:
+    name: Rust core registry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Rust formatting
+        run: cargo fmt --all -- --check
+      - name: Core clippy
+        run: cargo clippy -p trainer-core --all-targets -- -D warnings
+      - name: Core unit tests
+        run: cargo test -p trainer-core
+
+  frontend:
+    name: React UI & Mock registry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: ESLint
+        run: pnpm lint
+      - name: TypeScript
+        run: pnpm typecheck
+      - name: UI/registry tests
+        run: pnpm test
+      - name: Production web build
+        run: pnpm build
