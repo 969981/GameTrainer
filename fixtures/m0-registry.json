@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "source": "mock",
+  "read_only": true,
+  "runtimes": [
+    {
+      "runtime_id": "runtimes.mgba.external",
+      "name": "mGBA · 外部进程（规划）",
+      "status": "planned",
+      "description": "待 M1 验证的 GBA 进程只读访问"
+    },
+    {
+      "runtime_id": "runtimes.mgba.bridge",
+      "name": "mGBA · Bridge（规划）",
+      "status": "planned",
+      "description": "待验证的 Lua/IPC 桥接"
+    },
+    {
+      "runtime_id": "runtimes.nds.future",
+      "name": "NDS · Provider（规划）",
+      "status": "planned",
+      "description": "Gen4/Gen5 后续适配"
+    },
+    {
+      "runtime_id": "runtimes.3ds.future",
+      "name": "3DS · Provider（规划）",
+      "status": "planned",
+      "description": "Gen6 后续适配"
+    },
+    {
+      "runtime_id": "runtimes.win.external",
+      "name": "Windows · External（规划）",
+      "status": "planned",
+      "description": "未来单机原生进程只读研究"
+    },
+    {
+      "runtime_id": "runtimes.win.agent.future",
+      "name": "Windows · Agent（可选）",
+      "status": "planned",
+      "description": "后续可信 Native Agent / MinHook"
+    }
+  ],
+  "games": [
+    {
+      "game_id": "games.pokemon.emerald",
+      "name": "Pokémon Emerald",
+      "platform_family": "gen3",
+      "target_platform": "gba",
+      "summary": "从 Emerald v5.3.0 CE Lua 研究迁移；仅规划，未连接模拟器",
+      "icon": "sprout",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.mgba.external",
+        "runtimes.mgba.bridge"
+      ],
+      "features": [
+        {
+          "feature_id": "features.gen3.rng",
+          "name": "RNG / Seed",
+          "group": "研究",
+          "description": "Seed、Advances 和 RNG 快照（待 M1 实现）",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": [
+            {
+              "id": "seed",
+              "label": "目标 Seed",
+              "kind": "hex",
+              "placeholder": "00000000"
+            }
+          ]
+        },
+        {
+          "feature_id": "features.gen3.capture",
+          "name": "捕捉研究",
+          "group": "游戏修改",
+          "description": "捕捉相关 Patch 研究；未实现",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.gen3.warp",
+          "name": "地图与传送",
+          "group": "游戏修改",
+          "description": "位置与 Warp 数据研究；未实现",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.platinum",
+      "name": "Pokémon Platinum",
+      "platform_family": "gen4",
+      "target_platform": "nds",
+      "summary": "Gen4 · NDS 示例适配器，目前仅展示模块组织",
+      "icon": "gem",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.gen4.rng",
+          "name": "Gen4 RNG",
+          "group": "研究",
+          "description": "Gen4 RNG 逻辑设计",
+          "icon": "activity",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": [
+            {
+              "id": "seed",
+              "label": "Seed",
+              "kind": "hex",
+              "placeholder": "00000000"
+            }
+          ]
+        },
+        {
+          "feature_id": "features.gen4.party",
+          "name": "队伍观察",
+          "group": "数据浏览",
+          "description": "队伍结构研究（未实现）",
+          "icon": "users",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.black2",
+      "name": "Pokémon Black 2",
+      "platform_family": "gen5",
+      "target_platform": "nds",
+      "summary": "Gen5 · NDS 示例，版本与地址独立于 Gen4",
+      "icon": "layers",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.nds.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.gen5.rng",
+          "name": "Gen5 RNG",
+          "group": "研究",
+          "description": "Gen5 RNG 模块规划",
+          "icon": "activity",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.gen5.party",
+          "name": "宝可梦队伍",
+          "group": "数据浏览",
+          "description": "Gen5 特化存储与读取（未实现）",
+          "icon": "users",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.xy",
+      "name": "Pokémon X / Y",
+      "platform_family": "gen6",
+      "target_platform": "3ds",
+      "summary": "Gen6 · 3DS 示例；独立 Profile 与运行时接口",
+      "icon": "sparkles",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.3ds.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.gen6.party",
+          "name": "队伍与盒子",
+          "group": "数据浏览",
+          "description": "Gen6 数据格式研究（未实现）",
+          "icon": "boxes",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.gen6.save",
+          "name": "存档工具",
+          "group": "离线工具",
+          "description": "存档解析与导出规划",
+          "icon": "file-code",
+          "status": "planned",
+          "required_capabilities": [
+            "file.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.native.template",
+      "name": "Windows Native · Template",
+      "platform_family": "pc",
+      "target_platform": "windows",
+      "summary": "PC 原生单机游戏适配模板；不会扫描/连接进程",
+      "icon": "monitor",
+      "status": "template_only",
+      "runtime_candidates": [
+        "runtimes.win.external",
+        "runtimes.win.agent.future"
+      ],
+      "features": [
+        {
+          "feature_id": "features.native.process",
+          "name": "进程观察",
+          "group": "运行时",
+          "description": "进程和模块监控设计",
+          "icon": "cpu",
+          "status": "mock",
+          "required_capabilities": [
+            "process.discover"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.native.watch",
+          "name": "内存观察",
+          "group": "研究",
+          "description": "只读观察器，未实现",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "process.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.native.patch",
+          "name": "Patch 管理",
+          "group": "游戏修改",
+          "description": "受控预览和回滚流程规划，M0 不可执行",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    }
+  ]
+}
