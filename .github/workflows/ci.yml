@@ -13,6 +13,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+  desmume-m8-source-patch:
+    name: Pinned DeSmuME M8 source patch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: TASEmulators/desmume
+          ref: b549f71b83287f265b6d74b9e77ef5d98a617190
+          path: desmume-upstream
+          sparse-checkout: |
+            desmume/src/NDSSystem.cpp
+            desmume/src/frontend/windows/main.cpp
+          sparse-checkout-cone-mode: false
+      - name: Check the pinned upstream source patch
+        run: git -C desmume-upstream apply --check "$GITHUB_WORKSPACE/integrations/desmume/0001-m8-identity-bridge.patch"
+      - name: Apply to a scratch upstream checkout
+        run: |
+          git -C desmume-upstream apply "$GITHUB_WORKSPACE/integrations/desmume/0001-m8-identity-bridge.patch"
+          python - <<'PY'
+          from pathlib import Path
+          system = Path("desmume-upstream/desmume/src/NDSSystem.cpp").read_text()
+          entry = system.index("gthgss_m8::rom_commit(")
+          assert entry < system.index("return ret;", entry)
+          assert "gthgss_m8::hash_chunk(" in system
+          assert "gameInfo.romdataForReader != NULL" in system
+          win = Path("desmume-upstream/desmume/src/frontend/windows/main.cpp").read_text()
+          assert "gthgss_m8::start(" in win and "gthgss_m8::stop();" in win
+          PY
+
+  desmume-m8-msvc-smoke:
+    name: M8 Windows in-core bridge C++ smoke
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Compile and run synthetic in-core ROM SHA1 / unload test
+        shell: pwsh
+        run: |
+          cl /nologo /std:c++17 /EHsc /W4 integrations\desmume\bridge_smoke.cpp /Fe:m8-bridge-smoke.exe
+          if ($LASTEXITCODE -ne 0) { throw "M8 C++ bridge header failed MSVC compilation" }
+          .\m8-bridge-smoke.exe
+          if ($LASTEXITCODE -ne 0) { throw "M8 bridge synthetic ROM lifecycle failed" }
+
   rust-core:
     name: Rust core registry
     runs-on: ubuntu-latest
