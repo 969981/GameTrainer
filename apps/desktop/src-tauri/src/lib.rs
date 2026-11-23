@@ -11,6 +11,7 @@ mod m6;
 mod m7;
 mod m8;
 mod m9;
+mod m10;
 
 #[tauri::command]
 fn get_catalog() -> Result<GameCatalog, String> {
@@ -259,7 +260,9 @@ pub fn run() {
             m7::m7_hgss_preflight,
             m8::m8_hgss_core_rom_identity,
             m9::m9_dp_profiles,
-            m9::m9_dp_read_arm9
+            m9::m9_dp_read_arm9,
+            m10::m10_dp_core_identity,
+            m10::m10_dp_dual_cpu_overlay11_readonly
         ]);
     #[cfg(not(windows))]
     let builder = builder.invoke_handler(tauri::generate_handler![
@@ -303,7 +306,9 @@ pub fn run() {
         m7::m7_hgss_preflight,
         m8::m8_hgss_core_rom_identity,
         m9::m9_dp_profiles,
-        m9::m9_dp_read_arm9
+        m9::m9_dp_read_arm9,
+            m10::m10_dp_core_identity,
+            m10::m10_dp_dual_cpu_overlay11_readonly
     ]);
     builder
         .run(tauri::generate_context!())
