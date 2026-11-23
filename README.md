@@ -4,6 +4,14 @@
 
 **当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
 
+## M11 · 实验性原版珍珠 Guest 指令写入
+
+新增真实 DeSmuME ARM9 GDB M 写包和回读、来源签名与 ROM/PID/Epoch 校验、append-only fsync 所有权日志、按原指令恢复：APAE/APAI 穿墙，以及 APAE 英文 100% 捕捉。必须手动暂停双 GDB Stub，JIT 加载时关闭，用户明确风险确认。**无实机完整验证，不是原子双 CPU 停机证明。**
+
+传送、战斗 Hook 和 72B Thumb Cave 动态注入/擦除需要新的 Guest Safe Point/JIT/Overlay 证据，不能假装它们已安全开放。
+
+[M11 使用文档](docs/m11-dp-live-patch-lab.md) · [ADR-0013](docs/decisions/0013-m11-source-gated-experimental-live-write.md)。
+
 ## M10 · 钻石／珍珠 DeSmuME 内核 ROM SHA256 及 ARM9/ARM7/Overlay11 诊断
 
 M8 现扩展为 M10 双协议：保留 HGSS 原有 76B SHA1 桥，为钻石／珍珠增加独立 89B SHA256 ROM Reader 内核管道、Win32 进程/管道/双 GDB LISTEN 端口 PID 校验，以及前后 ROM Epoch 校验。Tauri/React 新增 M10 ROM 身份、独立 ARM9/ARM7 Stop/PC 与 Overlay11 静态只读观察。**APAE/APAI 有完整原版 ROM 对照；其余 8 个版本尚缺完整 ROM SHA256 参照。**
