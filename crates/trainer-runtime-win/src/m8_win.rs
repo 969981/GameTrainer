@@ -31,7 +31,7 @@ impl Drop for Owned {
 fn utf16(s: &str) -> Vec<u16> {
     OsStr::new(s).encode_wide().chain(Some(0)).collect()
 }
-fn created_filetime(pid: u32) -> Result<u64, String> {
+pub(crate) fn created_filetime(pid: u32) -> Result<u64, String> {
     let handle = Owned(unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid) });
     if handle.0.is_null() {
         return Err("OpenProcess failed for selected DeSmuME".into());
@@ -48,7 +48,7 @@ fn created_filetime(pid: u32) -> Result<u64, String> {
     }
     Ok(((created.dwHighDateTime as u64) << 32) | (created.dwLowDateTime as u64))
 }
-fn owned_port_pair(pid: u32, arm9: u16, arm7: u16) -> Result<bool, String> {
+pub(crate) fn owned_port_pair(pid: u32, arm9: u16, arm7: u16) -> Result<bool, String> {
     if arm9 < 1024 || arm7 < 1024 || arm9 == arm7 {
         return Ok(false);
     }
@@ -108,50 +108,46 @@ fn owned_port_pair(pid: u32, arm9: u16, arm7: u16) -> Result<bool, String> {
     }
     Ok(found9 && found7)
 }
-fn read_one_pipe(pid: u32) -> Result<([u8; WIRE_SIZE], u32), String> {
-    let name = utf16(&format!(r"\\.\pipe\GameTrainer.HGSS.M8.{pid}"));
+/// Read one fixed-layout local diagnostic packet and inspect the real Windows
+/// Named Pipe server PID. Shared by HGSS SHA1 M8 and DP SHA256 M10.
+pub(crate) fn read_named_pipe<const N: usize>(pipe_path: &str) -> Result<([u8; N], u32), String> {
+    if N == 0 || N > 512 {
+        return Err("unsupported diagnostic packet length".into());
+    }
+    let name = utf16(pipe_path);
     if unsafe { WaitNamedPipeW(name.as_ptr(), 1500) } == 0 {
-        return Err(
-            "M8 pipe absent: install source-patched GDB_STUB + GT_HGSS_M8_BRIDGE DeSmuME".into(),
-        );
+        return Err("DeSmuME in-core diagnostic pipe missing; rebuild with GDB_STUB + GT_HGSS_M8_BRIDGE".into());
     }
     let file = Owned(unsafe {
         CreateFileW(
-            name.as_ptr(),
-            FILE_GENERIC_READ,
-            0,
-            null_mut(),
-            OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL,
-            null_mut(),
+            name.as_ptr(), FILE_GENERIC_READ, 0, null_mut(),
+            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, null_mut(),
         )
     });
     if file.0 == INVALID_HANDLE_VALUE {
-        return Err("M8 pipe open failed: check Windows permissions and bridge process".into());
+        return Err("DeSmuME diagnostic pipe open failed".into());
     }
     let mut server = 0u32;
     if unsafe { GetNamedPipeServerProcessId(file.0, &mut server) } == 0 {
-        return Err("Windows could not identify M8 pipe server PID".into());
+        return Err("GetNamedPipeServerProcessId failed".into());
     }
-    let mut bytes = [0u8; WIRE_SIZE];
+    let mut bytes = [0u8; N];
     let mut filled = 0usize;
     while filled < bytes.len() {
         let mut count = 0u32;
         let success = unsafe {
-            ReadFile(
-                file.0,
-                bytes[filled..].as_mut_ptr().cast(),
-                (WIRE_SIZE - filled) as u32,
-                &mut count,
-                null_mut(),
-            )
+            ReadFile(file.0, bytes[filled..].as_mut_ptr().cast(),
+                (N - filled) as u32, &mut count, null_mut())
         };
         if success == 0 || count == 0 {
-            return Err("M8 pipe short response/disconnected".into());
+            return Err("DeSmuME diagnostic pipe disconnected or short read".into());
         }
         filled += count as usize;
     }
     Ok((bytes, server))
+}
+fn read_one_pipe(pid: u32) -> Result<([u8; WIRE_SIZE], u32), String> {
+    read_named_pipe::<WIRE_SIZE>(&format!(r"\\.\pipe\GameTrainer.HGSS.M8.{pid}"))
 }
 
 /// The selected PID is rechecked before/after pipe reads. Both GDB TCP ports
