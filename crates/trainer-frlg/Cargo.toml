@@ -8,3 +8,8 @@ description = "ROM identities and read-only source evidence for FireRed/LeafGree
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+trainer-rsp = { path = "../trainer-rsp" }
+trainer-storage = { path = "../trainer-storage" }
+sha1 = "0.10"
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }

@@ -1,6 +1,8 @@
 //! FireRed/LeafGreen v2.0.4 source-verified immutable retail profile table.
 //! Full ROM SHA-1 is checked in the separate trusted GDB live editor.
 //! CRC32 and headers are display evidence, NEVER mutation authorization.
+pub mod live;
+
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
