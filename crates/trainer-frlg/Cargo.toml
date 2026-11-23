@@ -1,0 +1,10 @@
+[package]
+name = "trainer-frlg"
+version.workspace = true
+edition.workspace = true
+description = "ROM identities and read-only source evidence for FireRed/LeafGreen v2.0.4"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
