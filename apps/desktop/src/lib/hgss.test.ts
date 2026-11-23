@@ -23,6 +23,6 @@ describe("HGSS M5 read-only profiles", () => {
     expect(games).toHaveLength(2);
     expect(games.every(g => g.platform_family === "gen4")).toBe(true);
     expect(games.every(g => g.features.some(f => f.feature_id === "features.hgss.rng"))).toBe(true);
-    expect(games.every(g => g.features.every(f => !f.required_capabilities.includes("patch.apply"))).toBe(true);
+    expect(games.every(g => g.features.every(f => !f.required_capabilities.includes("patch.apply")))).toBe(true);
   });
 });
