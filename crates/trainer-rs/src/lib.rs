@@ -14,7 +14,7 @@ use trainer_mgba::{GuestMemoryReader, RuntimeFingerprint};
 const ROM_BASE: u32 = 0x0800_0000;
 const HEADER_LEN: usize = 0xC0;
 pub const ROM_ANCHOR_ADDRESS: u32 = 0x0800_0128;
-const ID_COUNTER: AtomicU64 = AtomicU64::new(1);
+static ID_COUNTER: AtomicU64 = AtomicU64::new(1);
 const BOOT_ANCHOR_COMMON: [u8; 16] = [
     0xB8, 0x00, 0xC3, 0xE1, 0x22, 0x18, 0x02, 0xE0, 0x00, 0xC0, 0xA0, 0xE3, 0x80, 0x00, 0x11, 0xE2,
 ];

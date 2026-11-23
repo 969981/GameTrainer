@@ -21,11 +21,11 @@ for (const width of [1100, 1366, 1500]) {
     await expect(page.getByRole("button", { name: "打开 Pokémon Ruby" })).toBeVisible();
     await expect(page.getByRole("button", { name: "打开 Pokémon Sapphire" })).toBeVisible();
     await page.getByRole("button", { name: "打开 Pokémon Ruby" }).click();
-    await expect(page.getByRole("button", { name: "我方必会心（实验研究）" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "我方必会心（实验研究）" }).first()).toBeVisible();
     await page.screenshot({ path: 'test-results/screenshots/ruby-' + width + '.png', fullPage: true });
     await page.getByRole("button", { name: "游戏库" }).click();
     await page.getByRole("button", { name: "打开 Pokémon Sapphire" }).click();
-    await expect(page.getByRole("button", { name: "WISHMKR 存档 RNG" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "WISHMKR 存档 RNG" }).first()).toBeVisible();
     await page.screenshot({ path: 'test-results/screenshots/sapphire-' + width + '.png', fullPage: true });
     await page.getByRole("button", { name: "游戏库" }).click();
     await page.getByRole("button", { name: "Gen 6", exact: true }).last().click();
