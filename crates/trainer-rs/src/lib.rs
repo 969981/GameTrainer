@@ -492,8 +492,13 @@ mod tests {
         let mut reader = Mock::new(&profile);
         let mut session = RsReadOnlySession::attach(&reader).unwrap();
         reader.bytes.remove(&profile.seed_address);
-        assert!(matches!(session.snapshot(&reader), Err(RsError::Read(_, _))));
-        assert!(matches!(session.snapshot(&reader), Err(RsError::Invalidated)));
+        assert!(matches!(
+            session.snapshot(&reader),
+            Err(RsError::Read(_, _))
+        ));
+        assert!(matches!(
+            session.snapshot(&reader),
+            Err(RsError::Invalidated)
+        ));
     }
-
 }
