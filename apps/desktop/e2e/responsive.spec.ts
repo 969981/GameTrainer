@@ -6,7 +6,7 @@ for (const width of [1100, 1366, 1500]) {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "游戏库" })).toBeVisible();
     await expect(page.getByRole("button", { name: "打开 Pokémon Emerald" })).toBeVisible();
-    await expect(page.getByText("M0 MOCK")).toBeVisible();
+    await expect(page.locator(".demo-badge")).toBeVisible();
 
     const overflow = await page.evaluate(() => ({
       screen: window.innerWidth,

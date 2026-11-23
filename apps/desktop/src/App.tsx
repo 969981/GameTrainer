@@ -1,18 +1,21 @@
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, LoaderCircle } from "lucide-react";
 import { AppHeader, ContextSidebar, PrimaryRail, SessionInspector } from "@/components/Shell";
 import {
   GameLibraryPage, GameWorkspacePage, HistoryPage, HomePage, JournalPage,
   ModulesPage, RuntimePage, SettingsPage,
 } from "@/components/Pages";
-import { getCatalog, getSessionSnapshot } from "@/lib/backend";
+import { getCatalog, getSessionSnapshot, isTauriDesktop } from "@/lib/backend";
+import { disconnectEmerald } from "@/lib/mgba";
 import { findGame } from "@/lib/catalog";
 import { useWorkspace } from "@/store/workspace";
 import type { GameCatalog } from "@/types/catalog";
 
 export default function App({ catalogOverride }: { catalogOverride?: GameCatalog }) {
   const view = useWorkspace((state) => state.view);
+  const queryClient = useQueryClient();
+  const detaching = useRef(false);
   const selectedGameId = useWorkspace((state) => state.selectedGameId);
   const theme = useWorkspace((state) => state.theme);
   const { data, isPending, error } = useQuery({
@@ -33,6 +36,26 @@ export default function App({ catalogOverride }: { catalogOverride?: GameCatalog
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    // A runtime belongs to ONE game session. Selecting another game detaches
+    // the Emerald runtime rather than allowing an old process mapping to linger.
+    if (!isTauriDesktop()) return;
+    const session = sessionQuery.data;
+    const mismatched = selectedGameId &&
+      session?.state === "attached_read_only" &&
+      session.game_id !== selectedGameId;
+    if (!mismatched) {
+      if (session?.state !== "attached_read_only") detaching.current = false;
+      return;
+    }
+    if (detaching.current) return;
+    detaching.current = true;
+    void disconnectEmerald()
+      .then(() => queryClient.invalidateQueries({ queryKey: ["session"] }))
+      .finally(() => { detaching.current = false; });
+  }, [selectedGameId, sessionQuery.data, queryClient]);
+
 
   if (!catalog && isPending) {
     return <div className="startup-state" role="status"><LoaderCircle className="spin" size={24} /> 正在读取 Mock 游戏目录…</div>;

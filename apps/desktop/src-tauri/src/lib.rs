@@ -122,7 +122,6 @@ pub fn run() {
         .expect("failed to run GameTrainer Studio");
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
