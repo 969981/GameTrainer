@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 // GameTrainer HGSS M8 diagnostic bridge for a source-patched DeSmuME.
 // Copyright (C) 2026 GameTrainer contributors. Diagnostic / read-only.
 // C++11, Win32, MSVC. Build only when GDB_STUB + GT_HGSS_M8_BRIDGE defined.
