@@ -26,11 +26,11 @@ pub struct RspClient {
     paused: bool,
 }
 fn decode(bytes: &[u8]) -> Result<Vec<u8>, RspError> {
-    if bytes.len() % 2 != 0 {
+    if !bytes.len().is_multiple_of(2) {
         return Err(RspError::Protocol("odd hex"));
     }
     bytes
-        .chunks_exact(2)
+        .as_chunks::<2>().0.iter()
         .map(|two| {
             let s = std::str::from_utf8(two).map_err(|_| RspError::Protocol("nonascii hex"))?;
             u8::from_str_radix(s, 16).map_err(|_| RspError::Protocol("bad hex"))
