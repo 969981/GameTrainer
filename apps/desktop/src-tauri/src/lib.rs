@@ -4,6 +4,7 @@
 use trainer_core::{GameCatalog, GameRegistry, SessionSnapshot};
 
 mod m10;
+mod m11;
 mod m2;
 mod m3;
 mod m4;
@@ -262,7 +263,10 @@ pub fn run() {
             m9::m9_dp_profiles,
             m9::m9_dp_read_arm9,
             m10::m10_dp_core_identity,
-            m10::m10_dp_dual_cpu_overlay11_readonly
+            m10::m10_dp_dual_cpu_overlay11_readonly,
+            m11::m11_dp_preview,
+            m11::m11_dp_apply,
+            m11::m11_dp_restore
         ]);
     #[cfg(not(windows))]
     let builder = builder.invoke_handler(tauri::generate_handler![
@@ -308,7 +312,10 @@ pub fn run() {
         m9::m9_dp_profiles,
         m9::m9_dp_read_arm9,
         m10::m10_dp_core_identity,
-        m10::m10_dp_dual_cpu_overlay11_readonly
+        m10::m10_dp_dual_cpu_overlay11_readonly,
+            m11::m11_dp_preview,
+            m11::m11_dp_apply,
+            m11::m11_dp_restore
     ]);
     builder
         .run(tauri::generate_context!())
