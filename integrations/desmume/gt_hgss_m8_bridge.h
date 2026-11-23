@@ -20,6 +20,7 @@
 #include <cstring>
 #include <cwchar>
 #include <mutex>
+#include "gt_dp_m10_bridge.h"
 
 #ifdef _MSC_VER
 #pragma comment(lib, "advapi32.lib")
@@ -84,6 +85,7 @@ inline void release_digest(State& s) {
 
 // Called BEFORE opening the next game: stale ROM identity is immediately revoked.
 inline void rom_begin() {
+    gtdp_m10::rom_begin(); // revoke both digest protocols on every ROM load attempt
     State& s=state();std::lock_guard<std::mutex> g(s.mu);
     release_digest(s);
     ++s.wire.rom_epoch;
@@ -93,6 +95,7 @@ inline void rom_begin() {
     std::memset(s.wire.code,0,4);std::memset(s.wire.sha1,0,20);
 }
 inline void hash_begin() {
+    gtdp_m10::hash_begin();
     State& s=state();std::lock_guard<std::mutex> g(s.mu);
     release_digest(s);
     if(!CryptAcquireContextW(&s.provider,NULL,NULL,PROV_RSA_AES,CRYPT_VERIFYCONTEXT))
@@ -104,6 +107,7 @@ inline void hash_begin() {
 }
 // Feed EXACTLY the chunks consumed by NDS_LoadROM's own ROM CRC loop.
 inline void hash_chunk(const void* bytes,DWORD length) {
+    gtdp_m10::hash_chunk(bytes,length);
     State& s=state();std::lock_guard<std::mutex> g(s.mu);
     if(!s.hash_ok||!s.digest||!bytes||!length) {s.hash_ok=false;return;}
     if(!CryptHashData(s.digest,reinterpret_cast<const BYTE*>(bytes),length,0)) {
@@ -117,6 +121,7 @@ inline void hash_chunk(const void* bytes,DWORD length) {
 // no valid ROM record is published (including compressed or trimmed ROMs).
 inline void rom_commit(const char code[4],uint8_t revision,uint64_t size,
                        uint32_t crc32,bool jit_enabled,bool resident_rom_reader) {
+    gtdp_m10::rom_commit(code,revision,size,crc32,jit_enabled,resident_rom_reader);
     State& s=state();std::lock_guard<std::mutex> g(s.mu);
     BYTE hash[20]={0};DWORD count=20;
     const bool hgss=code && code[0]=='I'&&code[1]=='P' &&
@@ -175,9 +180,11 @@ inline bool start(uint16_t arm9_port,uint16_t arm7_port) {
     s.running.store(true);
     s.thread=CreateThread(NULL,0,pipe_worker,NULL,0,NULL);
     if(!s.thread){s.running.store(false);return false;}
-    return true;
+    // HGSS M8 keeps its original 76-byte pipe, DP M10 has a separate 89-byte pipe.
+    return gtdp_m10::start(arm9_port,arm7_port);
 }
 inline void stop() {
+    gtdp_m10::stop();
     State& s=state();
     if(!s.running.exchange(false))return;
     // Wake the server if blocked in ConnectNamedPipe.
