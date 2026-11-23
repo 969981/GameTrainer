@@ -261,7 +261,11 @@ mod tests {
         ] {
             assert_eq!(
                 registry.list_by_platform(&platform).len(),
-                if platform == PlatformFamily::Gen3 { 3 } else { 1 }
+                if platform == PlatformFamily::Gen3 {
+                    3
+                } else {
+                    1
+                }
             );
         }
         assert!(registry.snapshot().read_only);
@@ -289,9 +293,20 @@ mod tests {
         assert_eq!(ruby.features.len(), sapphire.features.len());
         assert_ne!(ruby.game_id, sapphire.game_id);
         for game in [ruby, sapphire] {
-            assert!(game.features.iter().any(|feature| feature.feature_id == "features.rs.battlecrit"));
-            assert!(game.features.iter().any(|feature| feature.feature_id == "features.gen3.rng"));
-            assert!(!game.features.iter().any(|feature| feature.status != ImplementationStatus::Planned && feature.required_capabilities.iter().any(|c| c == "patch.apply")));
+            assert!(game
+                .features
+                .iter()
+                .any(|feature| feature.feature_id == "features.rs.battlecrit"));
+            assert!(game
+                .features
+                .iter()
+                .any(|feature| feature.feature_id == "features.gen3.rng"));
+            assert!(!game.features.iter().any(|feature| feature.status
+                != ImplementationStatus::Planned
+                && feature
+                    .required_capabilities
+                    .iter()
+                    .any(|c| c == "patch.apply")));
         }
     }
 

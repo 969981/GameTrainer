@@ -8,7 +8,7 @@ const catalog = fixture as unknown as GameCatalog;
 describe("M0 shared catalog selectors", () => {
   it("exposes all five platform families", () => {
     expect(catalog.games.map((game) => game.platform_family).sort())
-      .toEqual(["gen3", "gen4", "gen5", "gen6", "pc"]);
+      .toEqual(["gen3", "gen3", "gen3", "gen4", "gen5", "gen6", "pc"]);
     expect(catalog.read_only).toBe(true);
     expect(catalog.source).toBe("mock");
   });
@@ -27,7 +27,7 @@ describe("M0 shared catalog selectors", () => {
     expect(uniqueModules(catalog).length).toBeGreaterThanOrEqual(10);
   });
 
-  it("handles a sixth game without changing navigation selectors", () => {
+  it("handles an eighth game without changing navigation selectors", () => {
     const sixth: GameDescriptor = {
       ...catalog.games[0],
       game_id: "games.pokemon.firered",
@@ -39,7 +39,7 @@ describe("M0 shared catalog selectors", () => {
       }],
     };
     const extended = { ...catalog, games: [...catalog.games, sixth] };
-    expect(filterGames(extended, "gen3", "")).toHaveLength(2);
+    expect(filterGames(extended, "gen3", "")).toHaveLength(4);
     expect(findGame(extended, sixth.game_id)?.features[0].name).toBe("FireRed Seed");
     expect(uniqueModules(extended).some((module) => module.id === "features.firered.seed")).toBe(true);
   });
