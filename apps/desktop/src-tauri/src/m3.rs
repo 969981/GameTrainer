@@ -34,7 +34,10 @@ pub async fn m3_live_connect(
     state: State<'_, LiveState>,
 ) -> Result<LiveIdentity, String> {
     let session = Arc::clone(&state.inner);
-    let file = state.audit_file.clone().ok_or("本地审计目录不可用，拒绝连接")?;
+    let file = state
+        .audit_file
+        .clone()
+        .ok_or("本地审计目录不可用，拒绝连接")?;
     tauri::async_runtime::spawn_blocking(move || {
         let mut guard = session.lock().map_err(|_| "M3 状态锁损坏".to_string())?;
         if guard.as_ref().is_some_and(LiveEditor::has_active) {

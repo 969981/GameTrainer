@@ -234,4 +234,68 @@ mod tests {
             Err(RspError::Bounds)
         ));
     }
+
+    fn fake_command(stream: &mut TcpStream) -> String {
+        let mut b = [0u8; 1];
+        loop {
+            stream.read_exact(&mut b).unwrap();
+            if b[0] == b'$' { break; }
+        }
+        let mut payload = Vec::new();
+        loop {
+            stream.read_exact(&mut b).unwrap();
+            if b[0] == b'#' { break; }
+            payload.push(b[0]);
+        }
+        let mut checksum = [0u8; 2];
+        stream.read_exact(&mut checksum).unwrap();
+        let expected = u8::from_str_radix(std::str::from_utf8(&checksum).unwrap(), 16).unwrap();
+        assert_eq!(expected, payload.iter().fold(0u8, |a, x| a.wrapping_add(*x)));
+        String::from_utf8(payload).unwrap()
+    }
+    fn fake_reply(stream: &mut TcpStream, bytes: &[u8]) {
+        let checksum = bytes.iter().fold(0u8, |a, x| a.wrapping_add(*x));
+        stream.write_all(b"+").unwrap();
+        let mut packet = Vec::new();
+        packet.push(b'$');
+        packet.extend_from_slice(bytes);
+        packet.extend_from_slice(format!("#{checksum:02x}").as_bytes());
+        stream.write_all(&packet).unwrap();
+        let mut ack = [0u8; 1];
+        stream.read_exact(&mut ack).unwrap();
+        assert_eq!(ack[0], b'+');
+    }
+    #[test]
+    fn fake_mgba_gdb_stop_guest_read_write_verify_resume() {
+        use std::{net::TcpListener, thread};
+        let server = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = server.local_addr().unwrap().port();
+        let worker = thread::spawn(move || {
+            let (mut stream, _) = server.accept().unwrap();
+            stream.set_read_timeout(Some(TIMEOUT)).unwrap();
+            assert_eq!(fake_command(&mut stream), "?");
+            fake_reply(&mut stream, b"S05");
+            assert_eq!(fake_command(&mut stream), "g");
+            let mut regs = vec![b'0'; 128];
+            regs[120..128].copy_from_slice(b"00000008");
+            fake_reply(&mut stream, &regs);
+            assert_eq!(fake_command(&mut stream), "m3004818,4");
+            fake_reply(&mut stream, b"78563412");
+            assert_eq!(fake_command(&mut stream), "M3004818,4:efbeadde");
+            fake_reply(&mut stream, b"OK");
+            assert_eq!(fake_command(&mut stream), "m3004818,4");
+            fake_reply(&mut stream, b"efbeadde");
+            assert_eq!(fake_command(&mut stream), "c");
+            stream.write_all(b"+").unwrap();
+        });
+        let mut client = RspClient::connect_local(port).unwrap();
+        assert!(client.is_paused());
+        assert_eq!(client.read(0x03004818, 4).unwrap(), [0x78,0x56,0x34,0x12]);
+        client.write(0x03004818, &[0xef,0xbe,0xad,0xde]).unwrap();
+        client.resume().unwrap();
+        assert!(!client.is_paused());
+        assert!(matches!(client.read(0x03004818,4), Err(RspError::Running)));
+        worker.join().unwrap();
+    }
+
 }
