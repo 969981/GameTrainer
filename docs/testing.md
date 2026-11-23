@@ -31,3 +31,9 @@
 - [ ] Windows 原生 WebView2 GUI 启动及 React→Tauri IPC 实测。
 - [ ] mGBA + Emerald Rev0 的真实 ROM/Seed 地址、读数、Reload/候选歧义验证。
 - 证据：[CI #45107272587](https://github.com/969981/GameTrainer/actions/runs/45107272587)。
+
+## M2 Fixture 回归
+- Rust PatchManager：token 过期/重放、epoch/build 变化、字节冲突、重叠拒绝、读回、恢复所有权、失败状态与 live 禁止。
+- SQLite AuditStore：先持久化 intent、模拟/真实事件隔离、重启保留不确定事件且不自动恢复。
+- React 浏览器：补丁实验室不能伪造后端成功、无法在浏览器内实际应用。
+- Windows Tauri/真实 mGBA + ROM 分别验收；详见 [M2 说明](m2-safe-patch.md)。

@@ -6,6 +6,8 @@
 - [M0 工程与 CI 验证](m0-implementation.md) · [[m0-implementation]]
 - [M1 Emerald/mGBA 只读实现、实机验收清单](m1-readonly.md) · [[m1-readonly]]
 
+- [M2 安全补丁与 SQLite 实施](m2-safe-patch.md) · [[m2-safe-patch]]
+
 ## 核心设计
 - [总体架构](architecture.md) · [[architecture]]
 - [扩展规划：Gen3–Gen6 + PC](extensions.md) · [[extensions]]
@@ -19,6 +21,7 @@
 - [测试矩阵](testing.md) · [[testing]]
 - [许可证与安全边界](license-and-safety.md) · [[license-and-safety]]
 - [ADR-0001 模块化架构](decisions/0001-modular-architecture.md)
+- [ADR-0002 Fixture-only 事务](decisions/0002-fixture-only-mutations.md)
 - [2026-11-23 项目开发记录](2026-11-23-planning.md)
 
 所有 Markdown 应说明是设计、Mock、已实现或已测试。切勿将本仓库的计划性链接误认为对用户的 Personal-Life-OS 已完成更新。

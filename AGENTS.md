@@ -28,6 +28,12 @@
 5. MinHook 仅用于受控的 Windows x86/x64 原生场景；GBA ARM/Thumb ROM Patch 不等于 MinHook。
 6. 禁止实现绕过反作弊、隐藏注入、未授权多玩家作弊、隐蔽提权或规避平台防护的行为。
 
+## M2 Fixture-only 安全约束
+- PatchManager 现在只允许隔离的 Rust FixtureTarget；不得因 UI 按钮可点击就开启 Windows 真实进程写内存能力。
+- token/session/epoch/owner/写前 SQLite Intent 由 Rust 校验；React 只能发送白名单业务参数，不得指定任意地址或字节。
+- 历史事件严格以 fixture/live 分区；异常退出不得盲目重放之前的 patch。
+- 解除 live 写入限制前必须更新 ADR、提交完整 ROM/Profile 和实机回归证据。
+
 ## 游戏和插件规范
 - 每个新游戏：唯一 game_id、platform_family、runtime candidates、独立 build profiles、fixture、功能清单、不兼容状态测试。
 - 每个新功能：唯一 feature_id、SemVer、required capabilities、输入/输出 schema、read/preview/apply/restore 的可测试行为、UI loading/empty/error states。

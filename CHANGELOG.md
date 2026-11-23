@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-23 — M2 safe mutation prototype (Fixture only)
+- Add Rust PatchManager: short one-time preview, identity validation, conflict checks, read-back, owner-scoped restore.
+- Add SQLite AuditStore: WAL+FULL sync, write intent before mutation and separated fixture/live history.
+- Add Tauri fixture commands and React preview/confirm/apply/restore screen. Actual mGBA memory remains read-only.
+- Document [M2 design](docs/m2-safe-patch.md) and [ADR-0002](docs/decisions/0002-fixture-only-mutations.md).
+
 ## 2026-11-23 — M0 automated validation and M1 read-only prototype
 
 - Windows Tauri icon-resource issue fixed; `cargo check`, desktop Rust `get_catalog` test, debug EXE `cargo build` succeeded.

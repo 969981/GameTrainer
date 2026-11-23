@@ -46,6 +46,13 @@ pnpm --filter @gametrainer/desktop test:e2e  # 首先安装 Playwright Chromium
 - 已配置六种 Rev0 ROM GameCode（BPEJ/BPEE/BPED/BPEF/BPEI/BPES）。现在只有**部分源代码锚点验证**，没有全 ROM CRC 或全部锚点，所以绝不开放写入。
 - 暂未经过真实 mGBA 版本、合法原版 ROM、实际存储映射/ROM Reload 测试；候选不确定时应失败关闭，而不是猜地址。
 
+## M2 · 补丁事务和 SQLite（Fixture-only）
+
+- [完整技术说明](docs/m2-safe-patch.md) · [ADR-0002](docs/decisions/0002-fixture-only-mutations.md)
+- [Rust PatchManager](crates/trainer-patch/src/lib.rs) + [SQLite AuditStore](crates/trainer-storage/src/lib.rs) + [Tauri M2 IPC](apps/desktop/src-tauri/src/m2.rs)。
+- 桌面「补丁实验室」可在隔离的 Rust 测试内存中完成 Seed 预览 → 明确确认 → 应用 → 安全恢复；「操作历史」区分真实与模拟实验。
+- **真实 mGBA 和其他游戏进程仍只读**；M2 尚未实机验证，不能把 Fixture 的成功等同于真实游戏修改。
+
 ## 文档入口
 
 | 文档 | 用途 |

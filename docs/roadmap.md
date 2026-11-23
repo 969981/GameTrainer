@@ -1,12 +1,12 @@
 # 开发路线 M0–M6
 
-状态：**M0 自动化全部通过**（2026-11-23，Rust 16 测试、React 10 测试、Chromium 1100/1366/1500px、Windows Tauri Shell/命令测试/EXE 构建）；**Windows WebView2 实际启动尚未人工验收**。M1 只读连接代码/CI 已完成第一迭代，真实 mGBA/ROM 待验。M2–M6 仍为规划。
+状态：**M0 自动化全部通过**（2026-11-23，Rust 16 测试、React 10 测试、Chromium 1100/1366/1500px、Windows Tauri Shell/命令测试/EXE 构建）；**Windows WebView2 实际启动尚未人工验收**。M1 只读连接代码/CI 已完成第一迭代，真实 mGBA/ROM 待验。M2 Fixture-only Rust/SQLite/UI 已开始实现和 CI；真实外部进程写入保持禁止；M3–M6 仍为规划。
 
 | Milestone | 交付 | 完成标准 |
 | --- | --- | --- |
 | M0 平台与 UI 基座 | **核心实现已提交：** Cargo/pnpm/Tauri 2/React；typed Registry；Gen3/4/5/6/PC Mock | **CI 已验收：** 六款扩展、跨游戏隔离、Rust 16 + React 10、Windows EXE、浏览器 1100/1366/1500px 截图；**待验：** Windows WebView2 GUI 实机 |
 | M1 Emerald 只读 | **第一迭代代码已实现：** Win32/mGBA Provider、六语言 Rev0 / 部分 ROM Anchor、Seed Snapshot、会话失效检查、Tauri IPC/React UI | **CI 已验证编译和合成单测；待验：** Windows+mGBA 真实读数、完整 ROM CRC、GUI 连通性与重启失效 |
-| M2 安全修改 | Seed 受控写入/锁定、Preview/Apply/Restore、冲突检查、SQLite ActionReceipt | stale epoch/版本变更拒绝写；恢复失败可审计；强退后不盲目恢复 |
+| M2 安全修改 | **Fixture-only 第一阶段已提交**：30s 令牌、预览/应用/恢复、原字节与 owner 校验、SQLite append-only Ledger、UI 实验室 | CI 合成测试与 Windows 编译待持续验证；真实 mGBA 写入关闭；崩溃后不自动恢复 |
 | M3 Gen3 功能迁移 | 捕捉/传送/钓鱼/培育屋等按独立 FeaturePack 迁移 | 每个功能有 Profile 证据、语言差异测试、真实恢复测试 |
 | M4 游戏拓展 | 同 Runtime 的第二个 Gen3 游戏，再扩展 NDS/3DS 与 PC Native | 新 GameAdapter 不修改 core 或 AppShell；不同 Runtime 有一致的 UI 状态 |
 | M5 插件、预设与日记 | 模块列表、版本/依赖管理、导出审计、Obsidian 明确确认式导出 | 不覆盖原笔记、不丢审计、模块升级/卸载行为可测 |

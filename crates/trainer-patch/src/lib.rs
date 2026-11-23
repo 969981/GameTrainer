@@ -368,11 +368,12 @@ impl PatchManager {
             )?;
             return Err(original_error);
         }
-        if matches!(&current, Ok(bytes) if bytes == &active.spec.desired) && still_same_identity {
-            if target.write(active.spec.address, &active.original).is_ok()
-                && matches!(target.read(active.spec.address, active.original.len()), Ok(bytes) if bytes.as_slice() == active.original.as_slice())
-                && self.validate_identity(target, &active.identity).is_ok()
-            {
+        if matches!(&current, Ok(bytes) if bytes == &active.spec.desired)
+            && still_same_identity
+            && target.write(active.spec.address, &active.original).is_ok()
+            && matches!(target.read(active.spec.address, active.original.len()), Ok(bytes) if bytes.as_slice() == active.original.as_slice())
+            && self.validate_identity(target, &active.identity).is_ok()
+        {
                 self.event(
                     &active.identity,
                     active.spec.feature_id,
@@ -384,7 +385,6 @@ impl PatchManager {
                     Some(reason),
                 )?;
                 return Err(original_error);
-            }
         }
         active.status = PatchStatus::RestoreFailed;
         let _ = self.event(
@@ -507,6 +507,8 @@ impl PatchManager {
         }
         Ok(())
     }
+    // Audit events map to fixed append-only fields; call sites stay explicit.
+    #[allow(clippy::too_many_arguments)]
     fn event(
         &mut self,
         identity: &TargetIdentity,
