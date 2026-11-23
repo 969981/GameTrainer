@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <atomic>
 #include <cstring>
+#include <cwchar>
 #include <mutex>
 
 #ifdef _MSC_VER
@@ -69,7 +70,8 @@ struct State {
         FILETIME created,exited,kernel,user;
         if(GetProcessTimes(GetCurrentProcess(),&created,&exited,&kernel,&user))
             wire.created_filetime=filetime64(created);
-        wsprintfW(pipe_name,L"\\\\.\\pipe\\GameTrainer.HGSS.M8.%lu",wire.pid);
+        std::swprintf(pipe_name,sizeof(pipe_name)/sizeof(pipe_name[0]),
+            L"\\\\.\\pipe\\GameTrainer.HGSS.M8.%lu",wire.pid);
     }
 };
 inline State& state() {static State s; return s;}
