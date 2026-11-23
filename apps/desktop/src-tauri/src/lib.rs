@@ -302,8 +302,8 @@ pub fn run() {
         m6::m6_hgss_probe_arm9_stop,
         m7::m7_hgss_preflight,
         m8::m8_hgss_core_rom_identity,
-            m9::m9_dp_profiles,
-            m9::m9_dp_read_arm9
+        m9::m9_dp_profiles,
+        m9::m9_dp_read_arm9
     ]);
     builder
         .run(tauri::generate_context!())

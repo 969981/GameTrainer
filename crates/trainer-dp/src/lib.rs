@@ -7,10 +7,12 @@ use std::collections::HashSet;
 
 pub const SOURCE_VERSION: &str = "0.8.14";
 const PROFILES: &str = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"), "/../../fixtures/dp-v0814-profiles.json"
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../fixtures/dp-v0814-profiles.json"
 ));
 const BATTLE: &str = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"), "/../../fixtures/dp-v0814-overlay11-evidence.json"
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../fixtures/dp-v0814-overlay11-evidence.json"
 ));
 #[derive(Clone, Debug, Deserialize)]
 struct Manifest {
@@ -69,15 +71,20 @@ pub struct BattleAudit {
 }
 pub fn profiles() -> Vec<DpProfile> {
     serde_json::from_str::<Manifest>(PROFILES)
-        .expect("checked-in DP source manifest").profiles
+        .expect("checked-in DP source manifest")
+        .profiles
 }
 pub fn profile_for(code: &str, revision: u8) -> Option<DpProfile> {
-    profiles().into_iter().find(|p| p.game_code == code && p.revision == revision)
+    profiles()
+        .into_iter()
+        .find(|p| p.game_code == code && p.revision == revision)
 }
 pub fn battle_for(code: &str, revision: u8) -> Option<BattleAudit> {
     serde_json::from_str::<BattleManifest>(BATTLE)
-        .expect("checked-in Overlay11 audit").variants
-        .into_iter().find(|b| b.game_code == code && b.revision == revision)
+        .expect("checked-in Overlay11 audit")
+        .variants
+        .into_iter()
+        .find(|b| b.game_code == code && b.revision == revision)
 }
 pub fn valid_catalog() -> bool {
     let m: Manifest = serde_json::from_str(PROFILES).expect("valid source manifest");
@@ -94,14 +101,17 @@ pub fn valid_catalog() -> bool {
                 && matches!(p.game_code.as_bytes()[1], b'D' | b'P')
                 && p.game_code.as_bytes()[2] == b'A'
                 && matches!(p.game_code.as_bytes()[3], b'E' | b'F' | b'D' | b'I' | b'S')
-                && p.arm9_sha256.len() == 64 && p.overlay06_sha256.len() == 64
+                && p.arm9_sha256.len() == 64
+                && p.overlay06_sha256.len() == 64
                 && p.arm9_sha256.bytes().all(|b| b.is_ascii_hexdigit())
                 && p.overlay06_sha256.bytes().all(|b| b.is_ascii_hexdigit())
-                && p.rom_sha256.as_ref().is_none_or(|x| x.len() == 64
-                    && x.bytes().all(|b| b.is_ascii_hexdigit()))
+                && p.rom_sha256
+                    .as_ref()
+                    .is_none_or(|x| x.len() == 64 && x.bytes().all(|b| b.is_ascii_hexdigit()))
                 && p.mt_seed_addr == p.current_seed_addr + 4
                 && p.arm9_size >= 1_000_000
-                && !p.write_allowed && !p.guest_exec_runtime_verified
+                && !p.write_allowed
+                && !p.guest_exec_runtime_verified
         })
         && profiles().iter().filter(|p| p.battle_static_audit).count() == 2
         && profiles().iter().filter(|p| p.rom_sha256.is_some()).count() == 2
@@ -177,10 +187,14 @@ fn hex(bytes: &[u8]) -> String {
 /// 4 MiB window alias of original CE source 0x02FFFE0C. No writes or resume.
 /// Code/Rev/header6C and ARM9 opcodes do NOT prove a full loaded ROM digest.
 pub fn inspect<R: GuestReader>(
-    r: &mut R, profile: &DpProfile, arm9_pc: u32
+    r: &mut R,
+    profile: &DpProfile,
+    arm9_pc: u32,
 ) -> Result<DpReadOnlySnapshot, String> {
-    if profile.write_allowed || profile.guest_exec_runtime_verified
-        || !(0x0200_0000..0x0300_0000).contains(&arm9_pc) {
+    if profile.write_allowed
+        || profile.guest_exec_runtime_verified
+        || !(0x0200_0000..0x0300_0000).contains(&arm9_pc)
+    {
         return Err("DP profile or CPU PC not eligible for read-only audit".into());
     }
     let code_bytes = read(r, 0x023F_FE0C, 4)?;
@@ -202,7 +216,9 @@ pub fn inspect<R: GuestReader>(
     ];
     let expected = [0xB538, 0xB084, 0xB530, 0xB085, 0x2801, 0xD101];
     if anchors != expected {
-        return Err("DP ARM9 source code anchor mismatch; stop stale/wrong/modified session".into());
+        return Err(
+            "DP ARM9 source code anchor mismatch; stop stale/wrong/modified session".into(),
+        );
     }
     let seed = word(r, profile.current_seed_addr)?;
     let mt = word(r, profile.mt_seed_addr)?;
@@ -237,13 +253,23 @@ pub fn inspect<R: GuestReader>(
         source_version: SOURCE_VERSION.into(),
         game_id: profile.game_id.clone(),
         game_code: profile.game_code.clone(),
-        revision, language: profile.language.clone(), arm9_pc,
-        gdb_stop_observed: true, header6c,
-        arm9_anchors_match: true, current_seed: seed, mt_state0: mt,
-        mt_index: index, delay, trainer_ptr, pid_ptr, battle,
+        revision,
+        language: profile.language.clone(),
+        arm9_pc,
+        gdb_stop_observed: true,
+        header6c,
+        arm9_anchors_match: true,
+        current_seed: seed,
+        mt_state0: mt,
+        mt_index: index,
+        delay,
+        trainer_ptr,
+        pid_ptr,
+        battle,
         complete_running_rom_sha256_verified: false,
         write_authorized: false,
-        evidence_scope: "dp_arm9_gdb_guest_code_rev_6c_opcode_rng_read_only_not_full_rom_or_safe_patch".into(),
+        evidence_scope:
+            "dp_arm9_gdb_guest_code_rev_6c_opcode_rng_read_only_not_full_rom_or_safe_patch".into(),
     })
 }
 #[cfg(test)]
@@ -252,71 +278,95 @@ mod tests {
     use std::collections::HashMap;
     struct Fake(HashMap<u32, u8>);
     impl Fake {
-        fn new() -> Self { Self(HashMap::new()) }
-        fn bytes(&mut self, a:u32, b:&[u8]) {
-            for(i,c) in b.iter().enumerate() { self.0.insert(a+i as u32,*c); }
+        fn new() -> Self {
+            Self(HashMap::new())
         }
-        fn u16(&mut self,a:u32,v:u16){self.bytes(a,&v.to_le_bytes());}
-        fn u32(&mut self,a:u32,v:u32){self.bytes(a,&v.to_le_bytes());}
+        fn bytes(&mut self, a: u32, b: &[u8]) {
+            for (i, c) in b.iter().enumerate() {
+                self.0.insert(a + i as u32, *c);
+            }
+        }
+        fn u16(&mut self, a: u32, v: u16) {
+            self.bytes(a, &v.to_le_bytes());
+        }
+        fn u32(&mut self, a: u32, v: u32) {
+            self.bytes(a, &v.to_le_bytes());
+        }
     }
     impl GuestReader for Fake {
-        fn read_guest(&mut self, address:u32,len:usize)->Result<Vec<u8>,String>{
-            (0..len).map(|i|self.0.get(&(address+i as u32)).copied()
-                .ok_or_else(|| format!("unmapped {address:08X}+{i}"))).collect()
+        fn read_guest(&mut self, address: u32, len: usize) -> Result<Vec<u8>, String> {
+            (0..len)
+                .map(|i| {
+                    self.0
+                        .get(&(address + i as u32))
+                        .copied()
+                        .ok_or_else(|| format!("unmapped {address:08X}+{i}"))
+                })
+                .collect()
         }
     }
-    fn fixture(code:&str,revision:u8)->(DpProfile,Fake){
-        let p=profile_for(code,revision).unwrap();
-        let mut f=Fake::new();
-        f.bytes(0x023F_FE0C,p.game_code.as_bytes());
-        f.bytes(0x023F_FE1E,&[p.revision]);
-        f.bytes(0x023F_FE6C,&[p.header6c]);
-        for (a,v) in [
-            (p.field_entry_addr,0xB538),(p.field_entry_addr+2,0xB084),
-            (p.warp_addr,0xB530),(p.warp_addr+2,0xB085),
-            (p.collision_addr-8,0x2801),(p.collision_addr-6,0xD101)
-        ] {f.u16(a,v);}
-        for (a,v) in [
-            (p.current_seed_addr,0xDEAD_BEEF),(p.mt_seed_addr,0x1234_5678),
-            (p.mt_index_addr,624),(p.delay_addr,200),
-            (p.trainer_ptr_addr,0x0212_3000),(p.pid_ptr_addr,0x0212_4000)
-        ] {f.u32(a,v);}
-        if let Some(b)=battle_for(code,revision) {
-            f.bytes(b.crit_callsite,&[0x00,0xF0,0x00,0xF8]);
-            f.bytes(b.thumb_cave_addr,&[0u8;72]);
+    fn fixture(code: &str, revision: u8) -> (DpProfile, Fake) {
+        let p = profile_for(code, revision).unwrap();
+        let mut f = Fake::new();
+        f.bytes(0x023F_FE0C, p.game_code.as_bytes());
+        f.bytes(0x023F_FE1E, &[p.revision]);
+        f.bytes(0x023F_FE6C, &[p.header6c]);
+        for (a, v) in [
+            (p.field_entry_addr, 0xB538),
+            (p.field_entry_addr + 2, 0xB084),
+            (p.warp_addr, 0xB530),
+            (p.warp_addr + 2, 0xB085),
+            (p.collision_addr - 8, 0x2801),
+            (p.collision_addr - 6, 0xD101),
+        ] {
+            f.u16(a, v);
         }
-        (p,f)
+        for (a, v) in [
+            (p.current_seed_addr, 0xDEAD_BEEF),
+            (p.mt_seed_addr, 0x1234_5678),
+            (p.mt_index_addr, 624),
+            (p.delay_addr, 200),
+            (p.trainer_ptr_addr, 0x0212_3000),
+            (p.pid_ptr_addr, 0x0212_4000),
+        ] {
+            f.u32(a, v);
+        }
+        if let Some(b) = battle_for(code, revision) {
+            f.bytes(b.crit_callsite, &[0x00, 0xF0, 0x00, 0xF8]);
+            f.bytes(b.thumb_cave_addr, &[0u8; 72]);
+        }
+        (p, f)
     }
     #[test]
-    fn ten_source_profiles_are_distinct_and_never_writable(){
+    fn ten_source_profiles_are_distinct_and_never_writable() {
         assert!(valid_catalog());
-        assert!(profile_for("ADAE",13).is_some());
-        assert!(profile_for("APAE",13).is_some());
-        assert!(profile_for("ADAE",0).is_none());
-        assert!(profile_for("APAJ",6).is_none());
-        assert!(profile_for("APAK",0).is_none());
+        assert!(profile_for("ADAE", 13).is_some());
+        assert!(profile_for("APAE", 13).is_some());
+        assert!(profile_for("ADAE", 0).is_none());
+        assert!(profile_for("APAJ", 6).is_none());
+        assert!(profile_for("APAK", 0).is_none());
     }
     #[test]
-    fn two_pearl_variants_only_have_full_rom_and_overlay11_static_audits(){
-        let pp=profiles();
-        assert_eq!(pp.iter().filter(|p|p.battle_static_audit).count(),2);
-        for code in ["APAE","APAI"] {
-            let p=pp.iter().find(|p|p.game_code==code).unwrap();
-            let b=battle_for(code,p.revision).unwrap();
-            assert_eq!(p.rom_sha256.as_ref().unwrap(),&b.rom_sha256);
-            assert_eq!(b.cave_bytes,72);
+    fn two_pearl_variants_only_have_full_rom_and_overlay11_static_audits() {
+        let pp = profiles();
+        assert_eq!(pp.iter().filter(|p| p.battle_static_audit).count(), 2);
+        for code in ["APAE", "APAI"] {
+            let p = pp.iter().find(|p| p.game_code == code).unwrap();
+            let b = battle_for(code, p.revision).unwrap();
+            assert_eq!(p.rom_sha256.as_ref().unwrap(), &b.rom_sha256);
+            assert_eq!(b.cave_bytes, 72);
         }
-        assert!(battle_for("ADAE",13).is_none());
+        assert!(battle_for("ADAE", 13).is_none());
     }
     #[test]
-    fn each_of_ten_profiles_yields_read_only_stopped_snapshot(){
-        for p in profiles(){
-            let(p,mut f)=fixture(&p.game_code,p.revision);
-            let s=inspect(&mut f,&p,0x0200_1040).unwrap();
-            assert_eq!(s.current_seed,0xDEAD_BEEF);
-            assert_eq!(s.mt_index,624);
+    fn each_of_ten_profiles_yields_read_only_stopped_snapshot() {
+        for p in profiles() {
+            let (p, mut f) = fixture(&p.game_code, p.revision);
+            let s = inspect(&mut f, &p, 0x0200_1040).unwrap();
+            assert_eq!(s.current_seed, 0xDEAD_BEEF);
+            assert_eq!(s.mt_index, 624);
             assert!(s.arm9_anchors_match && s.gdb_stop_observed);
-            assert!(!s.complete_running_rom_sha256_verified&&!s.write_authorized);
+            assert!(!s.complete_running_rom_sha256_verified && !s.write_authorized);
             if p.battle_static_audit {
                 assert!(s.battle.unwrap().thumb_bl_candidate);
             } else {
@@ -325,35 +375,38 @@ mod tests {
         }
     }
     #[test]
-    fn corrupted_revision_and_anchors_fail_closed(){
-        let(p,mut f)=fixture("ADAE",13);
-        f.bytes(0x023F_FE1E,&[5]);
-        assert!(inspect(&mut f,&p,0x0200_1040).is_err());
-        let(p,mut f)=fixture("APAI",5);
-        f.u16(p.collision_addr-8,0xFFFF);
-        assert!(inspect(&mut f,&p,0x0200_1040).is_err());
+    fn corrupted_revision_and_anchors_fail_closed() {
+        let (p, mut f) = fixture("ADAE", 13);
+        f.bytes(0x023F_FE1E, &[5]);
+        assert!(inspect(&mut f, &p, 0x0200_1040).is_err());
+        let (p, mut f) = fixture("APAI", 5);
+        f.u16(p.collision_addr - 8, 0xFFFF);
+        assert!(inspect(&mut f, &p, 0x0200_1040).is_err());
     }
     #[test]
-    fn incorrect_gdb_pc_mt_index_and_pointers_rejected(){
-        let(p,mut f)=fixture("ADAD",5);
-        assert!(inspect(&mut f,&p,0x0100_0000).is_err());
-        f.u32(p.mt_index_addr,9999);
-        assert!(inspect(&mut f,&p,0x0200_1040).is_err());
-        f.u32(p.mt_index_addr,2);
-        f.u32(p.trainer_ptr_addr,0);
-        assert!(inspect(&mut f,&p,0x0200_1040).is_err());
+    fn incorrect_gdb_pc_mt_index_and_pointers_rejected() {
+        let (p, mut f) = fixture("ADAD", 5);
+        assert!(inspect(&mut f, &p, 0x0100_0000).is_err());
+        f.u32(p.mt_index_addr, 9999);
+        assert!(inspect(&mut f, &p, 0x0200_1040).is_err());
+        f.u32(p.mt_index_addr, 2);
+        f.u32(p.trainer_ptr_addr, 0);
+        assert!(inspect(&mut f, &p, 0x0200_1040).is_err());
     }
     #[test]
-    fn source_guest_thumb_5a_a5_is_not_execution_proof(){
-        for code in ["APAE","APAI"] {
-            let p=profiles().into_iter().find(|p|p.game_code==code).unwrap();
-            let(p,mut f)=fixture(code,p.revision);
-            let b=battle_for(code,p.revision).unwrap();
-            f.bytes(b.thumb_cave_addr,&[0x5A,0x20,0x70,0x47]);
-            let s=inspect(&mut f,&p,0x0200_1040).unwrap();
-            let obs=s.battle.unwrap();
+    fn source_guest_thumb_5a_a5_is_not_execution_proof() {
+        for code in ["APAE", "APAI"] {
+            let p = profiles()
+                .into_iter()
+                .find(|p| p.game_code == code)
+                .unwrap();
+            let (p, mut f) = fixture(code, p.revision);
+            let b = battle_for(code, p.revision).unwrap();
+            f.bytes(b.thumb_cave_addr, &[0x5A, 0x20, 0x70, 0x47]);
+            let s = inspect(&mut f, &p, 0x0200_1040).unwrap();
+            let obs = s.battle.unwrap();
             assert!(!obs.cave_all_zero);
-            assert!(!obs.guest_execution_confirmed&&!obs.code_cave_restore_safe);
+            assert!(!obs.guest_execution_confirmed && !obs.code_cave_restore_safe);
         }
     }
 }
