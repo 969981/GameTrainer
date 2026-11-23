@@ -4,6 +4,7 @@ import { M3LivePanel } from "@/components/M3LivePanel";
 import { FrlgLivePanel } from "@/components/FrlgLivePanel";
 import { HgssPanel } from "@/components/HgssPanel";
 import { HgssM6ValidationPanel } from "@/components/HgssM6ValidationPanel";
+import { HgssM7SafetyPanel } from "@/components/HgssM7SafetyPanel";
 import { EmeraldRngLivePanel, MgbaConnection, RubySapphireLivePanel, RubySapphireProfileCatalog } from "@/components/MgbaConnection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,7 @@ export function RuntimePage({ catalog }: { catalog: GameCatalog }) {
     <FrlgLivePanel />
     <HgssPanel />
     <HgssM6ValidationPanel />
+    <HgssM7SafetyPanel />
     <div className="runtime-list">{catalog.runtimes.map((runtime) => <Card key={runtime.runtime_id}><CardContent className="runtime-row"><span className="feature-icon"><MonitorCog size={22} /></span><div><strong>{runtime.name}</strong><small>{runtime.description}</small><code>{runtime.runtime_id}</code></div><Badge>PLANNED</Badge></CardContent></Card>)}</div>
   </div>;
 }
