@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-23 — RS v4.6 advanced feature security migration review
+
+- Reviewed capture, fishing/Feebas, teleport/PokéFinder and experimental BattleCrit sources and installed/uninstall flow.
+- Added security assessment, ADR-0004, 7-feature deny-live Manifest and 4 regression assertions; no production patch, injector or live-write capability.
+- Targeted upstream tests locally: 47 passed / 2 skipped; full suite cannot pass without historical dist/*.CT artifacts.
+- See [RS migration security review](docs/gen3-rs-migration-security-review.md).
+
 ## 2026-11-23 — Ruby/Sapphire Gen3 separate adapters
 - Added 26-version source-backed Ruby/Sapphire header/anchor read-only Rust profiles and mGBA Win32 provider.
 - Added two Gen3 game descriptors, feature research pages, Rust profile catalog and Seed/Timer viewer.

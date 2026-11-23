@@ -60,3 +60,15 @@
 - [x] Windows Tauri check、桌面 Rust unit tests、Windows Debug EXE。
 - [ ] Windows 真实 GUI/WebView2 与 mGBA Ruby/Sapphire 真 ROM、ROM Reload 实机测试，所有真实游戏写入仍禁止。
 - [证据](https://github.com/969981/GameTrainer/actions/runs/45111652638)。
+
+## 2026-11-23 Ruby/Sapphire 四类功能源码复核
+
+- [x] 实际解压 v4.6.0 原包，检查 CaptureHook、FishingAssist、TeleportRaw/Guard、BattleCrit 及源包证据文档。
+- [x] 专项本地 pytest（7 个测试文件）：**47 passed, 2 skipped**。
+- [!] 完整原包 pytest 的历史构建一致性测试缺少 dist/v4.2.3 与 dist/v4.4 等老版 CT，出现 FileNotFoundError / 缺档断言；**不认定为完整通过**，与真实模拟器功能无关。
+- [x] 新增机器可读 Manifest 及 4 个 Vitest 门禁测试，均保持 live_write_enabled=false。
+- [ ] 26 版整 ROM SHA1 / 捕捉两处指令差异只读复查；钓鱼状态与 RngAdvance 轨迹模拟；306 条地图目录/Ruby-Sapphire 物种分离；SaveState stale Hook 冲突。
+- [ ] 多资源事务合成故障注入：2 指令、3 表指针、code cave、Mailbox、callback、恢复失败，尤其是写入中断与 CPU quiescence。
+- [ ] Windows+mGBA 真实游戏行为和独立实机记录（当前不允许任何 Live 写入）。
+
+相关：[迁移评估](gen3-rs-migration-security-review.md) · [ADR-0004](decisions/0004-rs-migration-write-gates.md)。

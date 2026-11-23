@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "source": "user-uploaded Ruby/Sapphire v4.6.0 source",
+  "review_date": "2026-11-23",
+  "status": "review_only",
+  "live_write_enabled": false,
+  "notes": "Evidence metadata only; never interpret as address/payload or capability grant.",
+  "features": [
+    {
+      "id": "features.rs.capture",
+      "area": "capture",
+      "risk": "high",
+      "priority": "P1",
+      "phase": "read_only_evidence",
+      "live_write_enabled": false,
+      "resource_kinds": [
+        "rom_halfword",
+        "rom_halfword"
+      ],
+      "requires_multiresource_transaction": true,
+      "required_gates": [
+        "whole_rom_digest",
+        "two_span_transaction",
+        "cpu_quiescence",
+        "context_signature",
+        "owner_restore"
+      ],
+      "source_paths": [
+        "src/main.lua",
+        "docs/ROM_VERIFICATION_FULL_MATRIX.md"
+      ]
+    },
+    {
+      "id": "features.rs.fishing.assist",
+      "area": "fishing_assist",
+      "risk": "critical",
+      "priority": "P1",
+      "phase": "read_only_state",
+      "live_write_enabled": false,
+      "resource_kinds": [
+        "function_table_pointer_x3",
+        "rom_code_cave",
+        "mailbox",
+        "guest_input"
+      ],
+      "requires_multiresource_transaction": true,
+      "required_gates": [
+        "whole_rom_digest",
+        "rng_advance_equivalence",
+        "cpu_quiescence",
+        "save_state_stale_hook",
+        "owner_restore"
+      ],
+      "source_paths": [
+        "src/main.lua",
+        "docs/RS_FISHING_ASSIST.md"
+      ]
+    },
+    {
+      "id": "features.rs.fishing.seed",
+      "area": "fishing_feebas",
+      "risk": "critical",
+      "priority": "P1",
+      "phase": "read_only_rng_analysis",
+      "live_write_enabled": false,
+      "resource_kinds": [
+        "rom_entry",
+        "rom_code_cave",
+        "mailbox",
+        "rng_seed"
+      ],
+      "requires_multiresource_transaction": true,
+      "required_gates": [
+        "whole_rom_digest",
+        "check_feebas_before_generate",
+        "rng_advance_equivalence",
+        "cpu_quiescence",
+        "save_state_stale_hook"
+      ],
+      "source_paths": [
+        "src/main.lua",
+        "docs/RS_FISHING_FIX9_FULL_VERSION_MATRIX.md"
+      ]
+    },
+    {
+      "id": "features.rs.teleport.catalog",
+      "area": "teleport_catalog",
+      "risk": "low",
+      "priority": "P0",
+      "phase": "read_only_catalog",
+      "live_write_enabled": false,
+      "resource_kinds": [],
+      "requires_multiresource_transaction": false,
+      "required_gates": [
+        "game_version",
+        "map_bounds",
+        "warp_count",
+        "collision_not_claimed",
+        "roamer_nonteleportable"
+      ],
+      "source_paths": [
+        "docs/RELEASE_NOTES.md",
+        "docs/POKEFINDER_GEN3_TELEPORT_V1.md"
+      ]
+    },
+    {
+      "id": "features.rs.teleport.execution",
+      "area": "teleport_execution",
+      "risk": "critical",
+      "priority": "P4",
+      "phase": "blocked_live_execution",
+      "live_write_enabled": false,
+      "resource_kinds": [
+        "callback2_pointer",
+        "rom_code_cave",
+        "mailbox",
+        "world_state"
+      ],
+      "requires_multiresource_transaction": true,
+      "required_gates": [
+        "whole_rom_digest",
+        "trusted_backend_guard",
+        "cpu_quiescence",
+        "callback_lifetime",
+        "irreversible_world_state",
+        "save_backup"
+      ],
+      "source_paths": [
+        "src/main.lua",
+        "docs/POKEFINDER_GEN3_TELEPORT_V1.md"
+      ]
+    },
+    {
+      "id": "features.rs.battlecrit",
+      "area": "battlecrit",
+      "risk": "critical",
+      "priority": "P5",
+      "phase": "blocked_experimental",
+      "live_write_enabled": false,
+      "resource_kinds": [
+        "battle_dispatch_pointer",
+        "rom_code_cave",
+        "battle_globals"
+      ],
+      "requires_multiresource_transaction": true,
+      "required_gates": [
+        "four_rom_evidence_only",
+        "whole_rom_digest",
+        "cpu_quiescence",
+        "battle_exception_matrix",
+        "owner_restore",
+        "no_link_battles"
+      ],
+      "source_paths": [
+        "src/cheats_panel.lua",
+        "docs/RS_CHEATS_V46_BATTLE_RESEARCH.md"
+      ]
+    },
+    {
+      "id": "features.rs.battle_unfinished",
+      "area": "battle_hit_miss_ohko",
+      "risk": "critical",
+      "priority": "blocked",
+      "phase": "source_not_implemented",
+      "live_write_enabled": false,
+      "resource_kinds": [
+        "battle_script"
+      ],
+      "requires_multiresource_transaction": true,
+      "required_gates": [
+        "source_implementation_missing",
+        "battle_script_semantics",
+        "real_emulator_proof"
+      ],
+      "source_paths": [
+        "docs/RS_CHEATS_V46_BATTLE_RESEARCH.md"
+      ]
+    }
+  ]
+}

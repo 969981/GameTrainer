@@ -8,6 +8,9 @@
 
 - [M2 安全补丁与 SQLite 实施](m2-safe-patch.md) · [[m2-safe-patch]]
 
+- [红蓝宝石四类功能的安全迁移审查](gen3-rs-migration-security-review.md) · [[gen3-rs-migration-security-review]]
+- [ADR-0004 多资源补丁与 Live 写入门禁](decisions/0004-rs-migration-write-gates.md)
+
 ## 核心设计
 - [总体架构](architecture.md) · [[architecture]]
 - [扩展规划：Gen3–Gen6 + PC](extensions.md) · [[extensions]]

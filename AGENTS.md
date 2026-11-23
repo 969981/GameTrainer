@@ -11,6 +11,7 @@
 6. docs/logging-and-diary.md
 7. docs/roadmap.md
 8. 触及的游戏/模块下属 README 和 Profile 证据
+9. 修改 Ruby/Sapphire 捕捉、钓鱼、传送、战斗或 ROM Hook 时必须先阅读 docs/gen3-rs-migration-security-review.md 和 docs/decisions/0004-rs-migration-write-gates.md
 
 ## 技术边界
 - Windows 优先；Rust Cargo Workspace + Tauri 2 + React/TypeScript/Vite + Tailwind CSS + shadcn/ui。
@@ -34,6 +35,14 @@
 - 上传原源码与 Thumb payload 有 GPL-3.0；不得把原 CT/Lua、ROM、存档/payload 直接加入本项目。
 - BattleCrit 是实验性研究，源报告仅四 ROM 静态/合成证据、未实机通过，禁止启用 Hook。
 - M2 Ruby/Sapphire 仅可对本机 Rust Fixture 进行事务性 Seed 模拟，跨游戏旧令牌必须拒绝。
+
+## Ruby/Sapphire 多资源功能独立门禁（ADR-0004）
+- fixtures/rs-migration-review.json 的七项功能均不得在没有新 ADR 与全 ROM/实机证据时把 live_write_enabled 改为 true；原源码的静态通过不是写入能力授权。
+- 捕捉：两处 16-bit 写入必须设计多资源原子化风险控制；当前只能提供 ROM 指令/上下文的只读预览。
+- 钓鱼：分别研究状态机辅助（保留 Random 调用次数）与 FishingWildEncounter/CheckFeebas RNG；禁止无所有权的 stale-payload 自动覆盖。
+- 传送：新 API 必须在可信 Rust 后端重新验证 MapGroup/Map/Warp、地图范围、剧情/碰撞证据和实验许可；不能只依赖 UI 的 pfGuardRow。
+- 战斗：原源码仅四 ROM 有静态 BattleCrit 证据，未实机验证。必中、敌方必 Miss、一击必杀为上游未实现。绝不可直接安装 Thumb payload。
+- CodeCave/函数指针/Callback/Mailbox 的启停必须有 CPU quiescence、跨度独占、依赖有序撤销、SQLite 逐资源意图及故障注入测试；现有单 Seed Fixture 不具备这些能力。
 
 ## M2 Fixture-only 安全约束
 - PatchManager 现在只允许隔离的 Rust FixtureTarget；不得因 UI 按钮可点击就开启 Windows 真实进程写内存能力。

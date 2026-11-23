@@ -68,6 +68,13 @@ pnpm --filter @gametrainer/desktop test:e2e  # 首先安装 Playwright Chromium
 - [完整 CI](https://github.com/969981/GameTrainer/actions/runs/45111652638) · [Windows x64 测试 EXE（ZIP）](https://github.com/969981/GameTrainer/actions/runs/45111652638/artifacts/14789568790) · [18 张页面截图](https://github.com/969981/GameTrainer/actions/runs/45111652638/artifacts/14789319553)
 - 这些测试不代表 Windows GUI/WebView2 手动启动或真实 mGBA ROM 的 Seed/Timer 实机读取成功；真实游戏写入仍保持关闭。
 
+## Ruby / Sapphire v4.6 · 安全迁移评审（2026-11-23）
+
+- [安全迁移评估：捕捉 / 钓鱼 / 传送 / 战斗](docs/gen3-rs-migration-security-review.md)：逐项列出上游源码支持程度、功能风险、M1/M2 缺口、迁移优先级和未来实机门禁。
+- [ADR-0004 多资源补丁安全边界](docs/decisions/0004-rs-migration-write-gates.md)；[7 项功能的禁写 Manifest](fixtures/rs-migration-review.json)。
+- 结论：先做捕捉两处指令的**只读**比对、钓鱼 RNG/状态观察和 306 条传送目录。多资源事务、真实地图切换以及 BattleCrit Hook 均不能通过解除 M2 的 Fixture 锁直接启用。
+- 源码专项 pytest：**47 passed / 2 skipped**；完整上传包测试存在因缺失历史 `dist/*.CT` 文件而失败的用例，不等同实机通过。
+
 ## 文档入口
 
 | 文档 | 用途 |

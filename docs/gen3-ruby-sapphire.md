@@ -66,3 +66,14 @@ Rust 测试：26 个组合、错误 Title/Checksum/Revision、German Debug Ancho
 - React ESLint、TypeScript、11 项 Vitest、Web Build、Chromium 1100/1366/1500 px 的 Ruby/Sapphire/Gen6/PC/M2 导航和页面截图均通过，共 18 张。
 - Windows Tauri 2 Shell `cargo check`、桌面 Rust 命令测试、debug EXE `cargo build` 及 Artifact 上传通过：[Windows Debug EXE](https://github.com/969981/GameTrainer/actions/runs/45111652638/artifacts/14789568790)。
 - 仍未执行的测试：在用户真实 Windows WebView2 上打开并连接 mGBA、使用真实 Ruby/Sapphire ROM 比对 Seed/Timer、复现 ROM Reload/错误版本拒绝与恢复。
+
+## v4.6 四类高级功能安全迁移审查（2026-11-23）
+
+已进一步检查原始 src/main.lua 中 CaptureHook、FishingAssist/Feebas、teleportRaw/pfGuardRow 及 src/cheats_panel.lua 中 BattleCrit 的安装/恢复路径。专项 pytest 47 passed/2 skipped；完整测试因上传 ZIP 未带历史 dist/*.CT 文件而不能全部通过。结论与逐项功能门禁详见 [安全迁移评估](gen3-rs-migration-security-review.md)、[ADR-0004](decisions/0004-rs-migration-write-gates.md)。
+
+- 捕捉：原工具使用两处 halfword 修改，GameTrainer 先做只读证据与差异预览。
+- 钓鱼：先做状态/RNG/Feebas 只读模拟，三函数指针、代码洞与 Mailbox 必须建立多资源生命周期。
+- 传送：优先 306 条分级目录；Rust 后端不能信任单纯 UI 边界检查；地图变化不等于可回滚。
+- 战斗：BattleCrit 四 ROM 静态+合成证据仍不可实机启用；其余三项尚未在原源码实现。
+
+所有真实游戏写入仍禁用。

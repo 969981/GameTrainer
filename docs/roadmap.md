@@ -26,3 +26,13 @@
 
 ## 公共完成定义（DoD）
 所有工作须包含：代码、Fixture/Mock 或实机测试、正常与异常状态、日志策略、许可评估、文档变更和提交摘要。真实连接与修改必须有版本/环境/复现说明；不得把浏览器原型通过当作 Windows+模拟器实测。
+
+## Ruby/Sapphire v4.6 安全迁移专项（2026-11-23）
+
+- **P0**：安全评估、七项禁写 Manifest、Vitest Guard（已提交）。
+- **P1**：100% 捕捉只读机器码对照；Fishing/Feebas 只读状态与 RNG；306 地点证据分级目录。
+- **P2**：独立 MultiResourcePatchManager 的全合成测试：资源租约、修改前签名、激活顺序/撤销顺序、CPU 安全点和 SQLite 逐 Component 记录。
+- **P3/P4**：只有完整 ROM SHA1/原入口静态证据与真实 Windows+mGBA 沙盒实测后，才讨论捕捉、钓鱼、传送的可授权写入。地图/剧情状态不可逆。
+- **P5**：BattleCrit 保留研究，不开放用户开关；必中、敌方 Miss、一击必杀上游尚未实现。
+
+[完整技术审查](gen3-rs-migration-security-review.md) · [ADR-0004](decisions/0004-rs-migration-write-gates.md)
