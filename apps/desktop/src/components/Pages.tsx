@@ -3,6 +3,7 @@ import { useState } from "react";
 import { M3LivePanel } from "@/components/M3LivePanel";
 import { FrlgLivePanel } from "@/components/FrlgLivePanel";
 import { HgssPanel } from "@/components/HgssPanel";
+import { DiamondPearlPanel } from "@/components/DiamondPearlPanel";
 import { HgssM6ValidationPanel } from "@/components/HgssM6ValidationPanel";
 import { HgssM7SafetyPanel } from "@/components/HgssM7SafetyPanel";
 import { HgssM8RomIdentityPanel } from "@/components/HgssM8RomIdentityPanel";
@@ -98,6 +99,7 @@ export function RuntimePage({ catalog }: { catalog: GameCatalog }) {
     <M3LivePanel />
     <FrlgLivePanel />
     <HgssPanel />
+    <DiamondPearlPanel />
     <HgssM6ValidationPanel />
     <HgssM7SafetyPanel />
     <HgssM8RomIdentityPanel />
