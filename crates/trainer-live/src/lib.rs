@@ -150,10 +150,7 @@ fn hex(bytes: &[u8]) -> String {
 }
 fn capture_addresses(code: &str) -> Option<[u32; 2]> {
     let code_bytes = code.as_bytes();
-    if code_bytes.len() != 4
-        || &code_bytes[..2] != b"AX"
-        || !matches!(code_bytes[2], b'V' | b'P')
-    {
+    if code_bytes.len() != 4 || &code_bytes[..2] != b"AX" || !matches!(code_bytes[2], b'V' | b'P') {
         return None;
     }
     Some(match code_bytes[3] {
