@@ -30,12 +30,13 @@
  	gameInfo.crc = 0;
  	
  	u8 fROMBuffer[4096];
-@@ -751,6 +760,9 @@
+@@ -751,6 +760,10 @@
  			gameInfo.crcForCheatsDb = (u32)~crc32(0, fROMBuffer, 512);
  		first = false;
  		gameInfo.crc = (u32)crc32(gameInfo.crc, fROMBuffer, read);
 +#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
-+		gthgss_m8::hash_chunk(fROMBuffer, static_cast<DWORD>(read));
++		if(read>0 && read<=4096)
++			gthgss_m8::hash_chunk(fROMBuffer, static_cast<DWORD>(read));
 +#endif
  	}
  
@@ -43,11 +44,11 @@
 @@ -835,6 +847,10 @@
  	NDS_Reset();
  
- 	return ret;
 +#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
 +	gthgss_m8::rom_commit(gameInfo.header.gameCode,gameInfo.header.romversion,
 +		gameInfo.romsize,gameInfo.crc,CommonSettings.use_jit);
 +#endif
+ 	return ret;
  }
  
  void NDS_FreeROM(void)
