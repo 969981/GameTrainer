@@ -8,6 +8,7 @@ description = "Windows external read-only mGBA process adapter"
 trainer-mgba = { path = "../trainer-mgba" }
 trainer-rs = { path = "../trainer-rs" }
 trainer-hgss = { path = "../trainer-hgss" }
+trainer-dp = { path = "../trainer-dp" }
 serde.workspace = true
 thiserror.workspace = true
 

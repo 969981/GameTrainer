@@ -10,3 +10,8 @@ pub use windows::*;
 mod m8_win;
 #[cfg(windows)]
 pub use m8_win::read_desmume_runtime_rom_identity;
+
+#[cfg(windows)]
+mod m10_win;
+#[cfg(windows)]
+pub use m10_win::read_dp_core_identity;
