@@ -1,0 +1,9 @@
+[package]
+name = "trainer-dp"
+version.workspace = true
+edition.workspace = true
+description = "Diamond/Pearl v0.8.14 source-backed 10-ROM read-only DeSmuME diagnostics"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
