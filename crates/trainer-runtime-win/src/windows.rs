@@ -917,4 +917,3 @@ impl AttachedHgss {
         })
     }
 }
-

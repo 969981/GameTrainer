@@ -4,6 +4,14 @@
 
 **当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
 
+## M5 · HeartGold / SoulSilver（HGSS v1.4.5.1）
+
+NDS Gen4 新增心金和魂银两款游戏，包含 14 个多语言 ROM Profile、独立 Rust trainer-hgss、Windows DeSmuME 外部只读内存适配、Tauri 2 IPC、React RNG/MT 面板及本地 NDS ROM SHA1 文件核验。12 个日/欧版 Profile 有 v1.4.5.1 静态审计，两份美版 Rev0 保留为旧版 Profile。
+
+**目前只读，未经真实 DeSmuME 联调，不能当作稳定修改器。** 不提供 NDS 捕捉/穿墙/瞬移/战斗 Hook 的实际内存写入；上游必会心、必中、一击必杀等战斗 Hook 也未得到安全验证。
+
+[M5 操作与安全说明](docs/m5-hgss-v1451-readonly.md) · [ADR-0007](docs/decisions/0007-m5-hgss-read-only.md) · [版本 Manifest](fixtures/hgss-v1451-profiles.json)。
+
 ## M4 · FireRed / LeafGreen v2.0.4（16 零售版 Profile）
 
 **M4 构建验证 2026-11-23**：[CI #45121396498](https://github.com/969981/GameTrainer/actions/runs/45121396498) 三组任务全部通过：Rust 57 项单元测试、前端自动化和响应式 Chromium 检查、Windows Tauri 2 check + desktop Rust test + debug EXE 编译。[Windows x64 测试构建 Artifact](https://github.com/969981/GameTrainer/actions/runs/45121396498/artifacts/14794430558)（工作流保留历史 artifact 名 `gametrainer-m0-m1-win64-debug`，内容为 M4 当前代码编译的 `game-trainer-desktop.exe`）。**真实 FireRed/LeafGreen ROM 游戏效果及 Hook 卸载仍未实机验证。**
