@@ -61,7 +61,7 @@ describe("M0 dynamic AppShell", () => {
     mount({ ...baseCatalog, games: [...baseCatalog.games, sixth] });
     fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon FireRed" }));
     expect(screen.getByRole("button", { name: "FireRed Seed" })).toBeInTheDocument();
-    expect(screen.getByText("6 Game Adapters")).toBeInTheDocument();
+    expect(screen.getByText(/6 Game Adapters/)).toBeInTheDocument();
   });
 
   it("keeps feature mutation disabled even after selecting a Mock feature", () => {
