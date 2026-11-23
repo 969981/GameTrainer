@@ -95,7 +95,8 @@ pub(crate) fn owned_port_pair(pid: u32, arm9: u16, arm7: u16) -> Result<bool, St
         // Win32 tables are DWORD-aligned; byte buffer is not guaranteed aligned.
         let row: MIB_TCPROW_OWNER_PID =
             unsafe { std::ptr::read_unaligned(buffer[at..].as_ptr().cast()) };
-        if row.dwOwningPid != pid {
+        // A connected or stale TCP row is not a GDB listener. MIB_TCP_STATE_LISTEN = 2.
+        if row.dwOwningPid != pid || row.dwState != 2 {
             continue;
         }
         let port = u16::from_be((row.dwLocalPort & 0xffff) as u16);
