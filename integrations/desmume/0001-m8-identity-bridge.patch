@@ -1,0 +1,96 @@
+--- a/desmume/src/NDSSystem.cpp
++++ b/desmume/src/NDSSystem.cpp
+@@ -67,6 +67,9 @@
+ 
+ #ifdef GDB_STUB
+ #include "gdbstub.h"
++#if defined(_WIN32) && defined(GT_HGSS_M8_BRIDGE)
++#include "gt_hgss_m8_bridge.h"
++#endif
+ #define GDBSTUB_MUTEX_LOCK() gdbstub_mutex_lock()
+ #define GDBSTUB_MUTEX_UNLOCK() gdbstub_mutex_unlock()
+ #else
+@@ -721,6 +724,9 @@
+ 	if (filename == NULL)
+ 		return -1;
+ 
++#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
++	gthgss_m8::rom_begin();
++#endif
+ 	ret = rom_init_path(filename, physicalName, logicalFilename);
+ 	if (ret < 1)
+ 		return ret;
+@@ -739,6 +745,9 @@
+ 	
+ 	//run crc over the whole buffer (chunk at a time, to avoid coding a streaming crc
+ 	gameInfo.reader->Seek(gameInfo.fROM, 0, SEEK_SET);
++#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
++	gthgss_m8::hash_begin();
++#endif
+ 	gameInfo.crc = 0;
+ 	
+ 	u8 fROMBuffer[4096];
+@@ -751,6 +760,9 @@
+ 			gameInfo.crcForCheatsDb = (u32)~crc32(0, fROMBuffer, 512);
+ 		first = false;
+ 		gameInfo.crc = (u32)crc32(gameInfo.crc, fROMBuffer, read);
++#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
++		gthgss_m8::hash_chunk(fROMBuffer, static_cast<DWORD>(read));
++#endif
+ 	}
+ 
+ 	gameInfo.chipID  = 0xC2;														// The Manufacturer ID is defined by JEDEC (C2h = Macronix)
+@@ -835,6 +847,10 @@
+ 	NDS_Reset();
+ 
+ 	return ret;
++#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
++	gthgss_m8::rom_commit(gameInfo.header.gameCode,gameInfo.header.romversion,
++		gameInfo.romsize,gameInfo.crc,CommonSettings.use_jit);
++#endif
+ }
+ 
+ void NDS_FreeROM(void)
+@@ -840,6 +856,9 @@
+ void NDS_FreeROM(void)
+ {
+ 	FCEUI_StopMovie();
++#if defined(_WIN32) && defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
++	gthgss_m8::rom_unloaded();
++#endif
+ 	gameInfo.closeROM();
+ 	UnloadMovieEmulationSettings();
+ }
+--- a/desmume/src/frontend/windows/main.cpp
++++ b/desmume/src/frontend/windows/main.cpp
+@@ -57,6 +57,9 @@
+ #include "gfx3d.h"
+ #include "render3D.h"
+ #include "gdbstub.h"
++#if defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
++#include "../../gt_hgss_m8_bridge.h"
++#endif
+ #include "wifi.h"
+ #include "cheatSystem.h"
+ #include "mic.h"
+@@ -2337,6 +2340,10 @@
+ #endif
+ 
+ 	osd->singleScreen = (video.layout == 2);
++#if defined(GDB_STUB) && defined(GT_HGSS_M8_BRIDGE)
++	gthgss_m8::start(static_cast<uint16_t>(cmdline.arm9_gdb_port),
++		static_cast<uint16_t>(cmdline.arm7_gdb_port));
++#endif
+ 	
+ 	GetPrivateProfileString("General", "Language", "0", text, 80, IniName);	
+ 
+@@ -2520,6 +2527,9 @@
+ 	WAV_End();
+ 
+ #ifdef GDB_STUB
++#if defined(GT_HGSS_M8_BRIDGE)
++	gthgss_m8::stop();
++#endif
+ 	destroyStub_gdb(arm9_gdb_stub);
+ 	arm9_gdb_stub = NULL;
+ 	
