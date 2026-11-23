@@ -5,6 +5,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
+pub mod m10;
+
 pub const SOURCE_VERSION: &str = "0.8.14";
 const PROFILES: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
