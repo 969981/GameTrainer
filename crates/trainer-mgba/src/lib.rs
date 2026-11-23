@@ -33,7 +33,7 @@ pub enum ProbeStrength {
     PartialAnchorsReadOnly,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EmeraldProfile {
     pub code: &'static str,
     pub language: &'static str,
@@ -211,9 +211,10 @@ pub fn guest_offset(guest_addr: u32, len: usize) -> Option<(&'static str, usize)
         ("ewram", GBA_EWRAM, 0x0004_0000u32),
         ("iwram", GBA_IWRAM, 0x0000_8000u32),
     ] {
-        let off = guest_addr.checked_sub(base)?;
-        if off.checked_add(len).is_some_and(|end| end <= size) {
-            return Some((label, off as usize));
+        if let Some(off) = guest_addr.checked_sub(base) {
+            if off.checked_add(len).is_some_and(|end| end <= size) {
+                return Some((label, off as usize));
+            }
         }
     }
     None

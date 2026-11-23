@@ -21,9 +21,9 @@ jobs:
       - name: Rust formatting
         run: cargo fmt --all -- --check
       - name: Core clippy
-        run: cargo clippy -p trainer-core --all-targets -- -D warnings
+        run: cargo clippy -p trainer-core -p trainer-mgba --all-targets -- -D warnings
       - name: Core unit tests
-        run: cargo test -p trainer-core
+        run: cargo test -p trainer-core -p trainer-mgba
 
   frontend:
     name: React UI & Mock registry
