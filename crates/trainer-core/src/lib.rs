@@ -261,9 +261,7 @@ mod tests {
         ] {
             assert_eq!(
                 registry.list_by_platform(&platform).len(),
-                if platform == PlatformFamily::Gen3 {
-                    5
-                } else if platform == PlatformFamily::Gen4 {
+                if matches!(platform, PlatformFamily::Gen3 | PlatformFamily::Gen4) {
                     5
                 } else {
                     1
