@@ -77,7 +77,7 @@ pub fn plan(code: &str, revision: u8, feature: LiveFeature) -> Result<PatchPlan,
     })
 }
 pub fn signature_preflight<R: GuestReader>(r: &mut R, p: &PatchPlan) -> Result<(), String> {
-    if p.original.len() != 2 || p.replacement.len() != 2 || p.address % 2 != 0 {
+    if p.original.len() != 2 || p.replacement.len() != 2 || !p.address.is_multiple_of(2) {
         return Err("M11 patch must be exactly one aligned Thumb halfword".into());
     }
     if p.feature == LiveFeature::WallCollision {
