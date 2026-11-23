@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { isTauriDesktop } from "@/lib/backend";
 import { validDpM10 } from "@/lib/dp-m10";
 
-export type M11Feature="wall_collision"|"capture_english";
+export type M11Feature="wall_collision"|"capture_english"|"cave_stage";
 export type M11Phase="prepared"|"applied"|"uncertain"|"restored";
 export interface M11Plan {
   feature:M11Feature;game_code:string;revision:number;address:number;
@@ -22,7 +22,7 @@ export interface M11Record {
 export const M11_ACK="I_ACCEPT_DP_M11_EXPERIMENTAL_GUEST_WRITES";
 export function m11SourceAllowed(code:string,revision:number,feature:M11Feature):boolean{
   return (code==="APAE"&&revision===13)||
-    (code==="APAI"&&revision===5&&feature==="wall_collision");
+    (code==="APAI"&&revision===5&&feature!=="capture_english");
 }
 export function m11Valid(pid:number,p9:number,p7:number,code:string,rev:number,feature:M11Feature):boolean{
   return validDpM10(pid,p9,p7,code,rev)&&m11SourceAllowed(code,rev,feature);
