@@ -4,6 +4,7 @@
 use trainer_core::{GameCatalog, GameRegistry, SessionSnapshot};
 
 mod m2;
+mod m3;
 
 #[tauri::command]
 fn get_catalog() -> Result<GameCatalog, String> {
@@ -196,6 +197,7 @@ fn get_session_snapshot() -> SessionSnapshot {
 pub fn run() {
     let builder = tauri::Builder::default().setup(|app| {
         m2::install(app);
+        m3::install(app);
         Ok(())
     });
     #[cfg(windows)]
@@ -217,7 +219,16 @@ pub fn run() {
             m2::m2_cancel_fixture_preview,
             m2::m2_apply_fixture_preview,
             m2::m2_restore_fixture_patch,
-            m2::m2_list_action_history
+            m2::m2_list_action_history,
+            m3::m3_live_status,
+            m3::m3_live_connect,
+            m3::m3_preview_live_capture,
+            m3::m3_preview_live_crit,
+            m3::m3_apply_live_preview,
+            m3::m3_restore_live_patch,
+            m3::m3_cancel_live_preview,
+            m3::m3_disconnect_live,
+            m3::m3_live_history
         ]);
     #[cfg(not(windows))]
     let builder = builder.invoke_handler(tauri::generate_handler![
@@ -229,7 +240,16 @@ pub fn run() {
         m2::m2_cancel_fixture_preview,
         m2::m2_apply_fixture_preview,
         m2::m2_restore_fixture_patch,
-        m2::m2_list_action_history
+        m2::m2_list_action_history,
+        m3::m3_live_status,
+        m3::m3_live_connect,
+        m3::m3_preview_live_capture,
+        m3::m3_preview_live_crit,
+        m3::m3_apply_live_preview,
+        m3::m3_restore_live_patch,
+        m3::m3_cancel_live_preview,
+        m3::m3_disconnect_live,
+        m3::m3_live_history
     ]);
     builder
         .run(tauri::generate_context!())
