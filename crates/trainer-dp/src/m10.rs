@@ -270,7 +270,7 @@ pub struct RuntimeAudit {
     pub blockers: Vec<String>,
 }
 pub fn runtime_audit(
-    identity: Identity,
+    mut identity: Identity,
     epoch_stable: bool,
     arm9: CpuObservation,
     arm7: CpuObservation,
@@ -290,6 +290,9 @@ pub fn runtime_audit(
         .is_some_and(|g| g.battle.as_ref().is_some_and(|b| b.version_static_evidence));
     let mut blockers = identity.blockers.clone();
     if !epoch_stable {
+        // A previously valid single snapshot is stale after a ROM/OS epoch
+        // mismatch. Do not leave a green identity field in the audit.
+        identity.diagnostic_identity_verified = false;
         blockers.push("rom_changed_during_gdb_observations".into());
     }
     if !arm9.stable() {
@@ -478,5 +481,24 @@ mod tests {
         assert!(a
             .blockers
             .contains(&"arm9_pc_currently_inside_thumb_cave".into()));
+    }
+    #[test]
+    fn gdb_samples_across_a_rom_epoch_change_revoke_identity() {
+        let packet = packet("APAE");
+        let identity = evaluate(&packet, 981, "APAE", 13, 3333, 3334, os());
+        assert!(identity.diagnostic_identity_verified);
+        let cpu = |cpu: &str, port| CpuObservation {
+            cpu: cpu.into(),
+            port,
+            stop_reply_observed: true,
+            first_pc: Some(0x0200_1000),
+            second_pc: Some(0x0200_1000),
+            error: None,
+        };
+        let r = runtime_audit(identity, false, cpu("ARM9", 3333),
+            cpu("ARM7", 3334), None);
+        assert!(!r.identity.diagnostic_identity_verified);
+        assert!(!r.write_authorized);
+        assert!(r.blockers.contains(&"rom_changed_during_gdb_observations".into()));
     }
 }
