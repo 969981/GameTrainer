@@ -1,6 +1,10 @@
 # Changelog
 
-## 2026-11-23 — M3 opt-in GDB live patches (unverified in real emulator)
+## 2026-11-23 — M3 opt-in GDB live patches (CI green, emulator unverified)
+
+- Verified [CI #45118655477](https://github.com/969981/GameTrainer/actions/runs/45118655477): 50 Rust tests, 15 UI tests, Chromium 3-width layouts, and Windows debug EXE.
+- Fixed strict AXV/AXP ROM family address selection and repeat full-ROM SHA1 before each preview and apply.
+- Added mocked GDB stop/read/write/readback/continue integration and fail-closed SQLite path management.
 
 - Introduce localhost GDB RSP transport, full ROM SHA1 allowlist, guarded two-span Capture modification and four-ROM experimental BattleCrit Hook with a user-supplied SHA256-verified source payload.
 - Add Tauri M3 scoped IPC and React preview/confirm/apply/restore/history UI; SQLite records real intents separately from M2 fixtures.

@@ -8,7 +8,7 @@ tags: [M3, GDB, Ruby, Sapphire, Capture, BattleCrit, SQLite]
 
 # M3 · Ruby / Sapphire 本地 mGBA GDB 实验性写入
 
-**这是具有真实 GBA Guest 内存写入能力的实验代码，并未在用户的 Windows+mGBA+原版 ROM 上实测捕捉或战斗功能。**
+**已通过完整 CI 的 Rust/React/Windows 桌面构建，但仍未在用户真实 Windows+mGBA+原版 ROM 上实测捕捉或战斗功能。**
 
 ## 技术路径
 
@@ -51,3 +51,12 @@ BattleCrit 本地 Payload 必须从你已持有的原 v4.6.0 研究源码中选�
 - 原源码 GPL-3.0 许可、用户本地模板和后续正式发行边界。
 
 关联：[M2](m2-safe-patch.md) · [RS 安全研究](gen3-rs-migration-security-review.md) · [ADR-0005](decisions/0005-m3-gdb-guarded-live.md)。
+
+## 2026-11-23 实际构建与自动化结果
+
+- [CI #45118655477](https://github.com/969981/GameTrainer/actions/runs/45118655477)：**三组全部通过**。Rust 50 项单元测试，包含新增 fake mGBA GDB RSP 停止/Guest read/write/readback/continue 协议回归；React/Vitest 15 项；Chromium 3 个浏览器布局 E2E。
+- Windows Tauri 2 Shell 的 check、桌面 Rust 单测和 debug exe 生成全部成功；[Windows x64 ZIP Artifact](https://github.com/969981/GameTrainer/actions/runs/45118655477/artifacts/14792413807)（artifact 名中 m0-m1 为历史 CI 名称，ZIP 内实际构建的是最新 M3 exe）。
+- 修复了 Capture 的地区字母单独选择地址问题：必须具有严格 AXV/AXP GameCode 前缀。预览和 Apply 阶段均重新读取并核对完整 Guest ROM SHA1；不能悄悄切换到其它 ROM。
+- SQLite app-local-data 无法解析时直接拒绝 live 连接，不再降级临时目录；多资源恢复可识别已有原字节，故障后保留 Owner 供诊断。
+- **未通过/尚无的证据**：在真实 Windows WebView2 程序内手工操作 mGBA GDB Server、CRC/SHA 实机比对、捕捉/战斗行为、代码洞安全卸载、SaveState/ROM Reload 实测。Rust fake GDB 不等于真实 mGBA。
+

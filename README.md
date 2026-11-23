@@ -11,6 +11,8 @@
 - 捕捉：双 ROM Halfword 读回/恢复。BattleCrit：四 ROM、用户提供且经 SHA256 校验的 124B Thumb 模板，code cave 先写、dispatch 最后激活，恢复顺序相反。
 - 用户明确确认备份及离线单机测试，SQLite 先写 Intent。**钓鱼/Feebas、传送实际 Hook 及其他未实现战斗功能仍然不开放；本阶段无真实 ROM/mGBA 端到端验收。**
 
+**M3 自动化结果（2026-11-23）**：最新 CI [#45118655477](https://github.com/969981/GameTrainer/actions/runs/45118655477) Rust 50 项单测、React/Vitest 15 项、三尺寸 Chromium E2E、Windows Tauri check/unit tests/debug EXE 全部通过。Windows ZIP 的 Artifact 名仍保留旧的 m0-m1 标记，但其内容为最新 M3 commit 构建的 exe：[下载 Actions Artifact](https://github.com/969981/GameTrainer/actions/runs/45118655477/artifacts/14792413807)。**没有实机游戏验证。**
+
 ## 产品目标
 
 - 支持 Pokémon Gen3（GBA）、Gen4/Gen5（NDS）、Gen6（3DS），并扩展到 Windows 原生单机游戏。

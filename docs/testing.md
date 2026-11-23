@@ -83,3 +83,13 @@
 - [ ] **真实 Windows + mGBA + 原版 ROM** 捕捉/战斗行为、双打特殊状态、SaveState/ROM Reload、代码洞执行/恢复实测。当前尚无实机证据。
 
 关联：[M3](m3-live-gdb-experimental.md) · [ADR-0005](decisions/0005-m3-gdb-guarded-live.md)。
+
+## M3 CI 完成情况（2026-11-23）
+
+- [x] Rust 50 项（Core 8 + trainer-live 3 + Emerald 9 + Patch 16 + Ruby/Sapphire 8 + trainer-rsp 3 + SQLite 3）。
+- [x] RustFmt/Clippy（严格 -D warnings）、React/Vitest 15 项、ESLint、TypeScript、Vite Web Build。
+- [x] Chromium 1100、1366、1500px 的 3 项 E2E，浏览器仍不允许执行真实 RSP 写入。
+- [x] Windows Tauri 2 cargo check、桌面命令单测、Debug EXE ZIP 构建。
+- [ ] 实际 Windows+mGBA+ROM 的 GDB 读写、捕捉验证和 BattleCrit 异常战斗/恢复测试，仍为明确阻塞。
+- [CI 全绿证据](https://github.com/969981/GameTrainer/actions/runs/45118655477) · [Windows 测试包](https://github.com/969981/GameTrainer/actions/runs/45118655477/artifacts/14792413807)。
+
