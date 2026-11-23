@@ -8,7 +8,7 @@
 
 新增真实 DeSmuME ARM9 GDB M 写包和回读、来源签名与 ROM/PID/Epoch 校验、append-only fsync 所有权日志、按原指令恢复：APAE/APAI 穿墙，以及 APAE 英文 100% 捕捉。必须手动暂停双 GDB Stub，JIT 加载时关闭，用户明确风险确认。**无实机完整验证，不是原子双 CPU 停机证明。**
 
-传送、战斗 Hook 和 72B Thumb Cave 动态注入/擦除需要新的 Guest Safe Point/JIT/Overlay 证据，不能假装它们已安全开放。
+新增 APAE/APAI 72B Cave 原版空白区实验性 NOP/BX LR 写入与按所有权清零；不会安装跳转入口，**不执行真正 0x5A/0xA5 Guest Thumb 回调**。传送、战斗动态 Hook 及已运行代码的热卸载仍需要 Guest Safe Point/JIT/Overlay 证据。
 
 [M11 使用文档](docs/m11-dp-live-patch-lab.md) · [ADR-0013](docs/decisions/0013-m11-source-gated-experimental-live-write.md)。
 
