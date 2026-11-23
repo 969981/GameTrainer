@@ -1,7 +1,7 @@
 import {
   Activity, BookOpenText, ChevronDown, ClipboardList, Command, Cpu,
   Gamepad2, LayoutDashboard, Layers3, Library, Moon, PanelRightClose,
-  PanelRightOpen, Puzzle, Search, Settings2, ShieldAlert, Sun,
+  PanelRightOpen, Puzzle, Search, Settings2, ShieldAlert, ShieldCheck, Sun,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ const PRIMARY_ITEMS: { id: ViewId; label: string; icon: typeof Library }[] = [
   { id: "home", label: "总览", icon: LayoutDashboard },
   { id: "library", label: "游戏库", icon: Library },
   { id: "modules", label: "模块中心", icon: Puzzle },
+  { id: "patchlab", label: "补丁实验室", icon: ShieldCheck },
   { id: "runtime", label: "运行时", icon: Cpu },
   { id: "history", label: "操作历史", icon: ClipboardList },
   { id: "journal", label: "开发日记", icon: BookOpenText },

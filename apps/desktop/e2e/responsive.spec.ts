@@ -31,5 +31,13 @@ for (const width of [1100, 1366, 1500]) {
     await expect(page.getByRole("button", { name: "进程观察", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "RNG / Seed" })).toHaveCount(0);
     await page.screenshot({ path: 'test-results/screenshots/pc-' + width + '.png', fullPage: true });
+
+    await page.getByRole("button", { name: "补丁实验室" }).click();
+    await expect(page.getByRole("heading", { name: "安全补丁实验室" })).toBeVisible();
+    await expect(page.getByText("浏览器仅能预览 M2 设计")).toBeVisible();
+    await expect(page.getByRole("button", { name: "生成后端预览" })).toBeDisabled();
+    const m2Overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(m2Overflow).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: 'test-results/screenshots/m2-' + width + '.png', fullPage: true });
   });
 }

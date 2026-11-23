@@ -65,6 +65,9 @@ pub fn m2_fixture_status(state: State<'_, LabState>) -> Result<LabStatus, String
 #[tauri::command]
 pub fn m2_start_fixture(state: State<'_, LabState>) -> Result<LabStatus, String> {
     with_lab(&state, |lab| {
+        if !lab.engine.active().is_empty() {
+            return Err("请先恢复现有测试补丁；不能通过重置绕过补丁所有权".into());
+        }
         // Synthetic memory starts clean. Never auto-replay or restore SQLite entries.
         lab.engine.clear_fixture_session();
         lab.target = Some(FixtureTarget::new());

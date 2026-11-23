@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, BookOpenText, Check, ClipboardList, Cpu, FileWarning, Gamepad2, Layers3, Library, MonitorCog, SearchX, ShieldAlert, Sparkles } from "lucide-react";
+import { Activity, ArrowRight, BookOpenText, Check, Cpu, FileWarning, Gamepad2, Layers3, Library, MonitorCog, SearchX, ShieldAlert, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { EmeraldRngLivePanel, MgbaConnection } from "@/components/MgbaConnection";
 import { Badge } from "@/components/ui/badge";
@@ -86,9 +86,6 @@ export function RuntimePage({ catalog }: { catalog: GameCatalog }) {
     <MgbaConnection />
     <div className="runtime-list">{catalog.runtimes.map((runtime) => <Card key={runtime.runtime_id}><CardContent className="runtime-row"><span className="feature-icon"><MonitorCog size={22} /></span><div><strong>{runtime.name}</strong><small>{runtime.description}</small><code>{runtime.runtime_id}</code></div><Badge>PLANNED</Badge></CardContent></Card>)}</div>
   </div>;
-}
-export function HistoryPage() {
-  return <div className="page-stack"><div className="page-heading"><div><div className="eyebrow">ACTION HISTORY</div><h1>操作历史</h1><p>未来由 Rust 通过 SQLite 记录真实操作。</p></div></div><div className="empty-state"><ClipboardList size={34} /><h3>暂无真实操作记录</h3><p>Mock 界面点击不会生成虚假的修改历史。</p></div></div>;
 }
 const STARTER_JOURNAL = ["# GameTrainer 开发草稿", "", "## M0 任务", "- [ ] Rust Registry 与五游戏平台", "- [ ] React 动态模块导航", "- [ ] 第六款游戏扩展测试", "", "## 技术结论", "Runtime、Game、Feature、UI Schema 分离。", "当前仅为 Mock，未连接任何真实游戏。", "", "> 仅临时草稿，尚未保存到 Obsidian。"].join("\n");
 export function JournalPage() {

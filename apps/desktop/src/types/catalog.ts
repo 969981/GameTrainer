@@ -1,7 +1,7 @@
 export type PlatformFamily = "gen3" | "gen4" | "gen5" | "gen6" | "pc";
 export type ImplementationStatus = "mock" | "planned" | "template_only";
 export type ParameterKind = "text" | "hex" | "integer";
-export type ViewId = "home" | "library" | "workspace" | "modules" | "runtime" | "history" | "journal" | "settings";
+export type ViewId = "home" | "library" | "workspace" | "modules" | "patchlab" | "runtime" | "history" | "journal" | "settings";
 
 export interface ParameterDescriptor {
   id: string;

@@ -3,10 +3,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, LoaderCircle } from "lucide-react";
 import { AppHeader, ContextSidebar, PrimaryRail, SessionInspector } from "@/components/Shell";
 import {
-  GameLibraryPage, GameWorkspacePage, HistoryPage, HomePage, JournalPage,
+  GameLibraryPage, GameWorkspacePage, HomePage, JournalPage,
   ModulesPage, RuntimePage, SettingsPage,
 } from "@/components/Pages";
 import { getCatalog, getSessionSnapshot, isTauriDesktop } from "@/lib/backend";
+import { PatchLabPage, AuditHistoryPage } from "@/components/PatchLab";
 import { disconnectEmerald } from "@/lib/mgba";
 import { findGame } from "@/lib/catalog";
 import { useWorkspace } from "@/store/workspace";
@@ -75,7 +76,8 @@ export default function App({ catalogOverride }: { catalogOverride?: GameCatalog
         : <GameLibraryPage catalog={catalog} />;
       case "modules": return <ModulesPage catalog={catalog} />;
       case "runtime": return <RuntimePage catalog={catalog} />;
-      case "history": return <HistoryPage />;
+      case "history": return <AuditHistoryPage />;
+      case "patchlab": return <PatchLabPage />;
       case "journal": return <JournalPage />;
       case "settings": return <SettingsPage />;
     }
