@@ -74,8 +74,7 @@ pub struct TargetIdentity {
 }
 impl TargetIdentity {
     fn validate_fixture(&self) -> Result<(), PatchError> {
-        let (profile_id, _) =
-            fixture_profile(&self.game_id).ok_or(PatchError::WriteLocked)?;
+        let (profile_id, _) = fixture_profile(&self.game_id).ok_or(PatchError::WriteLocked)?;
         if self.environment != "fixture"
             || self.profile_id != profile_id
             || self.runtime_id != "runtime.fixture.memory"
@@ -214,8 +213,11 @@ impl PatchManager {
         spec.validate()?;
         let identity = target.identity()?;
         identity.validate_fixture()?;
-        let (_, expected_address) = fixture_profile(&identity.game_id).ok_or(PatchError::WriteLocked)?;
-        if spec.address != expected_address { return Err(PatchError::WriteLocked); }
+        let (_, expected_address) =
+            fixture_profile(&identity.game_id).ok_or(PatchError::WriteLocked)?;
+        if spec.address != expected_address {
+            return Err(PatchError::WriteLocked);
+        }
         if self.overlaps(&identity, spec.address, spec.desired.len()) {
             return Err(PatchError::Overlap);
         }
@@ -618,7 +620,12 @@ impl FixtureTarget {
             epoch: self.identity.epoch,
             seed: self.seed,
             game_id: self.identity.game_id.clone(),
-            seed_address_display: format!("0x{:08X}", fixture_profile(&self.identity.game_id).expect("allowlisted fixture").1),
+            seed_address_display: format!(
+                "0x{:08X}",
+                fixture_profile(&self.identity.game_id)
+                    .expect("allowlisted fixture")
+                    .1
+            ),
             active_patches: patches,
             read_only_game_runtime: true,
             environment: "fixture".into(),
@@ -646,13 +653,17 @@ impl PatchTarget for FixtureTarget {
         Ok(self.identity.clone())
     }
     fn read(&self, address: u32, len: usize) -> Result<Vec<u8>, PatchError> {
-        if fixture_profile(&self.identity.game_id).is_none_or(|(_, expected)| expected != address) || len != 4 {
+        if fixture_profile(&self.identity.game_id).is_none_or(|(_, expected)| expected != address)
+            || len != 4
+        {
             return Err(PatchError::InvalidSpan);
         }
         Ok(self.seed.to_le_bytes().to_vec())
     }
     fn write(&mut self, address: u32, bytes: &[u8]) -> Result<(), PatchError> {
-        if fixture_profile(&self.identity.game_id).is_none_or(|(_, expected)| expected != address) || bytes.len() != 4 {
+        if fixture_profile(&self.identity.game_id).is_none_or(|(_, expected)| expected != address)
+            || bytes.len() != 4
+        {
             return Err(PatchError::InvalidSpan);
         }
         if self.fail_next_write {
@@ -858,7 +869,10 @@ mod tests {
             assert_eq!(original.game_id, game_id);
             assert_eq!(original.seed_address_display, "0x03004818");
             let preview = manager
-                .preview(&target, PatchSpec::for_fixture_game(game_id, 0x1122_3344).unwrap())
+                .preview(
+                    &target,
+                    PatchSpec::for_fixture_game(game_id, 0x1122_3344).unwrap(),
+                )
                 .unwrap();
             assert_eq!(preview.game_id, game_id);
             let applied = manager.apply(&mut target, &preview.preview_id).unwrap();
@@ -899,5 +913,4 @@ mod tests {
         ));
         assert_eq!(sapphire.seed, 0x1234_5678);
     }
-
 }

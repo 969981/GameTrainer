@@ -168,8 +168,15 @@ mod m1 {
                 session_id: Some(attached.session_id().to_owned()),
                 game_id: Some(attached.game_id().to_owned()),
                 runtime_id: Some("runtimes.mgba.external".into()),
-                profile_id: Some(format!("{}_R{}-anchor-only", attached.game_code(), attached.revision())),
-                message: format!("{} 只读连接：仅 Header/Rev/16-byte Anchor，禁止游戏写入", attached.game_id()),
+                profile_id: Some(format!(
+                    "{}_R{}-anchor-only",
+                    attached.game_code(),
+                    attached.revision()
+                )),
+                message: format!(
+                    "{} 只读连接：仅 Header/Rev/16-byte Anchor，禁止游戏写入",
+                    attached.game_id()
+                ),
             },
             None => SessionSnapshot::default(),
         }
@@ -238,8 +245,14 @@ mod tests {
         let catalog = get_catalog().expect("valid Rust Mock registry");
         assert_eq!(catalog.games.len(), 7);
         assert!(catalog.read_only);
-        assert!(catalog.games.iter().any(|game| game.game_id == "games.pokemon.ruby"));
-        assert!(catalog.games.iter().any(|game| game.game_id == "games.pokemon.sapphire"));
+        assert!(catalog
+            .games
+            .iter()
+            .any(|game| game.game_id == "games.pokemon.ruby"));
+        assert!(catalog
+            .games
+            .iter()
+            .any(|game| game.game_id == "games.pokemon.sapphire"));
         assert_eq!(catalog.source, "mock");
     }
 }

@@ -84,7 +84,10 @@ pub fn m2_fixture_status(state: State<'_, LabState>) -> Result<LabStatus, String
     })
 }
 #[tauri::command]
-pub fn m2_start_fixture(state: State<'_, LabState>, game_id: Option<String>) -> Result<LabStatus, String> {
+pub fn m2_start_fixture(
+    state: State<'_, LabState>,
+    game_id: Option<String>,
+) -> Result<LabStatus, String> {
     with_lab(&state, |lab| {
         if !lab.engine.active().is_empty() {
             return Err("请先恢复现有测试补丁；不能通过重置绕过补丁所有权".into());
@@ -198,13 +201,20 @@ mod tests {
     fn ruby_and_sapphire_fixture_sessions_are_isolated_and_audited() {
         for game in [trainer_patch::RUBY_GAME_ID, trainer_patch::SAPPHIRE_GAME_ID] {
             let mut lab = Lab {
-                engine: PatchManager::new(AuditStore::open_memory().unwrap(), Duration::from_secs(30)),
+                engine: PatchManager::new(
+                    AuditStore::open_memory().unwrap(),
+                    Duration::from_secs(30),
+                ),
                 target: Some(FixtureTarget::for_game(game).unwrap()),
             };
             let target = lab.target.as_mut().unwrap();
-            let preview = lab.engine.preview(
-                target, PatchSpec::for_fixture_game(game, 0xF00D_BABE).unwrap()
-            ).unwrap();
+            let preview = lab
+                .engine
+                .preview(
+                    target,
+                    PatchSpec::for_fixture_game(game, 0xF00D_BABE).unwrap(),
+                )
+                .unwrap();
             let applied = lab.engine.apply(target, &preview.preview_id).unwrap();
             assert_eq!(target.snapshot(vec![]).seed, 0xF00D_BABE);
             lab.engine.restore(target, &applied.owner_id).unwrap();
@@ -213,5 +223,4 @@ mod tests {
             assert!(events.iter().all(|event| event.game_id == game));
         }
     }
-
 }
