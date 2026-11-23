@@ -1,0 +1,10 @@
+[package]
+name = "trainer-rs"
+version.workspace = true
+edition.workspace = true
+description = "Source-grounded Ruby/Sapphire retail ROM and RNG read-only profiles"
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+trainer-mgba = { path = "../trainer-mgba" }

@@ -39,7 +39,7 @@ export function PrimaryRail() {
         </button>
       ))}
       <div className="rail-spacer" />
-      <div className="rail-footer" title="M0 · Mock 预览">M0</div>
+      <div className="rail-footer" title="M0 · 多游戏 Mock 目录">M0</div>
     </nav>
   );
 }
@@ -184,7 +184,7 @@ export function SessionInspector({ session, game }: { session?: SessionSnapshot;
         <span>{session?.message ?? "未连接后端。当前仅为 Mock 目录。"}</span>
       </div>
       <div className="sidebar-heading">只读连接约束</div>
-      <div className="inspector-note">M1 只支持 mGBA Emerald 只读探测和 Seed 观察；无写入、Patch 或 Hook 命令。所有未知 ROM 与内存映射均拒绝连接。</div>
+      <div className="inspector-note">M1 接入 Emerald 只读 Seed 观察；Ruby/Sapphire 只读 Profile 已建立、实机待验；无写入、Patch 或 Hook 命令。所有未知 ROM 与内存映射均拒绝连接。</div>
     </aside>
   );
 }

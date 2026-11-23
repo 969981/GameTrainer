@@ -21,14 +21,28 @@ beforeEach(() => {
 });
 
 describe("M0 dynamic AppShell", () => {
-  it("lists the five Mock games and never claims connected status", () => {
+  it("lists seven game descriptors across five platforms and never claims connected status", () => {
     mount();
     expect(screen.getByRole("button", { name: "打开 Pokémon Emerald" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开 Pokémon Ruby" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开 Pokémon Sapphire" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Platinum" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon Black 2" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Pokémon X / Y" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开 Windows Native · Template" })).toBeInTheDocument();
     expect(screen.getByText("未连接")).toBeInTheDocument();
+  });
+
+  it("switches Ruby and Sapphire without carrying over selected modules", () => {
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon Ruby" }));
+    expect(screen.getByRole("button", { name: "我方必会心（实验研究）" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "我方必会心（实验研究）" }));
+    expect(useWorkspace.getState().selectedFeatureId).toBe("features.rs.battlecrit");
+    fireEvent.click(screen.getByRole("button", { name: "游戏库" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon Sapphire" }));
+    expect(useWorkspace.getState().selectedGameId).toBe("games.pokemon.sapphire");
+    expect(useWorkspace.getState().selectedFeatureId).toBeNull();
   });
 
   it("switches a Gen6 game without leaking Emerald-only features", () => {
@@ -61,7 +75,7 @@ describe("M0 dynamic AppShell", () => {
     mount({ ...baseCatalog, games: [...baseCatalog.games, sixth] });
     fireEvent.click(screen.getByRole("button", { name: "打开 Pokémon FireRed" }));
     expect(screen.getByRole("button", { name: "FireRed Seed" })).toBeInTheDocument();
-    expect(screen.getByText(/6 Game Adapters/)).toBeInTheDocument();
+    expect(screen.getByText(/8 Game Adapters/)).toBeInTheDocument();
   });
 
   it("never produces live RNG values in browser Mock", () => {

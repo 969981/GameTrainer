@@ -249,9 +249,9 @@ mod tests {
     }
 
     #[test]
-    fn loads_five_independent_mock_platforms() {
+    fn loads_five_platforms_and_three_independent_gen3_games() {
         let registry = GameRegistry::mock().expect("valid M0 fixture");
-        assert_eq!(registry.snapshot().games.len(), 5);
+        assert_eq!(registry.snapshot().games.len(), 7);
         for platform in [
             PlatformFamily::Gen3,
             PlatformFamily::Gen4,
@@ -259,21 +259,40 @@ mod tests {
             PlatformFamily::Gen6,
             PlatformFamily::Pc,
         ] {
-            assert_eq!(registry.list_by_platform(&platform).len(), 1);
+            assert_eq!(
+                registry.list_by_platform(&platform).len(),
+                if platform == PlatformFamily::Gen3 { 3 } else { 1 }
+            );
         }
         assert!(registry.snapshot().read_only);
         assert_eq!(SessionSnapshot::default().state, SessionState::Detached);
     }
 
     #[test]
-    fn sixth_adapter_requires_no_registry_core_changes() {
+    fn eighth_adapter_requires_no_registry_core_changes() {
         let mut registry = GameRegistry::mock().unwrap();
         let mut new_game = registry.game("games.pokemon.emerald").unwrap().clone();
         new_game.game_id = "games.pokemon.firered".into();
         new_game.name = "Pokémon FireRed".into();
         registry.register(&AddedGame(new_game)).unwrap();
-        assert_eq!(registry.snapshot().games.len(), 6);
-        assert_eq!(registry.list_by_platform(&PlatformFamily::Gen3).len(), 2);
+        assert_eq!(registry.snapshot().games.len(), 8);
+        assert_eq!(registry.list_by_platform(&PlatformFamily::Gen3).len(), 4);
+    }
+
+    #[test]
+    fn ruby_and_sapphire_have_independent_descriptors_and_no_patch_capability() {
+        let registry = GameRegistry::mock().unwrap();
+        let ruby = registry.game("games.pokemon.ruby").unwrap();
+        let sapphire = registry.game("games.pokemon.sapphire").unwrap();
+        assert_eq!(ruby.platform_family, PlatformFamily::Gen3);
+        assert_eq!(sapphire.platform_family, PlatformFamily::Gen3);
+        assert_eq!(ruby.features.len(), sapphire.features.len());
+        assert_ne!(ruby.game_id, sapphire.game_id);
+        for game in [ruby, sapphire] {
+            assert!(game.features.iter().any(|feature| feature.feature_id == "features.rs.battlecrit"));
+            assert!(game.features.iter().any(|feature| feature.feature_id == "features.gen3.rng"));
+            assert!(!game.features.iter().any(|feature| feature.status != ImplementationStatus::Planned && feature.required_capabilities.iter().any(|c| c == "patch.apply")));
+        }
     }
 
     #[test]

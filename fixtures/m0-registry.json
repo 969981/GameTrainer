@@ -100,6 +100,324 @@
       ]
     },
     {
+      "game_id": "games.pokemon.ruby",
+      "name": "Pokémon Ruby",
+      "summary": "红宝石 v4.6.0 · 13 个零售 Revision Profile · 只读研究与实验性模块",
+      "icon": "gem",
+      "platform_family": "gen3",
+      "target_platform": "gba",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.mgba.external",
+        "runtimes.mgba.bridge"
+      ],
+      "features": [
+        {
+          "feature_id": "features.gen3.rng",
+          "name": "RNG / Seed",
+          "group": "研究",
+          "description": "红蓝宝石美版/日版/欧版不同 Seed 地址；支持版本化只读快照",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.encounters",
+          "name": "野生遭遇与 PokéFinder",
+          "group": "研究",
+          "description": "按 Ruby/Sapphire 原版遭遇物种差异及 97 个地图类别研究",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.fishing",
+          "name": "钓鱼与笨笨鱼",
+          "group": "研究",
+          "description": "原版钓鱼状态机、钓点、Seed 证据；Hook 暂未开放",
+          "icon": "activity",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.teleport",
+          "name": "丰缘地图与传送",
+          "group": "地图",
+          "description": "原版 MapGroup/Map 与 Warp 数据研究；未知落点禁止执行",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.breeding",
+          "name": "培育屋 / Egg RNG",
+          "group": "研究",
+          "description": "父母本/待领蛋/下一个 PID 只读研究",
+          "icon": "users",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.roamer",
+          "name": "拉帝游走与幻之岛",
+          "group": "研究",
+          "description": "游走宝可梦、Mirage Island 判定数据研究",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.party",
+          "name": "队伍与盒子",
+          "group": "数据浏览",
+          "description": "按原版 RS 数据布局的宝可梦加密结构只读研究",
+          "icon": "boxes",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.safari",
+          "name": "Safari / Repel / Wallet",
+          "group": "研究",
+          "description": "步数、球数、驱虫、金钱与代币状态研究",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.wishmkr",
+          "name": "WISHMKR 存档 RNG",
+          "group": "离线工具",
+          "description": "Section0 双槽只读检查与 Seed 预测，尚未移植导出工具",
+          "icon": "file-code",
+          "status": "planned",
+          "required_capabilities": [
+            "file.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.capture",
+          "name": "捕捉与球种",
+          "group": "修改规划",
+          "description": "原 Lua 100% 捕捉原版 halfword 证据；真实写入关闭",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.walls",
+          "name": "碰撞与穿墙",
+          "group": "修改规划",
+          "description": "原版 MapGridGetCollisionAt 签名研究；真实写入关闭",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.battlecrit",
+          "name": "我方必会心（实验研究）",
+          "group": "逆向研究",
+          "description": "v4.6.0 仅四 ROM 静态证据/模拟验证；无 mGBA 实机，禁止 Hook",
+          "icon": "activity",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
+      "game_id": "games.pokemon.sapphire",
+      "name": "Pokémon Sapphire",
+      "summary": "蓝宝石 v4.6.0 · 13 个零售 Revision Profile · 只读研究与实验性模块",
+      "icon": "sparkles",
+      "platform_family": "gen3",
+      "target_platform": "gba",
+      "status": "mock",
+      "runtime_candidates": [
+        "runtimes.mgba.external",
+        "runtimes.mgba.bridge"
+      ],
+      "features": [
+        {
+          "feature_id": "features.gen3.rng",
+          "name": "RNG / Seed",
+          "group": "研究",
+          "description": "红蓝宝石美版/日版/欧版不同 Seed 地址；支持版本化只读快照",
+          "icon": "activity",
+          "status": "mock",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.encounters",
+          "name": "野生遭遇与 PokéFinder",
+          "group": "研究",
+          "description": "按 Ruby/Sapphire 原版遭遇物种差异及 97 个地图类别研究",
+          "icon": "scan",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.fishing",
+          "name": "钓鱼与笨笨鱼",
+          "group": "研究",
+          "description": "原版钓鱼状态机、钓点、Seed 证据；Hook 暂未开放",
+          "icon": "activity",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.teleport",
+          "name": "丰缘地图与传送",
+          "group": "地图",
+          "description": "原版 MapGroup/Map 与 Warp 数据研究；未知落点禁止执行",
+          "icon": "map",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.breeding",
+          "name": "培育屋 / Egg RNG",
+          "group": "研究",
+          "description": "父母本/待领蛋/下一个 PID 只读研究",
+          "icon": "users",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.roamer",
+          "name": "拉帝游走与幻之岛",
+          "group": "研究",
+          "description": "游走宝可梦、Mirage Island 判定数据研究",
+          "icon": "sparkles",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.party",
+          "name": "队伍与盒子",
+          "group": "数据浏览",
+          "description": "按原版 RS 数据布局的宝可梦加密结构只读研究",
+          "icon": "boxes",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.safari",
+          "name": "Safari / Repel / Wallet",
+          "group": "研究",
+          "description": "步数、球数、驱虫、金钱与代币状态研究",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.wishmkr",
+          "name": "WISHMKR 存档 RNG",
+          "group": "离线工具",
+          "description": "Section0 双槽只读检查与 Seed 预测，尚未移植导出工具",
+          "icon": "file-code",
+          "status": "planned",
+          "required_capabilities": [
+            "file.read"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.capture",
+          "name": "捕捉与球种",
+          "group": "修改规划",
+          "description": "原 Lua 100% 捕捉原版 halfword 证据；真实写入关闭",
+          "icon": "target",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.walls",
+          "name": "碰撞与穿墙",
+          "group": "修改规划",
+          "description": "原版 MapGridGetCollisionAt 签名研究；真实写入关闭",
+          "icon": "shield",
+          "status": "planned",
+          "required_capabilities": [
+            "patch.apply"
+          ],
+          "parameter_schema": []
+        },
+        {
+          "feature_id": "features.rs.battlecrit",
+          "name": "我方必会心（实验研究）",
+          "group": "逆向研究",
+          "description": "v4.6.0 仅四 ROM 静态证据/模拟验证；无 mGBA 实机，禁止 Hook",
+          "icon": "activity",
+          "status": "planned",
+          "required_capabilities": [
+            "guest.read"
+          ],
+          "parameter_schema": []
+        }
+      ]
+    },
+    {
       "game_id": "games.pokemon.platinum",
       "name": "Pokémon Platinum",
       "platform_family": "gen4",
