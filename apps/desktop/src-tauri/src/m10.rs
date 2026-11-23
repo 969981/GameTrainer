@@ -145,6 +145,15 @@ pub async fn m10_dp_dual_cpu_overlay11_readonly(
         // *read-only* investigation when the complete ROM reference is absent.
         let profile = profile_for(&game_code, revision)
             .ok_or("DP profile unavailable during native snapshot")?;
+        if !identity.core_rom_stream_complete
+            || !identity.pipe_and_process_bound
+            || !identity.both_gdb_ports_bound
+            || identity.game_code != game_code
+            || identity.revision != revision
+            || identity.header6c != profile.header6c
+        {
+            return Err("M10 rejected GDB probing: core ROM header, pipe, process or both TCP owners are not bound to the selected DeSmuME session".into());
+        }
         let (arm9, snapshot) = observe_cpu("ARM9", arm9_port, Some(&profile));
         let (arm7, _) = observe_cpu("ARM7", arm7_port, None);
         let (after, after_identity) = trainer_runtime_win::read_dp_core_identity(
