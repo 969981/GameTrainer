@@ -239,18 +239,25 @@ mod tests {
         let mut b = [0u8; 1];
         loop {
             stream.read_exact(&mut b).unwrap();
-            if b[0] == b'$' { break; }
+            if b[0] == b'$' {
+                break;
+            }
         }
         let mut payload = Vec::new();
         loop {
             stream.read_exact(&mut b).unwrap();
-            if b[0] == b'#' { break; }
+            if b[0] == b'#' {
+                break;
+            }
             payload.push(b[0]);
         }
         let mut checksum = [0u8; 2];
         stream.read_exact(&mut checksum).unwrap();
         let expected = u8::from_str_radix(std::str::from_utf8(&checksum).unwrap(), 16).unwrap();
-        assert_eq!(expected, payload.iter().fold(0u8, |a, x| a.wrapping_add(*x)));
+        assert_eq!(
+            expected,
+            payload.iter().fold(0u8, |a, x| a.wrapping_add(*x))
+        );
         String::from_utf8(payload).unwrap()
     }
     fn fake_reply(stream: &mut TcpStream, bytes: &[u8]) {
@@ -290,12 +297,14 @@ mod tests {
         });
         let mut client = RspClient::connect_local(port).unwrap();
         assert!(client.is_paused());
-        assert_eq!(client.read(0x03004818, 4).unwrap(), [0x78,0x56,0x34,0x12]);
-        client.write(0x03004818, &[0xef,0xbe,0xad,0xde]).unwrap();
+        assert_eq!(
+            client.read(0x03004818, 4).unwrap(),
+            [0x78, 0x56, 0x34, 0x12]
+        );
+        client.write(0x03004818, &[0xef, 0xbe, 0xad, 0xde]).unwrap();
         client.resume().unwrap();
         assert!(!client.is_paused());
-        assert!(matches!(client.read(0x03004818,4), Err(RspError::Running)));
+        assert!(matches!(client.read(0x03004818, 4), Err(RspError::Running)));
         worker.join().unwrap();
     }
-
 }
