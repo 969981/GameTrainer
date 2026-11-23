@@ -1,0 +1,42 @@
+{
+  "source": "docs/DP_GUEST_EXEC_ROM_AUDIT_v0.8.14.json; docs/DP_MULTILANG_OVERLAY11_AUDIT_v0.8.11.json",
+  "verification_level": "original_rom_static_only",
+  "variants": [
+    {
+      "game_code": "APAE",
+      "revision": 13,
+      "rom_sha256": "7c8fbfe3b4b87f02bb9a962d1bb5a1332b38508c620b26749693bbba29c16c0c",
+      "overlay11_sha256": "2d3e2d84d2ff4f8c4bf762b0801374e45312a30286dd84bea6aede912d71ff14",
+      "overlay11_base": 35837376,
+      "crit_callsite": 35862760,
+      "crit_target": 35962684,
+      "hit_callsite": 35915852,
+      "ohko_callsite": 35860752,
+      "guest_heap_alloc": 33647000,
+      "guest_heap_free": 33647128,
+      "dc_flush_all": 34390256,
+      "ic_invalidate_all": 34390412,
+      "thumb_cave_addr": 34629488,
+      "cave_bytes": 72
+    },
+    {
+      "game_code": "APAI",
+      "revision": 5,
+      "rom_sha256": "937c3019bdd60b7dbd98928ae5b2beb21382a6ec10dfe117f1b64d7c9b95b405",
+      "overlay11_sha256": "c395e17f957864a13e4053c699ae9a72b83173a0a1cc941481a00d676cc4943a",
+      "overlay11_base": 35837728,
+      "crit_callsite": 35863132,
+      "crit_target": 35963116,
+      "hit_callsite": 35916236,
+      "ohko_callsite": 35861104,
+      "guest_heap_alloc": 33647076,
+      "guest_heap_free": 33647204,
+      "dc_flush_all": 34390316,
+      "ic_invalidate_all": 34390472,
+      "thumb_cave_addr": 34629712,
+      "cave_bytes": 72
+    }
+  ],
+  "outcome": "M6 static only. No real 0x5A/0xA5 DeSmuME ARM9 execution, JIT/ICache coherence, or safe code-cave unload verified.",
+  "write_allowed": false
+}
