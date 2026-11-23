@@ -1,0 +1,9 @@
+[package]
+name = "trainer-hgss"
+version.workspace = true
+edition.workspace = true
+description = "HeartGold/SoulSilver v1.4.5.1 source-backed read-only profiles"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
