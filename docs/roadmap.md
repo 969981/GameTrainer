@@ -8,7 +8,7 @@
 | M1 Emerald 只读 | **第一迭代代码已实现：** Win32/mGBA Provider、六语言 Rev0 / 部分 ROM Anchor、Seed Snapshot、会话失效检查、Tauri IPC/React UI | **CI 已验证编译和合成单测；待验：** Windows+mGBA 真实读数、完整 ROM CRC、GUI 连通性与重启失效 |
 | M2 安全修改 | **Fixture-only 第一阶段已提交**：30s 令牌、预览/应用/恢复、原字节与 owner 校验、SQLite append-only Ledger、UI 实验室 | CI 已通过 Rust Patch/Storage 共 16 项测试及 Windows Tauri EXE；真实 mGBA 写入关闭；崩溃后不自动恢复 |
 | M3 Gen3 功能迁移 | 捕捉/传送/钓鱼/培育屋等按独立 FeaturePack 迁移 | 每个功能有 Profile 证据、语言差异测试、真实恢复测试 |
-| M4 游戏拓展 | 同 Runtime 的第二个 Gen3 游戏，再扩展 NDS/3DS 与 PC Native | 新 GameAdapter 不修改 core 或 AppShell；不同 Runtime 有一致的 UI 状态 |
+| M4 游戏拓展 | 已提前集成 Ruby/Sapphire 的独立 Gen3 只读核心与 Fixture，后续 FireRed/LeafGreen、NDS/3DS 和 PC Native | 真实 mGBA 读取仍需实机验证；任何写入保持禁止 |
 | M5 插件、预设与日记 | 模块列表、版本/依赖管理、导出审计、Obsidian 明确确认式导出 | 不覆盖原笔记、不丢审计、模块升级/卸载行为可测 |
 | M6 高级研究 | WASM 纯逻辑插件 PoC、可选可信 Native Agent/MinHook | 跨进程协议经版本校验，未知原生二进制不自动加载 |
 

@@ -45,3 +45,10 @@
 - [x] Windows Tauri check、Rust 桌面命令测试、调试 EXE 构建。
 - [ ] Windows WebView2 GUI 人工交互验收、真实 mGBA/ROM 验证与任何 live 写入。
 - [CI 实际证据](https://github.com/969981/GameTrainer/actions/runs/45109373457)。
+
+## Ruby/Sapphire v4.6.0 回归
+- Rust：26 Header/Revision、区域 Seed/Timer、德国 Debug Anchor 不符、未知 ROM/Revision、进程身份变化。
+- M2：Ruby/Sapphire 独立 Fixture、原值恢复、game_id SQLite 审计、跨游戏旧 token 拒绝。
+- React/Chromium：Gen3 游戏库、两款独立页面、1100/1366/1500 px 与其它世代切换。
+- Windows：Tauri Win32 编译与桌面单测；真实 mGBA/ROM 实机仍须单独验收。
+- [详细说明](gen3-ruby-sapphire.md)。

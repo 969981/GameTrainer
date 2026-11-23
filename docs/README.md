@@ -25,3 +25,6 @@
 - [2026-11-23 项目开发记录](2026-11-23-planning.md)
 
 所有 Markdown 应说明是设计、Mock、已实现或已测试。切勿将本仓库的计划性链接误认为对用户的 Personal-Life-OS 已完成更新。
+
+- [Ruby/Sapphire Gen3 适配与证据](gen3-ruby-sapphire.md) · [[gen3-ruby-sapphire]]
+- [ADR-0003 Gen3 RS 独立游戏适配器](decisions/0003-gen3-ruby-sapphire.md)

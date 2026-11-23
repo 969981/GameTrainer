@@ -28,6 +28,13 @@
 5. MinHook 仅用于受控的 Windows x86/x64 原生场景；GBA ARM/Thumb ROM Patch 不等于 MinHook。
 6. 禁止实现绕过反作弊、隐藏注入、未授权多玩家作弊、隐蔽提权或规避平台防护的行为。
 
+## Ruby/Sapphire v4.6.0 源证据与安全约束
+- Ruby / Sapphire 独立 GameCode/Revision/ROM Anchor/Seed Layout，不得复用 Emerald Guest 地址。
+- 26 版本源表通过 Rust 头/16 字节锚点检查只是只读候选证明，不代表整 ROM SHA1/CRC、14 处功能入口或真实 mGBA 验证。
+- 上传原源码与 Thumb payload 有 GPL-3.0；不得把原 CT/Lua、ROM、存档/payload 直接加入本项目。
+- BattleCrit 是实验性研究，源报告仅四 ROM 静态/合成证据、未实机通过，禁止启用 Hook。
+- M2 Ruby/Sapphire 仅可对本机 Rust Fixture 进行事务性 Seed 模拟，跨游戏旧令牌必须拒绝。
+
 ## M2 Fixture-only 安全约束
 - PatchManager 现在只允许隔离的 Rust FixtureTarget；不得因 UI 按钮可点击就开启 Windows 真实进程写内存能力。
 - token/session/epoch/owner/写前 SQLite Intent 由 Rust 校验；React 只能发送白名单业务参数，不得指定任意地址或字节。

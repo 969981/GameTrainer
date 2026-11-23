@@ -56,6 +56,13 @@ pnpm --filter @gametrainer/desktop test:e2e  # 首先安装 Playwright Chromium
 - [M2 CI 全部通过（Rust 32 项、前端单测与三尺寸浏览器检查、Windows Tauri EXE）](https://github.com/969981/GameTrainer/actions/runs/45109373457)
 - [M2 Windows CI 调试版](https://github.com/969981/GameTrainer/actions/runs/45109373457/artifacts/14788604154) · [M2 三尺寸页面截图](https://github.com/969981/GameTrainer/actions/runs/45109373457/artifacts/14789250532)
 
+## Ruby / Sapphire Gen3 适配（只读）
+
+- [26 个零售版 Profile、内存布局、源代码证据与安全边界](docs/gen3-ruby-sapphire.md) · [ADR-0003](docs/decisions/0003-gen3-ruby-sapphire.md)。
+- 新增独立 Pokémon Ruby / Pokémon Sapphire 游戏，Rust `trainer-rs` 实现 26 个版本的只读 Header/Anchor/Seed/Timer；Windows mGBA 有独立只读连接命令。
+- M2 可选择 Emerald / Ruby / Sapphire 三种隔离 Fixture 做 Seed 事务与 SQLite 审计，**真实 mGBA 和所有原生游戏仍禁止写入**。
+- v4.6.0 BattleCrit 源资料仅部分 ROM 静态验证，缺乏真实 mGBA 战斗测试，只作为研究模块。
+
 ## 文档入口
 
 | 文档 | 用途 |

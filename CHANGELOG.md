@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-23 — Ruby/Sapphire Gen3 separate adapters
+- Added 26-version source-backed Ruby/Sapphire header/anchor read-only Rust profiles and mGBA Win32 provider.
+- Added two Gen3 game descriptors, feature research pages, Rust profile catalog and Seed/Timer viewer.
+- Extended fixture-only M2 seed transactions to Ruby/Sapphire with distinct game_id/profile_id/SQLite audit.
+- Real game writes and BattleCrit experiment remain disabled; see [source evidence](docs/gen3-ruby-sapphire.md).
+
 ## 2026-11-23 — M2 safe mutation prototype (Fixture only)
 
 - CI verified: 32 Rust unit tests, React unit/build, Playwright 1100/1366/1500px browser layout and Windows Tauri M2 fixture command/EXE.
