@@ -318,6 +318,31 @@ impl LiveEditor {
         }
         Ok(())
     }
+    /// Rehash the full, unmodified Guest ROM before each new preview/apply.
+    /// A matching Header/anchor alone must never authorize a stale ROM session.
+    /// This deliberately performs bounded GDB reads and can be slow on large ROMs.
+    fn verify_unmodified_rom(&mut self) -> Result<(), LiveError> {
+        if !self.rsp.is_paused() {
+            return Err(LiveError::NotPaused);
+        }
+        if self.active.is_some() {
+            return Err(LiveError::Busy);
+        }
+        let mut sha = Sha1::new();
+        let size = self.identity.rom_bytes;
+        let mut offset = 0usize;
+        while offset < size {
+            let count = (size - offset).min(256);
+            sha.update(self.rsp.read(ROM_BASE + offset as u32, count)?);
+            offset += count;
+        }
+        let actual = hex(&sha.finalize());
+        if !actual.eq_ignore_ascii_case(&self.identity.sha1) {
+            return Err(LiveError::Conflict);
+        }
+        Ok(())
+    }
+    #[allow(clippy::too_many_arguments)]
     fn event(
         &mut self,
         kind: &str,
@@ -356,6 +381,7 @@ impl LiveEditor {
             return Err(LiveError::Busy);
         }
         self.verify_identity()?;
+        self.verify_unmodified_rom()?;
         for (i, s) in spans.iter().enumerate() {
             if s.before.is_empty() || s.before.len() != s.after.len() || s.before.len() > 512 {
                 return Err(LiveError::Conflict);
@@ -528,6 +554,10 @@ impl LiveEditor {
             return Err(LiveError::Token);
         }
         self.verify_identity()?;
+        self.verify_unmodified_rom()?;
+        if Instant::now() >= plan.expires {
+            return Err(LiveError::Token);
+        }
         if plan.feature == Feature::BattleCrit {
             let p = crit_proof(&self.identity.game_code, self.identity.revision)
                 .ok_or(LiveError::Conflict)?;

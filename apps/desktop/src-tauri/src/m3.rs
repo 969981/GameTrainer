@@ -9,17 +9,18 @@ use trainer_storage::{ActionEvent, AuditStore};
 
 pub struct LiveState {
     inner: Arc<Mutex<Option<LiveEditor>>>,
-    audit_file: PathBuf,
+    audit_file: Option<PathBuf>,
 }
 pub fn install(app: &mut tauri::App) {
-    let folder = app
+    let audit_file = app
         .path()
         .app_local_data_dir()
-        .unwrap_or_else(|_| std::env::temp_dir().join("GameTrainer"));
-    // If this directory cannot persist audit rows, connect will fail closed.
+        .ok()
+        .map(|folder| folder.join("m3-live-action-history.sqlite3"));
+    // No writable app-local directory => no live session or fallback to temp storage.
     app.manage(LiveState {
         inner: Arc::new(Mutex::new(None)),
-        audit_file: folder.join("m3-live-action-history.sqlite3"),
+        audit_file,
     });
 }
 #[tauri::command]
@@ -33,7 +34,7 @@ pub async fn m3_live_connect(
     state: State<'_, LiveState>,
 ) -> Result<LiveIdentity, String> {
     let session = Arc::clone(&state.inner);
-    let file = state.audit_file.clone();
+    let file = state.audit_file.clone().ok_or("本地审计目录不可用，拒绝连接")?;
     tauri::async_runtime::spawn_blocking(move || {
         let mut guard = session.lock().map_err(|_| "M3 状态锁损坏".to_string())?;
         if guard.as_ref().is_some_and(LiveEditor::has_active) {
@@ -138,6 +139,7 @@ pub fn m3_disconnect_live(state: State<'_, LiveState>) -> Result<(), String> {
 }
 #[tauri::command]
 pub fn m3_live_history(state: State<'_, LiveState>) -> Result<Vec<ActionEvent>, String> {
-    let audit = AuditStore::open_file(&state.audit_file).map_err(|e| e.to_string())?;
+    let file = state.audit_file.as_ref().ok_or("本地审计目录不可用")?;
+    let audit = AuditStore::open_file(file).map_err(|e| e.to_string())?;
     audit.list("live", 100).map_err(|e| e.to_string())
 }
