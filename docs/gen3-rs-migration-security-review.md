@@ -8,7 +8,7 @@ tags: [GameTrainer, Gen3, Ruby, Sapphire, M2, Runtime, Safety]
 
 # Ruby/Sapphire v4.6.0 · 捕捉、钓鱼、传送、实验性战斗功能迁移审查
 
-**决策：优先只读功能；所有真实游戏写入保持关闭。** 本文依据用户上传的 Ruby/Sapphire v4.6.0 ZIP 和 CT，已重新打开并核对源码与文档。它是评估报告，不是实际 ROM 修改功能的验收记录。
+**历史 M2 评估：当时所有 Live 写入关闭。后续已依据 [ADR-0005](decisions/0005-m3-gdb-guarded-live.md) 新增 [M3 实验 GDB 写入](m3-live-gdb-experimental.md)，仅 Capture 与四 ROM BattleCrit 有受限代码，尚未实机验收；本报告其它功能继续禁写。** 本文依据用户上传的 Ruby/Sapphire v4.6.0 ZIP 和 CT，已重新打开并核对源码与文档。它是评估报告，不是实际 ROM 修改功能的验收记录。
 
 ## 证据分层
 

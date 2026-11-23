@@ -1,8 +1,15 @@
 # GameTrainer Studio
 
-> 多游戏、跨运行时的 Windows 桌面研究与修改工具（M0 已实现，M1 只读接入验证阶段）
+> 多游戏、跨运行时的 Windows 桌面研究与修改工具（M0–M2 已建立，M3 实验性真实 GDB 写入）
 
-**当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**没有在真实 Windows 桌面上亲自启动 WebView2，也没有用真实 mGBA + ROM 完成内存读取验证；没有写入、Hook、反作弊绕过。**
+**当前状态：M0 自动化测试通过、M1 Emerald/mGBA 只读原型已实现、M2 Fixture-only 安全事务与 SQLite 审计已通过 CI。** Windows Tauri 的 EXE、Rust 命令单测、React/Vite 和 Chromium 响应式测试均在 CI 通过；M1 新增 mGBA 进程发现、部分 ROM 指令锚点验证、Seed/Advances 只读快照及会话失效保护。**新增 M3 受限 mGBA GDB 真实 Guest 写入代码，尚无真实 Windows+mGBA+原版 ROM 实测，不能宣称捕捉/战斗 Hook 已通过。没有反作弊绕过。**
+
+## M3 · Ruby/Sapphire 实验性真实写入（未实机验收）
+
+- [M3 GDB 写入、捕捉和 BattleCrit 的使用及安全边界](docs/m3-live-gdb-experimental.md) · [ADR-0005](docs/decisions/0005-m3-gdb-guarded-live.md)。
+- 通过本机 mGBA GDB RSP，只有 Guest CPU 暂停、完整 ROM SHA1 命中 [28 个源报告白名单](fixtures/rs-known-rom-sha1.json) 和逐功能原指令匹配，Rust 才允许进入预览。
+- 捕捉：双 ROM Halfword 读回/恢复。BattleCrit：四 ROM、用户提供且经 SHA256 校验的 124B Thumb 模板，code cave 先写、dispatch 最后激活，恢复顺序相反。
+- 用户明确确认备份及离线单机测试，SQLite 先写 Intent。**钓鱼/Feebas、传送实际 Hook 及其他未实现战斗功能仍然不开放；本阶段无真实 ROM/mGBA 端到端验收。**
 
 ## 产品目标
 

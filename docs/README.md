@@ -11,6 +11,9 @@
 - [红蓝宝石四类功能的安全迁移审查](gen3-rs-migration-security-review.md) · [[gen3-rs-migration-security-review]]
 - [ADR-0004 多资源补丁与 Live 写入门禁](decisions/0004-rs-migration-write-gates.md)
 
+- [M3 真实 Guest GDB 写入与实验性 BattleCrit](m3-live-gdb-experimental.md) · [[m3-live-gdb-experimental]]
+- [ADR-0005 精确 ROM 实验写入门禁](decisions/0005-m3-gdb-guarded-live.md)
+
 ## 核心设计
 - [总体架构](architecture.md) · [[architecture]]
 - [扩展规划：Gen3–Gen6 + PC](extensions.md) · [[extensions]]

@@ -72,3 +72,14 @@
 - [ ] Windows+mGBA 真实游戏行为和独立实机记录（当前不允许任何 Live 写入）。
 
 相关：[迁移评估](gen3-rs-migration-security-review.md) · [ADR-0004](decisions/0004-rs-migration-write-gates.md)。
+
+## M3 · Ruby/Sapphire 真实 Guest GDB 写入（正在验证）
+
+- [ ] 完整 mGBA GDB RSP 数据包 ACK、校验和、暂停/继续、读取/写入回读，模拟 GDB 服务和断线故障注入。
+- [ ] 26 Retail + 2 JP Box Guest ROM SHA1/尺寸校验，未知 ROM、德版 Debug、错误 Revision 和不完整身份均拒绝。
+- [ ] 捕捉两处 ROM 半字与上下文；第二地址失败自动反序恢复，恢复中断时 Owner 保留。
+- [ ] 四 ROM BattleCrit 原函数前缀、字面池、脚本尾、用户本地 124B SHA256 模板、非战斗判断与按顺序恢复。
+- [ ] Windows Tauri SQLite Live 意图/回执，断线/异常崩溃不自动重写旧 ROM。
+- [ ] **真实 Windows + mGBA + 原版 ROM** 捕捉/战斗行为、双打特殊状态、SaveState/ROM Reload、代码洞执行/恢复实测。当前尚无实机证据。
+
+关联：[M3](m3-live-gdb-experimental.md) · [ADR-0005](decisions/0005-m3-gdb-guarded-live.md)。

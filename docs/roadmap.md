@@ -36,3 +36,10 @@
 - **P5**：BattleCrit 保留研究，不开放用户开关；必中、敌方 Miss、一击必杀上游尚未实现。
 
 [完整技术审查](gen3-rs-migration-security-review.md) · [ADR-0004](decisions/0004-rs-migration-write-gates.md)
+
+## M3 · 精确 ROM 的实验 GDB 写入（2026-11-23）
+
+- Rust trainer-rsp + trainer-live：本机 GDB Guest 读取/写入、完整 ROM SHA1 白名单、Capture 双指令、四 ROM BattleCrit 受控 Hook，独立 SQLite 实操审计。
+- Tauri/React 已新增 M3 确认操作界面；目前正在 CI 和安全恢复审查，未实机测试。
+- Fishing/Feebas 与 Teleport 的运行时 Hook 仍在后续专项审查阶段，不允许仅把 M2 Fixture 校验关闭就启用。
+- [详情](m3-live-gdb-experimental.md) · [ADR-0005](decisions/0005-m3-gdb-guarded-live.md)。

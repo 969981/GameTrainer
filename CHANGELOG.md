@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-23 — M3 opt-in GDB live patches (unverified in real emulator)
+
+- Introduce localhost GDB RSP transport, full ROM SHA1 allowlist, guarded two-span Capture modification and four-ROM experimental BattleCrit Hook with a user-supplied SHA256-verified source payload.
+- Add Tauri M3 scoped IPC and React preview/confirm/apply/restore/history UI; SQLite records real intents separately from M2 fixtures.
+- Fishing/Feebas/Teleport live hooks remain disabled; real Windows+mGBA+retail ROM acceptance still outstanding.
+- See [M3 experimental implementation](docs/m3-live-gdb-experimental.md).
+
 ## 2026-11-23 — RS v4.6 advanced feature security migration review
 
 - Reviewed capture, fishing/Feebas, teleport/PokéFinder and experimental BattleCrit sources and installed/uninstall flow.
